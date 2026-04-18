@@ -30,3 +30,7 @@ export function registerAsFormData(data) {
         }
     })
 }
+
+export function getuser(id) {
+    return api.get(`/view.user.by.branch/${id}`)
+}
