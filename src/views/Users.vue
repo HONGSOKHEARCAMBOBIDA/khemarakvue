@@ -26,7 +26,7 @@
             :on-change="handleProfileFileChange"
           >
             <img v-if="profileImageUrl" :src="profileImageUrl" class="avatar" />
-            <el-button v-else type="primary" plain>ជ្រេីសរេីសរូបភាព</el-button>
+            <el-button v-else type="primary" plain>ជ្រេីសរេីសរូបភាព<el-icon class="el-icon--right"><Upload /></el-icon></el-button>
           </el-upload>
         </el-form-item>
 
@@ -436,7 +436,8 @@
                 <el-input v-model="formData.noteedu[index]" placeholder="ចំណាំ" size="large" />
               </el-form-item>
             </el-col>
-            <el-col :span="12" class="flex items-center">
+            <el-col :span="12" class="flex items-right">
+              <el-form-item label="រូបភាពដែលបានជ្រេីសរេីស">
               <el-upload
                 class="avatar-uploader"
                 action=""
@@ -444,10 +445,12 @@
                 :show-file-list="false"
                 :on-change="(file) => handleEducationImageFileChange(file, index)"
               >
-                <img v-if="educationimage[index]" :src="educationimage[index]" class="avatar" :fit="fit"/>
+                <img v-if="educationimage[index]" :src="educationimage[index]" class="avataredu" />
  
-                <el-button v-else type="primary" plain>ជ្រើសរើសរូបភាពសញ្ញាបត្រ</el-button>
+                <el-button v-else type="primary" plain>ជ្រើសរើសរូបភាពសញ្ញាបត្រ<el-icon class="el-icon--right"><Upload /></el-icon></el-button>
               </el-upload>
+              </el-form-item>
+
             </el-col>
           </el-row>
           <el-button v-if="index > 0" type="danger" size="small" @click="removeEducation(index)">លុប</el-button>
@@ -495,28 +498,27 @@
           </el-select>
         </el-form-item>
 
-        <!--
-          FIX: day_of_weeks is a flat []int on the backend.
-          We bind directly to formData.day_of_weeks (a flat array of selected day IDs).
-          is_day_of is derived: for each selected day, is it a day off?
-          Here we use a separate dayOffSet (Set of day IDs marked as off) to build is_day_of on submit.
-        -->
         <el-form-item label="ថ្ងៃធ្វើការ / ឈប់សម្រាក" prop="day_of_weeks">
-          <el-table :data="dayofweeks" style="width:100%">
+          <el-switch v-model="parentBorder" />
+          <el-table :data="dayofweeks" style="width:100%"  :border="parentBorder">
             <el-table-column label="ថ្ងៃ" prop="name" />
             <el-table-column label="ជ្រើសរើស">
+              
               <template #default="{ row }">
                 <el-checkbox
                   :model-value="formData.day_of_weeks.includes(row.id)"
+                  size="small" border
                   @change="(val) => toggleDayOfWeek(row.id, val)"
                 />
               </template>
             </el-table-column>
+            
             <el-table-column label="ថ្ងៃឈប់សម្រាក">
               <template #default="{ row }">
                 <el-checkbox
                   :disabled="!formData.day_of_weeks.includes(row.id)"
                   :model-value="dayOffSet.has(row.id)"
+                  size="small" border
                   @change="(val) => toggleDayOff(row.id, val)"
                 />
               </template>
@@ -559,8 +561,9 @@ import { fetchDistrict } from '../services/district'
 import { fetchCommunce } from '../services/communce'
 import { fetchVillage } from '../services/village'
 import { fetchDayofweek } from '../services/dayofweek'
+import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
 
-// ─── Refs ───────────────────────────────────────────────────────────────────
+const parentBorder = ref(false)
 const formRef       = ref(null)
 const submitting    = ref(false)
 const loading       = ref(false)
@@ -1083,7 +1086,11 @@ const formRules = {
 .avatar {
   width: 200px;
   height: 300px;
-  border-radius: 5%;
+  border: 1px solid;
+}
+.avataredu {
+  width: 500px;
+  height: 350px;
   border: 1px solid;
 }
 </style>
