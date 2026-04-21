@@ -820,11 +820,14 @@ function buildFormData() {
   })
 
   // Work experience arrays 
-  formData.company_name.forEach(v   => fd.append('company_name',    v ?? ''))
-  formData.position_title.forEach(v => fd.append('position_title',  v ?? ''))
-  formData.start_date.forEach(v     => fd.append('start_date',      v ?? ''))
-  formData.end_date.forEach(v       => fd.append('end_date',        v ?? ''))
-  formData.job_description.forEach(v=> fd.append('job_description', v ?? ''))
+const hasWorkExperience = formData.company_name.some(v => v && v.trim() !== '')
+if (hasWorkExperience) {
+  formData.company_name.forEach(v    => fd.append('company_name',    v ?? ''))
+  formData.position_title.forEach(v  => fd.append('position_title',  v ?? ''))
+  formData.start_date.forEach(v      => fd.append('start_date',      v ?? ''))
+  formData.end_date.forEach(v        => fd.append('end_date',        v ?? ''))
+  formData.job_description.forEach(v => fd.append('job_description', v ?? ''))
+}
 
   // Education arrays 
   formData.education_level_id.forEach(v   => fd.append('education_level_id', v ?? 0))
@@ -855,16 +858,19 @@ const submitForm = async () => {
       return
     }
 
-    const weLen = formData.company_name.length
-    if (
-      formData.position_title.length !== weLen ||
-      formData.start_date.length     !== weLen ||
-      formData.end_date.length       !== weLen ||
-      formData.job_description.length !== weLen
-    ) {
-      ElMessage.error('ទិន្នន័យបទពិសោធន៍ការងារមិនត្រូវគ្នា!')
-      return
-    }
+const hasWorkExp = formData.company_name.some(v => v && v.trim() !== '')
+if (hasWorkExp) {
+  const weLen = formData.company_name.length
+  if (
+    formData.position_title.length  !== weLen ||
+    formData.start_date.length      !== weLen ||
+    formData.end_date.length        !== weLen ||
+    formData.job_description.length !== weLen
+  ) {
+    ElMessage.error('ទិន្នន័យបទពិសោធន៍ការងារមិនត្រូវគ្នា!')
+    return
+  }
+}
 
     // Guard: shift schedule
     if (formData.day_of_weeks.length === 0) {
@@ -946,7 +952,7 @@ async function load(fn, target) {
   }
 }
 
-onMounted(() => {
+onMounted(async() => {
   load(fetchDepartment,    departments)
   load(fetchPositionLevel, positionlevel)
   load(fetchEmployeetype,  employeetypes)
@@ -958,7 +964,19 @@ onMounted(() => {
   load(fetchManageBranch,  managebranchs)
   load(fetchPart,          parts)
   load(fetchProvince,      provinces)
-  load(fetchDayofweek,     dayofweeks)
+
+    loading.value = true
+  try {
+    const res = await fetchDayofweek()
+    dayofweeks.value = res.data.data
+    dayofweeks.value.forEach(day => {
+      formData.day_of_weeks.push(day.id)
+    })
+  } catch (e) {
+    ElMessage.error(e?.message || 'Load dayofweek failed')
+  } finally {
+    loading.value = false;
+  }
 })
 
 // ─── Watchers ────────────────────────────────────────────────────────────────

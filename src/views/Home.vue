@@ -5,25 +5,25 @@
       <template #default="scope">
         
         <div style="display: flex; ">
-<el-button size="small" type="primary" plain :icon="View" @click="openDetail(scope.row)">
+<el-button size="large" type="primary" plain :icon="View" @click="openDetail(scope.row)">
   មេីលលំអិត
 </el-button>
-          <el-button size="small" type="success" plain :icon="Edit">
+          <el-button size="large" type="success" plain :icon="Edit">
             កែប្រែ
           </el-button>
-          <el-button size="small" type="warning" plain :icon="Wallet">
+          <el-button size="large" type="warning" plain :icon="Wallet">
             កែប្រែប្រាក់ខែ
           </el-button>
-          <el-button size="small" type="success" plain :icon="Wallet">
+          <el-button size="large" type="success" plain :icon="Wallet">
             ដំឡេីងប្រាក់ខែ
           </el-button>
-          <el-button size="small" type="primary" plain :icon="ArrowUp">
+          <el-button size="large" type="primary" plain :icon="ArrowUp">
             វាយតម្លៃការងារ
           </el-button>
-                    <el-button size="small"  plain :icon="Clock">
+                    <el-button size="large"  plain :icon="Clock">
             ដូរវេនការងារ
           </el-button>
-          <el-button size="small" type="danger"  plain :icon="Switch ">
+          <el-button size="large" type="danger"  plain :icon="Switch ">
             ដូរថ្ងៃសម្រាក
           </el-button>
         </div>
@@ -36,7 +36,7 @@
           :src="getImage(row)"
           :preview-src-list="[getImage(row)]"
           preview-teleported
-          style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer"
+          style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer"
           fit="cover"
         />
       </template>
@@ -47,7 +47,7 @@
           :src="getImageQR(row)"
           :preview-src-list="[getImageQR(row)]"
           preview-teleported
-          style="width: 40px; height: 40px; border-radius: 10%; cursor: pointer"
+          style="width: 60px; height: 60px; border-radius: 10%; cursor: pointer"
           fit="cover"
         />
       </template>
@@ -85,7 +85,7 @@
     <el-table-column label="តួនាទី" width="150">
       <template #default="{ row }">
         <el-column>
-{{ row.employees?.[0]?.position_name ?? "—" }}
+<el-tag size="large">{{ row.employees?.[0]?.position_name ?? "—" }}</el-tag>
 <el-text>
   
 </el-text>
@@ -200,12 +200,13 @@
     </el-table-column>
     <el-table-column label="កូនប្រុស" width="120">
       <template #default="{ row }">
-        {{ row.employeeprofies?.[0]?.son_number ?? "—" }}
+        <el-tag size="large" type="primary">{{ row.employeeprofies?.[0]?.son_number ?? "—" }}</el-tag>        
       </template>
     </el-table-column>
     <el-table-column label="កូនស្រី" width="120">
       <template #default="{ row }">
-        {{ row.employeeprofies?.[0]?.daughter_number ?? "—" }}
+        <el-tag size="large" type="warning"> {{ row.employeeprofies?.[0]?.daughter_number ?? "—" }}</el-tag>
+
       </template>
     </el-table-column>
   </el-table>
@@ -296,5 +297,10 @@ onMounted(() => {
 :deep(.el-table__expanded-cell) {
   padding: 12px 20px !important;
   background-color: #f5f7fa;
+}
+
+:deep(.el-table__header-wrapper th) {
+  background-color: #409eff !important;
+  color: #ffffff !important;
 }
 </style>

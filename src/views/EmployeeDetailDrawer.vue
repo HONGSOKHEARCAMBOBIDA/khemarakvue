@@ -11,7 +11,7 @@
       <!-- Sidebar nav -->
       <div class="detail-sidebar">
         <el-avatar
-          :size="100"
+          :size="140"
           style="
             background: #cecbf6;
             color: #3c3489;
