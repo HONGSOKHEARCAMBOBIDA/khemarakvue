@@ -192,17 +192,17 @@
               >
 <div class="pb-2">
                   <el-tag type="success" size="large">
-                {{ edu.education_level_name }}
+               កម្រិតការសិក្សា : {{ edu.education_level_name }}
               </el-tag>
 </div>
 <div class="pb-2">
                   <el-tag type="primary" size="large">
-                 {{ edu.major_field_of_study }}
+                ជំនាញ : {{ edu.major_field_of_study }}
               </el-tag>
 </div>               
       <div class="pb-2">
                   <el-tag type="warning" size="large">
-                 {{ edu.note }}
+                ពិពណ៌នា : {{ edu.note }}
               </el-tag>
 </div>  
 <el-image

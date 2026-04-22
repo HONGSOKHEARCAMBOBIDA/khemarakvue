@@ -327,7 +327,7 @@
           </el-col>
           <el-col :span="8">
             <!-- FIX: display computed dailyRate, it will be written to formData on submit -->
-            <el-form-item label="ថ្លៃក្នុងមួយថ្ងៃ">
+            <el-form-item label="ថ្លៃជួលក្នុងមួយថ្ងៃ">
               <el-input-number :model-value="dailyRate" :min="0" style="width:100%" size="large"  />
             </el-form-item>
           </el-col>
@@ -563,7 +563,7 @@ import { fetchVillage } from '../services/village'
 import { fetchDayofweek } from '../services/dayofweek'
 import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
 
-const parentBorder = ref(false)
+const parentBorder = ref(true)
 const formRef       = ref(null)
 const submitting    = ref(false)
 const loading       = ref(false)
@@ -886,7 +886,7 @@ if (hasWorkExp) {
       const response = await registerAsFormData(fd)
 
       if (response.status === 200 || response.status === 201) {
-        ElMessage.success('បង្កើតអ្នកប្រើប្រាស់ដោយជោគជ័យ!')
+        ElMessage.success('បង្កើតអ្នកប្រើប្រាស់បានជោគជ័យ!')
         resetForm()
       } else {
         ElMessage.error('មានបញ្ហា៖ ' + (response.data?.message || 'សូមពិនិត្យម្តងទៀត'))
@@ -1057,6 +1057,7 @@ const formRules = {
   base_salary:        [{ required: true, message: 'សូមបញ្ចូលប្រាក់ខែគោល',             trigger: 'blur' }],
   work_day:           [{ required: true, message: 'សូមបញ្ចូលចំនួនថ្ងៃធ្វើការ',         trigger: 'blur' }],
   currency_id:        [{ required: true, message: 'សូមជ្រើសរើសរូបិយប័ណ្ណ',             trigger: 'change' }],
+  dob: [{required: true,message: 'សូមជ្រេីសរេីសថ្ងៃខែឆ្នាំកំណេីត',trigger: 'change'}]
 }
 </script>
 
@@ -1077,8 +1078,9 @@ const formRules = {
 }
 
 .register-card {
-  max-width: 1500px;
+  max-width: 1700px;
   margin: 0 auto;
+  border: 1 solid;
 }
 
 .work-experience-item,
@@ -1103,7 +1105,7 @@ const formRules = {
 
 .avatar {
   width: 200px;
-  height: 300px;
+  height: 270px;
   border: 1px solid;
 }
 .avataredu {

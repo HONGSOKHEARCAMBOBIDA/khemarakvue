@@ -32,13 +32,23 @@
     
     <el-table-column label="រូបភាព" width="100" fixed>
       <template #default="{ row }">
-        <el-image
-          :src="getImage(row)"
-          :preview-src-list="[getImage(row)]"
-          preview-teleported
-          style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer"
-          fit="cover"
-        />
+<el-image
+  :src="getImage(row)"
+  :preview-src-list="[getImage(row)]"
+  preview-teleported
+  style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer"
+  fit="cover"
+>
+  <template #toolbar="{ actions, activeIndex }">
+    <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
+    <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
+    <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
+    <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
+    
+    <!-- ✅ Download button with prevent default -->
+  
+  </template>
+</el-image>
       </template>
     </el-table-column>
     <el-table-column label="រូបភាពQR" width="100" fixed>
@@ -216,12 +226,17 @@
 import { onMounted, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { fetchEmployee } from "../services/employee";
-import { Delete, Edit, Search, Share, Upload,View,Wallet,ArrowUp,Clock,Switch} from '@element-plus/icons-vue'
+import { Delete, Edit, Search, Share, Upload,View,Wallet,ArrowUp,Clock,Switch,ZoomIn,ZoomOut,RefreshLeft,RefreshRight,Download} from '@element-plus/icons-vue'
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue";
+import axios from 'axios';
 const loading = ref(false);
 const employees = ref([]);
 const drawerVisible = ref(false)
 const selectedEmployee = ref(null)
+
+
+// Download image function
+
 
 function openDetail(row) {
   selectedEmployee.value = row
