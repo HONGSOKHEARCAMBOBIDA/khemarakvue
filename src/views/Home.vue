@@ -1,6 +1,20 @@
 <template>
+<div class="pb-4">
+  <el-row :gutter="12">
+  <el-col :span="12">
+    <el-input v-model="formData.name" placeholder="ស្វែងរក" size="large" />
+  </el-col>
+  <el-col :span="12">
+    <el-select v-model="formData.branch_id" placeholder="ជ្រើសរើសសាខា" style="width:100%" size="large">
+      <el-option v-for="branch in branches" :key="branch.id" :label="branch.name" :value="branch.id" />
+    </el-select>
+  </el-col>
+</el-row>
+</div>
   <EmployeeDetailDrawer v-model="drawerVisible" :employee="selectedEmployee" />
-  <el-table :data="employees" style="width: 100%" v-loading="loading">
+   
+  <el-table :data="employees"  height="650" style="width: 100%" v-loading="loading" >
+    
     <el-table-column type="expand" fixed>
       <template #default="scope">
         
@@ -62,16 +76,27 @@
         />
       </template>
     </el-table-column>
-    <el-table-column label="ឈ្មោះ" width="130" fixed>
+<el-table-column label="ឈ្មោះខែ្មរ" width="130" fixed>
+  <template #default="{ row }">
+  
+      <el-text>
+        {{ row.employees?.[0]?.name_kh ?? "—" }}
+      </el-text>
+
+    
+  </template>
+</el-table-column>
+
+<el-table-column label="ឈ្មោះអង់គ្លេស" width="130" fixed>
+  <template #default="{ row }">
+    
       
-      <template #default="{ row }">
-        <el-column>
- {{ row.employees?.[0]?.name_kh ?? "—" }}
- <el-text type="primary">{{ row.employees?.[0]?.name_en ?? "_" }}</el-text>
-        </el-column>
-       
-      </template>
-    </el-table-column>
+      <el-text type="primary">
+        {{ row.employees?.[0]?.name_en ?? "_" }}
+      </el-text>
+    
+  </template>
+</el-table-column>
 
     <el-table-column label="ភេទ" width="70">
       <template #default="{ row }">
@@ -223,16 +248,25 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { fetchEmployee } from "../services/employee";
 import { Delete, Edit, Search, Share, Upload,View,Wallet,ArrowUp,Clock,Switch,ZoomIn,ZoomOut,RefreshLeft,RefreshRight,Download} from '@element-plus/icons-vue'
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue";
+import { fetchBranch } from '../services/branch'
 import axios from 'axios';
 const loading = ref(false);
 const employees = ref([]);
 const drawerVisible = ref(false)
 const selectedEmployee = ref(null)
+const branches      = ref([])
+const formData = ref({
+  name: '',
+  branch_id: null,
+})
+let searchTimer = null
+
+
 
 
 // Download image function
@@ -300,7 +334,27 @@ async function loadData(fn, target, params = {}) {
 
 onMounted(() => {
   loadData(fetchEmployee, employees);
+  loadData(fetchBranch,        branches);
 });
+function buildParams() {
+  const params = {}
+  if (formData.value.name.trim() !== '') {
+    params.name = formData.value.name.trim()
+  }
+  if (formData.value.branch_id) {
+    params.branch_id = formData.value.branch_id
+  }
+  return params
+}
+watch(() => formData.value.name, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    loadData(fetchEmployee, employees, buildParams())
+  }, 250)
+})
+watch(() => formData.value.branch_id, () => {
+  loadData(fetchEmployee, employees, buildParams())
+})
 </script>
 
 <style scoped>

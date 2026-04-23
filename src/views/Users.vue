@@ -91,7 +91,7 @@
         </el-row>
 
         <!-- Birth Address -->
-        <el-row :gutter="20" class="spaced-row">
+        <el-row :gutter="20" class="spaced-row" prop="village_id_of_birth">
           <el-form-item label="ទីកន្លែងកំណេីត" style="margin-bottom:8px" />
           <el-col :span="5">
             <el-select v-model="formData.province_id" placeholder="ជ្រើសរើសខេត្ត" style="width:100%" size="large" clearable>
@@ -116,8 +116,8 @@
         </el-row>
 
         <!-- Current Address -->
-        <el-row :gutter="10" class="spaced-row">
-          <el-form-item label="ទីកន្លែងបច្ចុប្បន្ន" style="margin-bottom:8px" />
+        <el-row :gutter="10" class="spaced-row" >
+          <el-form-item label="ទីកន្លែងបច្ចុប្បន្ន" style="margin-bottom:8px"/>
           <el-col :span="5">
             <el-select v-model="formData.province_id_currenct" placeholder="ជ្រើសរើសខេត្ត" style="width:100%" size="large" clearable>
               <el-option v-for="p in provinces" :key="p.id" :label="p.name" :value="p.id" />
@@ -136,7 +136,7 @@
             </el-select>
           </el-col>
           <el-col :span="5">
-            <el-select v-model="formData.village_id_current_address" placeholder="ជ្រើសរើសភូមិ" style="width:100%" size="large" clearable>
+            <el-select v-model="formData.village_id_current_address" placeholder="ជ្រើសរើសភូមិ" style="width:100%" size="large" clearable  prop="village_id_current_address">
               <!-- FIX: use villagescurrent, not villages -->
               <el-option v-for="v in villagescurrent" :key="v.id" :label="v.name" :value="v.id" />
             </el-select>
@@ -478,7 +478,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="របាយការណ៍ទៅ" prop="report_to">
+            <el-form-item label="រាយការណ៍ទៅ" prop="report_to">
               <el-select v-model="formData.report_to" placeholder="ជ្រើសរើស" style="width:100%" size="large">
                 <el-option v-for="user in users" :key="user.id" :label="user.name" :value="user.id" />
               </el-select>
@@ -499,7 +499,7 @@
         </el-form-item>
 
         <el-form-item label="ថ្ងៃធ្វើការ / ឈប់សម្រាក" prop="day_of_weeks">
-          <el-switch v-model="parentBorder" />
+         
           <el-table :data="dayofweeks" style="width:100%"  :border="parentBorder">
             <el-table-column label="ថ្ងៃ" prop="name" />
             <el-table-column label="ជ្រើសរើស">
@@ -1057,7 +1057,19 @@ const formRules = {
   base_salary:        [{ required: true, message: 'សូមបញ្ចូលប្រាក់ខែគោល',             trigger: 'blur' }],
   work_day:           [{ required: true, message: 'សូមបញ្ចូលចំនួនថ្ងៃធ្វើការ',         trigger: 'blur' }],
   currency_id:        [{ required: true, message: 'សូមជ្រើសរើសរូបិយប័ណ្ណ',             trigger: 'change' }],
-  dob: [{required: true,message: 'សូមជ្រេីសរេីសថ្ងៃខែឆ្នាំកំណេីត',trigger: 'change'}]
+  dob: [{required: true,message: 'សូមជ្រេីសរេីសថ្ងៃខែឆ្នាំកំណេីត',trigger: 'change'}],
+  material_status: [{required: true,message: 'សូមជ្រេីសរេីសស្ថានភាពអាពាហ៍ពិពាហ៍'}],
+  village_id_of_birth: [{required: true,message:'សូមជ្រេីសរេីសភូមិកំណេីត'}],
+  village_id_current_address: [{required: true,message:'សូមជ្រេីសរេីសភូមិបច្ចុប្បន្ន'}],
+  position_level_id: [{required: true,message:'សូមជ្រេីសរេីសកម្រិតតួនាទី'}],
+  hire_date: [{required: true,message:  'សូមជ្រេីសរេីសថ្ងៃចូលធ្វេីការ'}],
+  promote_date: [{required: true,message: 'សូមជ្រេីសរេីសកាលបរិច្ឆេទវាយតម្លៃការងារ'}],
+  contact: [{required: true,message: 'សូមបញ្ចូលលេខទូរស័ព្ទសាមីខ្លួន'}],
+  family_phone: [{required: true,message: 'សូមបញ្ចូលលេខទូរស័ព្ទគ្រួសារ'}],
+  shift_id: [{required: true,message: 'សូមជ្រេីសរេីសវេនធ្វើការ'}],
+  report_to: [{required: true,message: 'សូមជ្រេីសរេីសអ្នកត្រូវរាយការណ៍'}],
+  part_ids: [{required: true,message: 'សូមជ្រេីសរេីសសិទ្ធក្នុងការមេីលទិន្ន័យ'}]
+
 }
 </script>
 
