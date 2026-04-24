@@ -37,9 +37,11 @@
       <div class="detail-content">
         <!-- Personal -->
         <template v-if="activeTab === 'personal'">
-         <div class="pb-4">
-             <el-tag type="primary" size="large">ព័ត៌មានទូទៅ</el-tag>
-         </div>
+          
+  <div class="pb-4" style="display:flex; justify-content:space-between; align-items:center">
+    <el-tag type="primary" size="large">ព័ត៌មានទូទៅ</el-tag>
+    <el-button type="warning" @click="showUpdateDialog = true">កែប្រែ</el-button>
+  </div>
       
           <el-descriptions :column="2" border size="large">
             <el-descriptions-item label="ឈ្មោះខ្មែរ" >
@@ -440,11 +442,18 @@
       </div>
     </div>
   </el-drawer>
+  <EmployeeUpdateDialog
+  v-model="showUpdateDialog"
+  :employee="employee"
+  @updated="emit('refresh')" 
+/>
 </template>
 
 <script setup>
 import { ref, computed, defineProps, defineEmits } from "vue";
 import api from "../services/api";
+import EmployeeUpdateDialog from "../components/EmployeeUpdateDialog.vue"
+const showUpdateDialog = ref(false)
 // defineProps → receive data from parent component
 // defineEmits → send events back to parent
 const props = defineProps({ employee: Object, modelValue: Boolean });
