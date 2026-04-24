@@ -10,26 +10,16 @@
     <div style="display: flex; height: 100%; gap: 0">
       <!-- Sidebar nav -->
       <div class="detail-sidebar">
-        <el-avatar
-          :size="140"
-          style="
-            background: #cecbf6;
-            color: #3c3489;
-            font-weight: 500;
-            cursor: pointer;
-          "
-        >
-          <el-image
-            v-if="profileImage"
-            :src="profileImage"
-            :preview-src-list="[profileImage]"
-            preview-teleported
-            alt="employee avatar"
-            style="width: 100%; height: 100%; object-fit: cover"
-            @error="handleImageError"
-          >
-          </el-image>
-        </el-avatar>
+             <el-image
+  v-if="profileImage"
+  :src="profileImage"
+  :preview-src-list="[profileImage]"
+  preview-teleported
+  alt="employee avatar"
+  style="width: 80%; height: 20%; object-fit: cover"
+  @error="handleImageError"
+>
+</el-image>
         <p class="emp-name">{{ employee?.employees?.[0]?.name_kh }}</p>
         <el-text >{{ employee?.employees?.[0]?.position_name }}</el-text>
         <el-divider />

@@ -328,7 +328,7 @@
           <el-col :span="8">
             <!-- FIX: display computed dailyRate, it will be written to formData on submit -->
             <el-form-item label="ថ្លៃជួលក្នុងមួយថ្ងៃ">
-              <el-input-number :model-value="dailyRate" :min="0" style="width:100%" size="large"  />
+             <el-input-number v-model="formData.daily_rate" :min="0" style="width:100%" size="large" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -676,9 +676,14 @@ const formData = reactive({
   village_id_current_address: null,
 })
 
-const dailyRate = computed(() => {
-  if (!formData.work_day || formData.work_day === 0) return 0
-  return parseFloat((formData.base_salary / formData.work_day).toFixed(2))
+const dailyRate = computed({
+  get() {
+    if (!formData.work_day || formData.work_day === 0) return 0
+    return parseFloat((formData.base_salary / formData.work_day).toFixed(2))
+  },
+  set(val) {
+    formData.daily_rate = val
+  }
 })
 
 function toggleDayOfWeek(dayId, checked) {
