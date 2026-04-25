@@ -51,36 +51,51 @@
       </template>
     </el-table-column>
 
-    <el-table-column label="រូបភាព" width="100" fixed>
-      <template #default="{ row }">
-        <el-image
-          :src="getImage(row)"
-          :preview-src-list="[getImage(row)]"
-          preview-teleported
-          style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer"
-          fit="cover"
-        >
-          <template #toolbar="{ actions }">
-            <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
-            <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
-            <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
-            <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
-          </template>
-        </el-image>
+<el-table-column label="រូបភាព" width="100" fixed>
+  <template #default="{ row }">
+    <el-image
+      :src="getImage(row)"
+      :preview-src-list="[getImage(row)]"
+      preview-teleported
+      style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer"
+      fit="cover"
+    >
+      <template #toolbar="{ actions }">
+        <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
+        <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
+        <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
+        <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
+        <!-- ✅ Add this -->
+        <el-icon @click="downloadImage(getImage(row), row.employees?.[0]?.name_en + '_profile.jpg')">
+          <Download />
+        </el-icon>
       </template>
-    </el-table-column>
+    </el-image>
+  </template>
+</el-table-column>
 
-    <el-table-column label="រូបភាពQR" width="100" fixed>
-      <template #default="{ row }">
-        <el-image
-          :src="getImageQR(row)"
-          :preview-src-list="[getImageQR(row)]"
-          preview-teleported
-          style="width: 60px; height: 60px; border-radius: 10%; cursor: pointer"
-          fit="cover"
-        />
+<el-table-column label="រូបភាពQR" width="100" fixed>
+  <template #default="{ row }">
+    <el-image
+      :src="getImageQR(row)"
+      :preview-src-list="[getImageQR(row)]"
+      preview-teleported
+      style="width: 60px; height: 60px; border-radius: 10%; cursor: pointer"
+      fit="cover"
+    >
+      <!-- ✅ Add toolbar -->
+      <template #toolbar="{ actions }">
+        <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
+        <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
+        <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
+        <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
+        <el-icon @click="downloadImage(getImageQR(row), row.employees?.[0]?.name_en + '_qr.jpg')">
+          <Download />
+        </el-icon>
       </template>
-    </el-table-column>
+    </el-image>
+  </template>
+</el-table-column>
 
     <el-table-column label="ឈ្មោះខែ្មរ" width="130" fixed>
       <template #default="{ row }">
@@ -224,7 +239,7 @@ import { fetchPosition } from "../services/position"
 import { fetchOffice } from "../services/office"
 import {
   Edit, View, Wallet, ArrowUp, Clock, Switch,
-  ZoomIn, ZoomOut, RefreshLeft, RefreshRight
+  ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download
 } from "@element-plus/icons-vue"
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue"
 
@@ -254,6 +269,27 @@ const pagination = ref({
 })
 
 let searchTimer = null
+
+async function downloadImage(url, filename = 'image.jpg') {
+  try {
+    const response = await fetch(url)
+    //  ទាញយកទិន្នន័យរូបភាពពី url ដែលបានផ្តល់ឱ្យ
+    const blob = await response.blob()
+    //  បំប្លែងទិន្នន័យដែលទាញបានទៅជា blob (blob គឺជាទិន្នន័យឯកសារ binary ដូចជារូបភាព)
+    const link = document.createElement('a')
+    // បង្កើត element <a> (link) នៅក្នុង HTML តែមិនទាន់បង្ហាញនៅលើ screen
+    link.href = URL.createObjectURL(blob)
+    // បង្កើត URL បណ្តោះអាសន្នសម្រាប់ blob រូបភាពនោះ ហើយដាក់វាជា href របស់ link
+    link.download = filename
+    // កំណត់ឈ្មោះឯកសារដែលនឹង download 
+    link.click()
+    // Click link ដោយស្វ័យប្រវត្តិ ដើម្បីចាប់ផ្តើម download រូបភាព
+    URL.revokeObjectURL(link.href)
+    // លុប URL បណ្តោះអាសន្នចោល បន្ទាប់ពី download រួច ដើម្បីសន្សំ memory
+  } catch (e) {
+    ElMessage.error('ទាញយករូបភាពមិនបានសម្រេច')
+  }
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function buildParams() {
