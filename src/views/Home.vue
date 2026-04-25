@@ -33,7 +33,7 @@
     </el-row>
   </div>
 
-  <EmployeeDetailDrawer v-model="drawerVisible" :employee="selectedEmployee" />
+  <EmployeeDetailDrawer v-model="drawerVisible" :employee="selectedEmployee" @refresh="onEmployeeUpdated"/>
 
   <el-table :data="employees" height="750" style="width: 100%" v-loading="loading" default-expand-all>
 
@@ -295,6 +295,15 @@ async function loadEmployees(params = {}) {
     ElMessage.error(e?.response?.data?.message || e?.message || "Load failed")
   } finally {
     loading.value = false
+  }
+}
+
+async function onEmployeeUpdated() {
+  await loadEmployees(buildParams())
+  if (selectedEmployee.value) {
+    const userId = selectedEmployee.value.user_id
+    const fresh = employees.value.find(e => e.user_id === userId)
+    if (fresh) selectedEmployee.value = fresh
   }
 }
 

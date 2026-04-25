@@ -21,7 +21,9 @@
 >
 </el-image>
         <p class="emp-name">{{ employee?.employees?.[0]?.name_kh }}</p>
-        <el-text >{{ employee?.employees?.[0]?.position_name }}</el-text>
+        <div class="p-3">
+          <el-tag type="success" size="large">{{ employee?.employees?.[0]?.position_name }}</el-tag>
+        </div>
         <el-divider />
         <el-menu :default-active="activeTab" @select="activeTab = $event">
           <el-menu-item index="personal">ព័ត៌មានផ្ទាល់ខ្លួន</el-menu-item>
@@ -38,9 +40,9 @@
         <!-- Personal -->
         <template v-if="activeTab === 'personal'">
           
-  <div class="pb-4" style="display:flex; justify-content:space-between; align-items:center">
+  <div class="pb-4" style="display:flex;  align-items:center">
     <el-tag type="primary" size="large">ព័ត៌មានទូទៅ</el-tag>
-    <el-button type="warning" @click="showUpdateDialog = true">កែប្រែ</el-button>
+    <div class="pl-4"><el-button type="warning" @click="showUpdateDialog = true">កែប្រែ</el-button></div>
   </div>
       
           <el-descriptions :column="2" border size="large">
@@ -167,8 +169,10 @@
 
         <!-- Education -->
         <template v-else-if="activeTab === 'education'">
-    <div class="pb-4">
+    <div class="pb-4" style="display:flex;  align-items:center">
              <el-tag type="primary" size="large">កម្រិតការសិក្សា</el-tag>
+             
+              <div class="pl-4"><el-button type="success" @click="showCreateEducation = true">បន្ថែមថ្មី</el-button></div>
          </div>
           
           <el-timeline>
@@ -182,10 +186,12 @@
                 shadow="hover"
                 style="border: 0.5px solid var(--el-border-color)"
               >
-<div class="pb-2">
-                  <el-tag type="success" size="large">
-               កម្រិតការសិក្សា : {{ edu.education_level_name }}
-              </el-tag>
+              
+<div class="pb-2" style="display: flex; align-items: center; gap: 12px;">
+  <el-tag type="success" size="large">
+    កម្រិតការសិក្សា : {{ edu.education_level_name }}
+  </el-tag>
+  <el-button type="warning" @click="openUpdateEducation(edu)">កែប្រែ</el-button>
 </div>
 <div class="pb-2">
                   <el-tag type="primary" size="large">
@@ -447,20 +453,39 @@
   :employee="employee"
   @updated="emit('refresh')" 
 />
+<EducationUpdateDialog
+  v-model="showUpdateEducation"
+  :education="selectedEducation"
+  @updated="emit('refresh')" 
+/>
+  <EducadtionCreateDialog
+  v-model="showCreateEducation"
+  :employee="employee"
+  @updated="emit('refresh')" 
+/>
 </template>
 
 <script setup>
 import { ref, computed, defineProps, defineEmits } from "vue";
 import api from "../services/api";
 import EmployeeUpdateDialog from "../components/EmployeeUpdateDialog.vue"
+import EducationUpdateDialog from "../components/EducationUpdateDialog.vue";
+import EducadtionCreateDialog from "../components/EducadtionCreateDialog.vue";
 const showUpdateDialog = ref(false)
+const showUpdateEducation = ref(false)
+const showCreateEducation = ref(false)
+const selectedEducation = ref(null)
+function openUpdateEducation(edu) {
+  selectedEducation.value = edu
+  showUpdateEducation.value = true
+}
 // defineProps → receive data from parent component
 // defineEmits → send events back to parent
 const props = defineProps({ employee: Object, modelValue: Boolean });
 // Props (data coming from parent)
 // employee Object containing employee data (probably from API)
 // modelValue Boolean used for dialog open/close state
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "refresh"]);
 // Emits (send data back to parent)
 const visible = computed({
   get: () => props.modelValue,

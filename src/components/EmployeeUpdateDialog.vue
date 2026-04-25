@@ -6,6 +6,17 @@
     width="1400px"
     destroy-on-close
   >
+
+<div  class="pb-4" style="display:flex; justify-content:space-between; align-items:center">
+  <div>
+    <el-button @click="visible = false" size="large">បោះបង់</el-button>
+    <el-button type="primary" @click="submitUpdate" :loading="submitting" size="large">រក្សាទុក</el-button>
+  </div>
+
+  <el-tag v-if="!formData.is_promote" type="danger" size="large" effect="dark">មិនទាន់វាយតម្លៃ</el-tag>
+  <el-tag v-else type="success" size="large" effect="dark">បុគ្គលិកបានវាយតម្លៃរួចហើយ</el-tag>
+</div>
+
     <el-form
       :model="formData"
       :rules="formRules"
@@ -45,7 +56,7 @@
             <el-input v-model="formData.name_en" size="large" />
           </el-form-item>
         </el-col>
-        <el-col>
+        <el-col :span="12">
                   <el-form-item label="ឈ្មោះជាភាសាខ្មែរ" prop="name_kh">
             <el-input v-model="formData.name_kh" size="large" />
           </el-form-item>    
@@ -207,14 +218,22 @@
       </el-row>
 
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="កាលបរិច្ឆេទចូលធ្វើការ" prop="hire_date">
             <el-date-picker v-model="formData.hire_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width:100%" size="large" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="កាលបរិច្ឆេទវាយតម្លៃ" prop="promote_date">
             <el-date-picker v-model="formData.promote_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width:100%" size="large" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+            <el-form-item label="វាយតម្លៃ" prop="gender">
+            <el-select v-model="formData.is_promote" style="width:100%" size="large">
+              <el-option label="បានវាយតម្លៃ" :value="true" />
+              <el-option label="មិនទាន់វាយតម្លៃ" :value="false" />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-row>
@@ -251,7 +270,17 @@
         <el-col :span="8">
           <el-form-item label="QR Code">
             <el-upload action="" :auto-upload="false" :show-file-list="false" :on-change="handleQrFileChange">
-              <img v-if="qrImageUrl" :src="qrImageUrl" class="qr-preview" />
+                        <el-image
+  v-if="qrImageUrl"
+  :src="qrImageUrl"
+  :preview-src-list="qrImageUrl"
+  preview-teleported
+  alt="qr image"
+  style="width: 100%; height: 60%; object-fit: cover"
+  @error="handleImageError"
+>
+</el-image>
+             
               <el-button v-else type="primary" plain>ជ្រើសរើស QR Code</el-button>
             </el-upload>
           </el-form-item>
@@ -295,10 +324,6 @@
       </el-form-item>
     </el-form>
 
-    <template #footer>
-      <el-button @click="visible = false" size="large">បោះបង់</el-button>
-      <el-button type="primary" @click="submitUpdate" :loading="submitting" size="large">រក្សាទុក</el-button>
-    </template>
   </el-dialog>
 </template>
 
@@ -317,6 +342,7 @@ import { fetchDistrict }      from '../services/district'
 import { fetchCommunce }      from '../services/communce'
 import { fetchVillage }       from '../services/village'
 import { getuser }            from '../services/userservice'
+import { fetchEmployee } from '../services/employee'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 const props = defineProps({
@@ -644,7 +670,7 @@ const submitUpdate = async () => {
       if (qrImageFile.value)      fd.append('qr_code_bank_account', qrImageFile.value)
 
       await updateEmployee(employeeId, fd)
-
+     
       ElMessage.success('កែប្រែព័ត៌មានបានជោគជ័យ!')
       emit('updated')
       visible.value = false
