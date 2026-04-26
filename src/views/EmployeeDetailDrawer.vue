@@ -200,41 +200,47 @@
         </template>
 
         <!-- Experience -->
-        <template v-else-if="activeTab === 'experience'">
-          <div class="pb-4">
-            <el-tag type="primary" size="large">បទពិសោធន៍ការងារ</el-tag>
+        <!-- Experience -->
+<template v-else-if="activeTab === 'experience'">
+  <div class="pb-4" style="display:flex; align-items:center">
+    <el-tag type="primary" size="large">បទពិសោធន៍ការងារ</el-tag>
+    <div class="pl-4">
+      <el-button type="success" @click="showCreateExperience = true">បន្ថែមថ្មី</el-button>
+    </div>
+  </div>
+
+  <el-timeline>
+    <el-timeline-item
+      v-for="exp in employee?.employeeworkexperiences"
+      :key="exp.id"
+      :timestamp="`${exp.start_date} → ${exp.end_date}`"
+      placement="top"
+    >
+      <el-card shadow="hover" style="border: 0.5px solid var(--el-border-color)">
+        <div style="flex-direction: column; gap: 8px">
+
+          <div class="pb-2" style="display: flex; align-items: center; gap: 12px;">
+            <el-tag type="primary" size="large">
+              តួនាទី : {{ exp.position_title }}
+            </el-tag>
+            <el-button type="warning" @click="openUpdateExperience(exp)">កែប្រែ</el-button>
           </div>
 
-          <el-timeline>
-            <el-timeline-item v-for="exp in employee?.employeeworkexperiences" :key="exp.id"
-              :timestamp="`${exp.start_date} → ${exp.end_date}`" placement="top">
-              <el-card shadow="hover" style="border: 0.5px solid var(--el-border-color)">
-                <div style=" flex-direction: column; gap: 8px">
+          <div class="pb-2">
+            <el-tag type="success" size="large">
+              ឈ្មោះក្រុមហ៊ុន : {{ exp.company_name }}
+            </el-tag>
+          </div>
 
-                  <div class="pb-2">
-                    <el-tag type="primary" size="large">
-                      តួនាទី : {{ exp.position_title }}
-                    </el-tag>
+          <div class="pb-2">
+            <el-tag>ការទទួលខុសត្រូវ : {{ exp.job_description }}</el-tag>
+          </div>
 
-                  </div>
-
-                  <div class="pb-2">
-                    <el-tag type="success" size="large">
-                      ឈ្មោះក្រុមហ៊ុន : {{ exp.company_name }}
-                    </el-tag>
-                  </div>
-
-                  <div class="pb-2">
-                    <el-tag>ការទទួលខុសត្រូវ : {{ exp.job_description }}</el-tag>
-
-                  </div>
-
-                </div>
-              </el-card>
-            </el-timeline-item>
-          </el-timeline>
-        </template>
-
+        </div>
+      </el-card>
+    </el-timeline-item>
+  </el-timeline>
+</template>
         <!-- Salary -->
         <template v-else-if="activeTab === 'salary'">
           <div class="pb-4">
@@ -384,6 +390,11 @@
   <EmployeeUpdateDialog v-model="showUpdateDialog" :employee="employee" @updated="emit('refresh')" />
   <EducationUpdateDialog v-model="showUpdateEducation" :education="selectedEducation" @updated="emit('refresh')" />
   <EducadtionCreateDialog v-model="showCreateEducation" :employee="employee" @updated="emit('refresh')" />
+  <WorkExperienUpdateDialog 
+  v-model="showUpdateExperience" 
+  :workexperience="selectedExperience" 
+  @updated="emit('refresh')" 
+/>
 </template>
 
 <script setup>
@@ -392,6 +403,7 @@ import api from "../services/api";
 import EmployeeUpdateDialog from "../components/EmployeeUpdateDialog.vue"
 import EducationUpdateDialog from "../components/EducationUpdateDialog.vue";
 import EducadtionCreateDialog from "../components/EducadtionCreateDialog.vue";
+import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue";
 import {
   Edit, View, Wallet, ArrowUp, Clock, Switch,
   ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download
@@ -401,6 +413,15 @@ const showUpdateDialog = ref(false)
 const showUpdateEducation = ref(false)
 const showCreateEducation = ref(false)
 const selectedEducation = ref(null)
+
+const showUpdateExperience = ref(false)
+const showCreateExperience = ref(false)
+const selectedExperience = ref(null)
+function openUpdateExperience(exp) {
+  selectedExperience.value = exp
+  showUpdateExperience.value = true
+}
+
 function openUpdateEducation(edu) {
   selectedEducation.value = edu
   showUpdateEducation.value = true
