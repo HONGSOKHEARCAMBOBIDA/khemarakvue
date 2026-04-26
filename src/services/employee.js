@@ -10,3 +10,4 @@ export const updateEmployee = (id, formData) =>
   })
 export const updateEducation = (id,formData) => api.put(`/edit.education/${id}`,formData)
 export const createEducation = (formData) => api.post(`add.education`,formData)
+export const updateWorkExperience = (id,formData) => api.put(`edit.work.experience/${id}`,formData)
