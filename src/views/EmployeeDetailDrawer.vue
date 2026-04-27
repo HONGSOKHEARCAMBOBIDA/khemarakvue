@@ -1,30 +1,47 @@
 <!-- EmployeeDetailDrawer.vue -->
 <template>
-  <el-drawer v-model="visible" size="90%" direction="ltr" :title="employee?.employees?.[0]?.name_kh || '—'"
-    destroy-on-close>
+  <el-drawer
+    v-model="visible"
+    size="90%"
+    direction="ltr"
+    :title="employee?.employees?.[0]?.name_kh || '—'"
+    destroy-on-close
+  >
     <div style="display: flex; height: 100%; gap: 0">
       <!-- Sidebar nav -->
       <div class="detail-sidebar">
-        <el-image 
-        v-if="profileImage" 
-        :src="profileImage" 
-        :preview-src-list="[profileImage]" 
-        preview-teleported
-          alt="employee avatar" style="width: 80%; height: 20%; object-fit: cover" @error="handleImageError">
-          <template #toolbar="{actions}" >
-                    <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
-        <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
-        <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
-        <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
-        <!-- ✅ Add this -->
-        <el-icon @click="downloadImage(profileImage, employee?.employees?.[0]?.name_en + '_profile.jpg')">
-          <Download />
-        </el-icon>
+        <el-image
+          v-if="profileImage"
+          :src="profileImage"
+          :preview-src-list="[profileImage]"
+          preview-teleported
+          alt="employee avatar"
+          style="width: 80%; height: 20%; object-fit: cover"
+          @error="handleImageError"
+        >
+          <template #toolbar="{ actions }">
+            <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
+            <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
+            <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
+            <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
+            <!-- ✅ Add this -->
+            <el-icon
+              @click="
+                downloadImage(
+                  profileImage,
+                  employee?.employees?.[0]?.name_en + '_profile.jpg',
+                )
+              "
+            >
+              <Download />
+            </el-icon>
           </template>
         </el-image>
         <p class="emp-name">{{ employee?.employees?.[0]?.name_kh }}</p>
         <div class="p-3">
-          <el-tag type="success" size="large">{{ employee?.employees?.[0]?.position_name }}</el-tag>
+          <el-tag type="success" size="large">{{
+            employee?.employees?.[0]?.position_name
+          }}</el-tag>
         </div>
         <el-divider />
         <el-menu :default-active="activeTab" @select="activeTab = $event">
@@ -41,85 +58,84 @@
       <div class="detail-content">
         <!-- Personal -->
         <template v-if="activeTab === 'personal'">
-
-          <div class="pb-4" style="display:flex;  align-items:center">
+          <div class="pb-4" style="display: flex; align-items: center">
             <el-tag type="primary" size="large">ព័ត៌មានទូទៅ</el-tag>
-            <div class="pl-4"><el-button type="warning" @click="showUpdateDialog = true">កែប្រែ</el-button></div>
+            <div class="pl-4">
+              <el-button type="warning" @click="showUpdateDialog = true"
+                >កែប្រែ</el-button
+              >
+            </div>
           </div>
 
           <el-descriptions :column="2" border size="large">
             <el-descriptions-item label="ឈ្មោះខ្មែរ">
               <el-text type="">
-                {{
-                  emp?.name_kh
-                }}
+                {{ emp?.name_kh }}
               </el-text>
             </el-descriptions-item>
             <el-descriptions-item label="ឈ្មោះឡាតាំង">
-              {{
-                emp?.name_en
-              }}
+              {{ emp?.name_en }}
             </el-descriptions-item>
             <el-descriptions-item label="ភេទ">
-              <el-tag :type="emp?.gender === 1 ? 'primary' : 'danger'" size="small">
+              <el-tag
+                :type="emp?.gender === 1 ? 'primary' : 'danger'"
+                size="small"
+              >
                 {{ emp?.gender === 1 ? "ប្រុស" : "ស្រី" }}
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="ថ្ងៃ-ខែ-ឆ្នាំកំណើត">
-              {{
-                profile?.dob
-              }}</el-descriptions-item>
+              {{ profile?.dob }}</el-descriptions-item
+            >
             <el-descriptions-item label="អត្តសញ្ញាណប័ណ្ណ">
-              {{
-                emp?.national_id_number
-              }}</el-descriptions-item>
+              {{ emp?.national_id_number }}</el-descriptions-item
+            >
             <el-descriptions-item label="ស្ថានភាព">
-              <el-tag type="success" size="large">{{ profile?.material_status }}</el-tag>
+              <el-tag type="success" size="large">{{
+                profile?.material_status
+              }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="តួនាទី">{{
               emp?.position_name
-              }}</el-descriptions-item>
+            }}</el-descriptions-item>
             <el-descriptions-item label="កម្រិតតួនាទី">
-              {{
-                profile?.position_level_name
-              }}</el-descriptions-item>
+              {{ profile?.position_level_name }}</el-descriptions-item
+            >
             <el-descriptions-item label="ប្រភេទបុគ្គលិក">
-              {{
-                emp?.employee_type_name
-              }}</el-descriptions-item>
+              {{ emp?.employee_type_name }}</el-descriptions-item
+            >
             <el-descriptions-item label="ការិយាល័យ">
-              {{
-                emp?.office_name
-              }}</el-descriptions-item>
+              {{ emp?.office_name }}</el-descriptions-item
+            >
             <el-descriptions-item label="ថ្ងៃចូលធ្វើការ">
-              {{
-                emp?.hire_date
-              }}</el-descriptions-item>
+              {{ emp?.hire_date }}</el-descriptions-item
+            >
             <el-descriptions-item label="ថ្ងៃត្រូវវាយតម្លៃ">
-              <el-tag :type="emp?.is_promote ? 'success' : 'warning'" size="small">
+              <el-tag
+                :type="emp?.is_promote ? 'success' : 'warning'"
+                size="small"
+              >
                 {{ emp?.promote_date || "—" }}
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="លេខទូរសព្ទ">
-              {{
-                employee?.contact
-              }}</el-descriptions-item>
+              {{ employee?.contact }}</el-descriptions-item
+            >
             <el-descriptions-item label="លេខទូរសព្ទគ្រួសារ">
-              {{
-                profile?.family_phone
-              }}</el-descriptions-item>
+              {{ profile?.family_phone }}</el-descriptions-item
+            >
             <el-descriptions-item label="ធនាគារ">{{
               profile?.bank_name
-              }}</el-descriptions-item>
+            }}</el-descriptions-item>
             <el-descriptions-item label="លេខកុងធនាគារ">{{
               profile?.bank_account_number
-              }}</el-descriptions-item>
+            }}</el-descriptions-item>
             <el-descriptions-item label="រាយការណ៍ជូន">{{
               profile?.report_to_name
-              }}</el-descriptions-item>
+            }}</el-descriptions-item>
             <el-descriptions-item label="ឈ្មោះប្ដី/ប្រពន្ធ">{{
               profile?.husban_name || profile?.wife_name
-              }}</el-descriptions-item>
+            }}</el-descriptions-item>
             <el-descriptions-item label="កូនប្រុស">
               {{ profile?.son_number ?? "-" }}
             </el-descriptions-item>
@@ -151,32 +167,53 @@
               }}
             </el-descriptions-item>
           </el-descriptions>
-          <el-image v-if="profile.qr_code_bank_account"
+          <el-image
+            v-if="profile.qr_code_bank_account"
             :src="`http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`"
-            :preview-src-list="[`http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`]"
-            preview-teleported alt="qr image" style="width: 15%; height: 40%; object-fit: cover"
-            @error="handleImageError">
+            :preview-src-list="[
+              `http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`,
+            ]"
+            preview-teleported
+            alt="qr image"
+            style="width: 15%; height: 40%; object-fit: cover"
+            @error="handleImageError"
+          >
           </el-image>
         </template>
 
         <!-- Education -->
         <template v-else-if="activeTab === 'education'">
-          <div class="pb-4" style="display:flex;  align-items:center">
+          <div class="pb-4" style="display: flex; align-items: center">
             <el-tag type="primary" size="large">កម្រិតការសិក្សា</el-tag>
 
-            <div class="pl-4"><el-button type="success" @click="showCreateEducation = true">បន្ថែមថ្មី</el-button></div>
+            <div class="pl-4">
+              <el-button type="success" @click="showCreateEducation = true"
+                >បន្ថែមថ្មី</el-button
+              >
+            </div>
           </div>
 
           <el-timeline>
-            <el-timeline-item v-for="edu in employee?.employeeeducation" :key="edu.id"
-              :timestamp="`${edu.start_date} → ${edu.end_date}`" placement="top">
-              <el-card shadow="hover" style="border: 0.5px solid var(--el-border-color)">
-
-                <div class="pb-2" style="display: flex; align-items: center; gap: 12px;">
+            <el-timeline-item
+              v-for="edu in employee?.employeeeducation"
+              :key="edu.id"
+              :timestamp="`${edu.start_date} → ${edu.end_date}`"
+              placement="top"
+            >
+              <el-card
+                shadow="hover"
+                style="border: 0.5px solid var(--el-border-color)"
+              >
+                <div
+                  class="pb-2"
+                  style="display: flex; align-items: center; gap: 12px"
+                >
                   <el-tag type="success" size="large">
                     កម្រិតការសិក្សា : {{ edu.education_level_name }}
                   </el-tag>
-                  <el-button type="warning" @click="openUpdateEducation(edu)">កែប្រែ</el-button>
+                  <el-button type="warning" @click="openUpdateEducation(edu)"
+                    >កែប្រែ</el-button
+                  >
                 </div>
                 <div class="pb-2">
                   <el-tag type="primary" size="large">
@@ -188,12 +225,18 @@
                     ពិពណ៌នា : {{ edu.note }}
                   </el-tag>
                 </div>
-                <el-image v-if="edu.image" :src="`http://localhost:8080/educationimage/${edu.image}`"
-                  :preview-src-list="[`http://localhost:8080/educationimage/${edu.image}`]" preview-teleported
-                  alt="edu image" style="width: 30%; height: 30%; object-fit: cover" @error="handleImageError">
+                <el-image
+                  v-if="edu.image"
+                  :src="`http://localhost:8080/educationimage/${edu.image}`"
+                  :preview-src-list="[
+                    `http://localhost:8080/educationimage/${edu.image}`,
+                  ]"
+                  preview-teleported
+                  alt="edu image"
+                  style="width: 30%; height: 30%; object-fit: cover"
+                  @error="handleImageError"
+                >
                 </el-image>
-
-
               </el-card>
             </el-timeline-item>
           </el-timeline>
@@ -201,72 +244,95 @@
 
         <!-- Experience -->
         <!-- Experience -->
-<template v-else-if="activeTab === 'experience'">
-  <div class="pb-4" style="display:flex; align-items:center">
-    <el-tag type="primary" size="large">បទពិសោធន៍ការងារ</el-tag>
-    <div class="pl-4">
-      <el-button type="success" @click="showCreateExperience = true">បន្ថែមថ្មី</el-button>
-    </div>
-  </div>
-
-  <el-timeline>
-    <el-timeline-item
-      v-for="exp in employee?.employeeworkexperiences"
-      :key="exp.id"
-      :timestamp="`${exp.start_date} → ${exp.end_date}`"
-      placement="top"
-    >
-      <el-card shadow="hover" style="border: 0.5px solid var(--el-border-color)">
-        <div style="flex-direction: column; gap: 8px">
-
-          <div class="pb-2" style="display: flex; align-items: center; gap: 12px;">
-            <el-tag type="primary" size="large">
-              តួនាទី : {{ exp.position_title }}
-            </el-tag>
-            <el-button type="warning" @click="openUpdateExperience(exp)">កែប្រែ</el-button>
+        <template v-else-if="activeTab === 'experience'">
+          <div class="pb-4" style="display: flex; align-items: center">
+            <el-tag type="primary" size="large">បទពិសោធន៍ការងារ</el-tag>
+            <div class="pl-4">
+              <el-button type="success" @click="showCreateExperience = true"
+                >បន្ថែមថ្មី</el-button
+              >
+            </div>
           </div>
 
-          <div class="pb-2">
-            <el-tag type="success" size="large">
-              ឈ្មោះក្រុមហ៊ុន : {{ exp.company_name }}
-            </el-tag>
-          </div>
+          <el-timeline>
+            <el-timeline-item
+              v-for="exp in employee?.employeeworkexperiences"
+              :key="exp.id"
+              :timestamp="`${exp.start_date} → ${exp.end_date}`"
+              placement="top"
+            >
+              <el-card
+                shadow="hover"
+                style="border: 0.5px solid var(--el-border-color)"
+              >
+                <div style="flex-direction: column; gap: 8px">
+                  <div
+                    class="pb-2"
+                    style="display: flex; align-items: center; gap: 12px"
+                  >
+                    <el-tag type="primary" size="large">
+                      តួនាទី : {{ exp.position_title }}
+                    </el-tag>
+                    <el-button type="warning" @click="openUpdateExperience(exp)"
+                      >កែប្រែ</el-button
+                    >
+                  </div>
 
-          <div class="pb-2">
-            <el-tag>ការទទួលខុសត្រូវ : {{ exp.job_description }}</el-tag>
-          </div>
+                  <div class="pb-2">
+                    <el-tag type="success" size="large">
+                      ឈ្មោះក្រុមហ៊ុន : {{ exp.company_name }}
+                    </el-tag>
+                  </div>
 
-        </div>
-      </el-card>
-    </el-timeline-item>
-  </el-timeline>
-</template>
+                  <div class="pb-2">
+                    <el-tag type="info"
+                      >ការទទួលខុសត្រូវ : {{ exp.job_description }}</el-tag
+                    >
+                  </div>
+                </div>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </template>
         <!-- Salary -->
         <template v-else-if="activeTab === 'salary'">
-          <div class="pb-4">
+          <div class="pb-4" style="display: flex">
             <el-tag type="primary" size="large">ព័ត៌មានប្រាក់ខែ</el-tag>
+            <div class="pl-4">
+              <el-button type="success" @click="showCreateExperience = true"
+                >តម្លេីងប្រាក់ខែ</el-button
+              >
+            </div>
           </div>
 
           <div v-for="sal in employee?.salarys" :key="sal.id">
             <el-descriptions :column="2" border size="large">
               <el-descriptions-item label="ប្រាក់ខែមូលដ្ឋាន" :span="2">
-                <span style="
-                    font-size: 22px;
-                    font-weight: 800;
-                    color: var(--el-color-primary);
-                  ">
-                  {{ sal.base_salary }} {{ sal.currency_name }}
-                </span>
+                <div style="display: flex; justify-content: space-between">
+                  <span
+                    style="
+                      font-size: 22px;
+                      font-weight: 800;
+                      color: var(--el-color-primary);
+                    "
+                  >
+                    {{ sal.base_salary }} {{ sal.currency_name }}
+                  </span>
+                 <el-button type="warning" plain @click="openUpdateSalary(sal)">កែប្រែ</el-button>
+                </div>
               </el-descriptions-item>
-              <el-descriptions-item label="ចំនួនថ្ងៃធ្វើការ">{{ sal.work_day }} ថ្ងៃ</el-descriptions-item>
-              <el-descriptions-item label="ប្រាក់ជួលក្នុងមួយថ្ងៃ">{{ sal.daily_rate }} {{ sal.currency_name }}
+              <el-descriptions-item label="ចំនួនថ្ងៃធ្វើការ"
+                >{{ sal.work_day }} ថ្ងៃ</el-descriptions-item
+              >
+              <el-descriptions-item label="ប្រាក់ជួលក្នុងមួយថ្ងៃ"
+                >{{ sal.daily_rate }} {{ sal.currency_name }}
               </el-descriptions-item>
               <el-descriptions-item label="មានប្រសិទ្ធភាព">{{
                 sal.effective_date
-                }}</el-descriptions-item>
+              }}</el-descriptions-item>
               <el-descriptions-item label="អស់ប្រសិទ្ធភាព">{{
                 sal.expire_date
-                }}</el-descriptions-item>
+              }}</el-descriptions-item>
               <el-descriptions-item label="ស្ថានភាព">
                 <el-tag :type="sal.is_active ? 'success' : 'info'" size="large">
                   {{ sal.is_active ? "សកម្ម" : "អសកម្ម" }}
@@ -283,15 +349,26 @@
           </div>
 
           <div class="shift-week">
-            <div v-for="day in employee?.shift_patterns" :key="day.id"
-              :class="['shift-card', day.is_dayoff ? 'dayoff' : 'workday']">
-              <el-text :tag="day.is_dayoff ? 'del' : 'b'" :type="day.is_dayoff ? 'danger' : 'primary'" size="large">
+            <div
+              v-for="day in employee?.shift_patterns"
+              :key="day.id"
+              :class="['shift-card', day.is_dayoff ? 'dayoff' : 'workday']"
+            >
+              <el-text
+                :tag="day.is_dayoff ? 'del' : 'b'"
+                :type="day.is_dayoff ? 'danger' : 'primary'"
+                size="large"
+              >
                 {{ day.day_of_week_name }}
               </el-text>
 
               <template v-if="!day.is_dayoff">
-                <p v-for="session in day.shift_response?.[0]
-                  ?.shiftsessionresponse" :key="session.id" class="time-slot">
+                <p
+                  v-for="session in day.shift_response?.[0]
+                    ?.shiftsessionresponse"
+                  :key="session.id"
+                  class="time-slot"
+                >
                   {{ session.start_time.slice(0, 5) }}–{{
                     session.end_time.slice(0, 5)
                   }}
@@ -305,69 +382,88 @@
 
         <template v-else-if="activeTab === 'system'">
           <div class="pb-4">
-            <el-tag type="primary" size="large">ព័ត៌មានប្រេីប្រាស់ប្រព័ន្ធ</el-tag>
+            <el-tag type="primary" size="large"
+              >ព័ត៌មានប្រេីប្រាស់ប្រព័ន្ធ</el-tag
+            >
           </div>
 
           <div>
             <el-descriptions :column="2" border size="large">
               <el-descriptions-item label="ឈ្មោះចូលប្រព័ន្ធ" :span="2">
-                <span style="
+                <span
+                  style="
                     font-size: 15px;
                     font-weight: 800;
                     color: var(--el-color-primary);
-                  ">
+                  "
+                >
                   {{ employee?.username }}
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label="លេខទូរសព្ទ" :span="2">
-                <span style="
+                <span
+                  style="
                     font-size: 15px;
                     font-weight: 800;
                     color: var(--el-color-primary);
-                  ">
+                  "
+                >
                   {{ employee?.contact }}
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label="ស្ថិតក្នុងសាខា" :span="2">
-                <span style="
+                <span
+                  style="
                     font-size: 15px;
                     font-weight: 800;
                     color: var(--el-color-primary);
-                  ">
+                  "
+                >
                   {{ employee?.branch_name }}
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label="តួនាទីប្រេីប្រព័ន្ធ" :span="2">
-                <span style="
+                <span
+                  style="
                     font-size: 15px;
                     font-weight: 800;
                     color: var(--el-color-primary);
-                  ">
+                  "
+                >
                   {{ employee?.role_display_name }}({{ employee?.role_name }})
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label="ស្ថានភាព" :span="2">
-                <span style="
+                <span
+                  style="
                     font-size: 15px;
                     font-weight: 800;
                     color: var(--el-color-primary);
-                  ">
+                  "
+                >
                   {{ employee?.user_active ? "កំពុងប្រេី" : "បានបិទ" }}
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label="សិទ្ធមេីលសាខា" :span="2">
-                <span style="
+                <span
+                  style="
                     font-size: 15px;
                     font-weight: 800;
                     color: var(--el-color-primary);
-                  ">
+                  "
+                >
                   {{ employee?.manage_branch_name }}
                 </span>
               </el-descriptions-item>
               <!-- Parts -->
               <el-descriptions-item label="សិទ្ធមើលប្រព័ន្ធ" :span="2">
                 <el-space wrap>
-                  <el-tag v-for="p in employee?.parts || []" :key="p.id" type="primary" size="large">
+                  <el-tag
+                    v-for="p in employee?.parts || []"
+                    :key="p.id"
+                    type="primary"
+                    size="large"
+                  >
                     {{ p.part_display_name }} ({{ p.part_name }})
                   </el-tag>
                 </el-space>
@@ -376,7 +472,12 @@
               <!-- Branches -->
               <el-descriptions-item label="សាខាដែលអាចមើលបាន" :span="2">
                 <el-space wrap>
-                  <el-tag v-for="b in employee?.branches || []" :key="b.id" type="success" size="large">
+                  <el-tag
+                    v-for="b in employee?.branches || []"
+                    :key="b.id"
+                    type="success"
+                    size="large"
+                  >
                     {{ b.branch_name }}
                   </el-tag>
                 </el-space>
@@ -387,44 +488,84 @@
       </div>
     </div>
   </el-drawer>
-  <EmployeeUpdateDialog v-model="showUpdateDialog" :employee="employee" @updated="emit('refresh')" />
-  <EducationUpdateDialog v-model="showUpdateEducation" :education="selectedEducation" @updated="emit('refresh')" />
-  <EducadtionCreateDialog v-model="showCreateEducation" :employee="employee" @updated="emit('refresh')" />
-  <WorkExperienUpdateDialog 
-  v-model="showUpdateExperience" 
-  :workexperience="selectedExperience" 
-  @updated="emit('refresh')" 
+  <EmployeeUpdateDialog
+    v-model="showUpdateDialog"
+    :employee="employee"
+    @updated="emit('refresh')"
+  />
+  <EducationUpdateDialog
+    v-model="showUpdateEducation"
+    :education="selectedEducation"
+    @updated="emit('refresh')"
+  />
+  <EducadtionCreateDialog
+    v-model="showCreateEducation"
+    :employee="employee"
+    @updated="emit('refresh')"
+  />
+  <WorkExperienUpdateDialog
+    v-model="showUpdateExperience"
+    :workexperience="selectedExperience"
+    @updated="emit('refresh')"
+  />
+  <WorkExperienceCreateDialog
+    v-model="showCreateExperience"
+    :employee="employee"
+    @created="emit('refresh')"
+  />
+  <SalaryUpdateDialog
+  v-model="showUpdateSalary"
+  :salary="selectedSalary"
+  @updated="emit('refresh')"
 />
 </template>
 
 <script setup>
 import { ref, computed, defineProps, defineEmits } from "vue";
 import api from "../services/api";
-import EmployeeUpdateDialog from "../components/EmployeeUpdateDialog.vue"
+import EmployeeUpdateDialog from "../components/EmployeeUpdateDialog.vue";
 import EducationUpdateDialog from "../components/EducationUpdateDialog.vue";
 import EducadtionCreateDialog from "../components/EducadtionCreateDialog.vue";
 import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue";
+import WorkExperienceCreateDialog from "../components/WorkExperienceCreateDialog.vue";
+import SalaryUpdateDialog from "../components/SalaryUpdateDialog.vue";
 import {
-  Edit, View, Wallet, ArrowUp, Clock, Switch,
-  ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download
-} from "@element-plus/icons-vue"
+  Edit,
+  View,
+  Wallet,
+  ArrowUp,
+  Clock,
+  Switch,
+  ZoomIn,
+  ZoomOut,
+  RefreshLeft,
+  RefreshRight,
+  Download,
+} from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-const showUpdateDialog = ref(false)
-const showUpdateEducation = ref(false)
-const showCreateEducation = ref(false)
-const selectedEducation = ref(null)
+const showUpdateDialog = ref(false);
+const showUpdateEducation = ref(false);
+const showCreateEducation = ref(false);
+const selectedEducation = ref(null);
 
-const showUpdateExperience = ref(false)
-const showCreateExperience = ref(false)
-const selectedExperience = ref(null)
+const showUpdateExperience = ref(false);
+const showCreateExperience = ref(false);
+const selectedExperience = ref(null);
+
+const showUpdateSalary = ref(false);
+const selectedSalary = ref(null);
+function openUpdateSalary(sal) {
+  selectedSalary.value = sal;
+  showUpdateSalary.value = true;
+}
 function openUpdateExperience(exp) {
-  selectedExperience.value = exp
-  showUpdateExperience.value = true
+  selectedExperience.value = exp;
+  showUpdateExperience.value = true;
 }
 
 function openUpdateEducation(edu) {
-  selectedEducation.value = edu
-  showUpdateEducation.value = true
+  selectedEducation.value = edu;
+  showUpdateEducation.value = true;
 }
 // defineProps → receive data from parent component
 // defineEmits → send events back to parent
@@ -448,28 +589,25 @@ const activeTab = ref("personal");
 const emp = computed(() => props.employee?.employees?.[0]);
 const profile = computed(() => props.employee?.employeeprofies?.[0]);
 
-
 const profileImage = computed(() => {
   const imageFile = profile.value?.profile_image;
   if (!imageFile) return null;
   return `http://localhost:8080/profileimage/${imageFile}`;
 });
 
-async function downloadImage(url,filename){
-  try{
-    const res = await fetch(url)
-    const blob = await res.blob()
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(link.href)
-
-  }catch(e){
-    ElMessage.error('ទាញយករូបភាពមិនបានសម្រេច')
+async function downloadImage(url, filename) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  } catch (e) {
+    ElMessage.error("ទាញយករូបភាពមិនបានសម្រេច");
   }
 }
-
 </script>
 
 <style scoped>
