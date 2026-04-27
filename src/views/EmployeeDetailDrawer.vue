@@ -346,7 +346,7 @@
         <template v-else-if="activeTab === 'shift'">
           <div class="pb-4" style="display: flex;">
             <el-tag type="primary" size="large">វេនការងារប្រចាំសប្ដាហ៍</el-tag>
- 
+           <div class="pl-3"> <el-button type="danger">ប្ដូរវ៉េនធ្វេីការ</el-button></div>
           </div>
 
           <div class="shift-week">
