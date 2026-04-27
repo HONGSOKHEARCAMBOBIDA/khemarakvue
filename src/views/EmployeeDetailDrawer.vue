@@ -299,13 +299,13 @@
           <div class="pb-4" style="display: flex">
             <el-tag type="primary" size="large">ព័ត៌មានប្រាក់ខែ</el-tag>
             <div class="pl-4">
-              <el-button type="success" @click="showCreateExperience = true"
+              <el-button type="success" @click="showCreateSalary = true"
                 >តម្លេីងប្រាក់ខែ</el-button
               >
             </div>
           </div>
 
-          <div v-for="sal in employee?.salarys" :key="sal.id">
+          <div v-for="sal in employee?.salarys" :key="sal.id " class="p-2">
             <el-descriptions :column="2" border size="large">
               <el-descriptions-item label="ប្រាក់ខែមូលដ្ឋាន" :span="2">
                 <div style="display: flex; justify-content: space-between">
@@ -518,6 +518,11 @@
   :salary="selectedSalary"
   @updated="emit('refresh')"
 />
+<SalaryCreateDialog 
+v-model="showCreateSalary"
+:employee="employee"
+@created="emit('refresh')"
+/>
 </template>
 
 <script setup>
@@ -529,6 +534,7 @@ import EducadtionCreateDialog from "../components/EducadtionCreateDialog.vue";
 import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue";
 import WorkExperienceCreateDialog from "../components/WorkExperienceCreateDialog.vue";
 import SalaryUpdateDialog from "../components/SalaryUpdateDialog.vue";
+import SalaryCreateDialog from "../components/SalaryCreateDialog.vue";
 import {
   Edit,
   View,
@@ -543,6 +549,7 @@ import {
   Download,
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
+const showCreateSalary = ref(false);
 const showUpdateDialog = ref(false);
 const showUpdateEducation = ref(false);
 const showCreateEducation = ref(false);

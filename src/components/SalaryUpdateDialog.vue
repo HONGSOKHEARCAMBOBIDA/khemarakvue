@@ -39,7 +39,7 @@ watch(visible, async (open) => {
     formData.effective_date = sal.effective_date || ''; // ✅ Fixed: was `val`
     formData.currency_id   = sal.currency_id   || null;// ✅ Fixed: was `val`
 })
-
+  
 const submitUpdate = async () => {
     if (!formRef.value) return
     await formRef.value.validate(async (valid) => {
@@ -90,7 +90,17 @@ const formRules = {
       <el-divider content-position="left">
         <div class="logo">ព័ត៌មានប្រាក់ខែ</div>
       </el-divider>
-
+      <el-form-item label="រូបិយប័ណ្ណ" prop="currency_id">
+        <el-select v-model="formData.currency_id" placeholder="ជ្រើសរើសរូបិយប័ណ្ណ" style="width:100%" size="large">
+          <!-- ✅ Fixed: was `currencys` (undefined), correct ref name is `currency` -->
+          <el-option
+            v-for="cur in currency"
+            :key="cur.id"
+            :label="cur.name"
+            :value="cur.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="ប្រាក់ខែគោល" prop="base_salary">
@@ -119,17 +129,7 @@ const formRules = {
         />
       </el-form-item>
 
-      <el-form-item label="រូបិយប័ណ្ណ" prop="currency_id">
-        <el-select v-model="formData.currency_id" placeholder="ជ្រើសរើសរូបិយប័ណ្ណ" style="width:100%" size="large">
-          <!-- ✅ Fixed: was `currencys` (undefined), correct ref name is `currency` -->
-          <el-option
-            v-for="cur in currency"
-            :key="cur.id"
-            :label="cur.name"
-            :value="cur.id"
-          />
-        </el-select>
-      </el-form-item>
+
 
     </el-form>
 
