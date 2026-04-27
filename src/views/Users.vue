@@ -685,7 +685,14 @@ const formData = reactive({
 //     formData.daily_rate = val
 //   }
 // })
-
+watch(
+  () => [formData.base_salary, formData.work_day],
+  ([salary, days]) => {
+    if (days && days > 0) {
+      formData.daily_rate = parseFloat((salary / days).toFixed(2));
+    }
+  }
+);
 function toggleDayOfWeek(dayId, checked) {
   if (checked) {
     if (!formData.day_of_weeks.includes(dayId)) {
@@ -805,7 +812,7 @@ function buildFormData() {
     ['shift_id',         formData.shift_id],
     ['base_salary',      formData.base_salary],
     ['work_day',         formData.work_day],
-    ['daily_rate',       dailyRate.value],
+    ['daily_rate',       formData.daily_rate],
     ['currency_id',      formData.currency_id],
     ['dob',              formData.dob],
   ]

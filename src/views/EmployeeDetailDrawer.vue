@@ -344,8 +344,9 @@
 
         <!-- Shift -->
         <template v-else-if="activeTab === 'shift'">
-          <div class="pb-4">
+          <div class="pb-4" style="display: flex;">
             <el-tag type="primary" size="large">វេនការងារប្រចាំសប្ដាហ៍</el-tag>
+ 
           </div>
 
           <div class="shift-week">
@@ -376,6 +377,15 @@
               </template>
 
               <p v-else class="off-label">សម្រាក</p>
+                    <el-button
+        type="warning"
+        size="small"
+        style="margin-top: 6px;"
+        :loading="changingShiftId === day.id"
+        @click="handleChangeShift(day.id)"
+      >
+        ផ្លាស់ប្ដូរ
+      </el-button>
             </div>
           </div>
         </template>
@@ -535,6 +545,7 @@ import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue
 import WorkExperienceCreateDialog from "../components/WorkExperienceCreateDialog.vue";
 import SalaryUpdateDialog from "../components/SalaryUpdateDialog.vue";
 import SalaryCreateDialog from "../components/SalaryCreateDialog.vue";
+import { changeshiftpattern } from "../services/employee";
 import {
   Edit,
   View,
@@ -549,6 +560,19 @@ import {
   Download,
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
+const changingShiftId = ref(null);
+async function handleChangeShift(id) {
+  try {
+    changingShiftId.value = id;
+    await changeshiftpattern(id);
+    ElMessage.success("ផ្លាស់ប្ដូរវេនការងារបានសម្រេច");
+    emit("refresh");
+  } catch (e) {
+    ElMessage.error("ផ្លាស់ប្ដូរវេនការងារមិនបានសម្រេច");
+  } finally {
+    changingShiftId.value = null;
+  }
+}
 const showCreateSalary = ref(false);
 const showUpdateDialog = ref(false);
 const showUpdateEducation = ref(false);

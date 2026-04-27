@@ -14,3 +14,4 @@ export const updateWorkExperience = (id,formData) => api.put(`edit.work.experien
 export const createWorkExperience = (formData) => api.post(`add.work.experience`,formData)
 export const updatesalary = (id,formData) => api.put(`edit.salary/${id}`,formData)
 export const createsalary = (formData) => api.post(`add.salary`,formData)
+export const changeshiftpattern = (id) => api.put(`edit.shift.pattern/${id}`)

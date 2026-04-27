@@ -35,7 +35,8 @@
 
   <EmployeeDetailDrawer v-model="drawerVisible" :employee="selectedEmployee" @refresh="onEmployeeUpdated"/>
 
-  <el-table :data="employees" height="750" style="width: 100%" v-loading="loading" default-expand-all>
+  <el-table :data="employees" height="750" style="width: 100%" v-loading="loading" >
+    <!-- default-expand-all -->
 
     <el-table-column type="expand" fixed>
       <template #default="scope">
