@@ -721,6 +721,10 @@ const SubmitUpdate = async () => {
       shift_id: formData.shift_id,
     });
     ElMessage.success("ផ្លាស់ប្ដូរវេនការងារបានសម្រេច");
+    formData.branch_id = null,
+    formData.shift_id = null,
+    shifts.value = [];
+    shiftsession.value = []
     emit("refresh");
   } catch (e) {
     ElMessage.error(e?.response?.data?.message || "ផ្លាស់ប្ដូរវេនការងារមិនបានសម្រេច");
