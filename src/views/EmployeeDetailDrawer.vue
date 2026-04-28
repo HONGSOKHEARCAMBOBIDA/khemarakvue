@@ -344,10 +344,30 @@
 
         <!-- Shift -->
         <template v-else-if="activeTab === 'shift'">
-          <div class="pb-4" style="display: flex;">
-            <el-tag type="primary" size="large">វេនការងារប្រចាំសប្ដាហ៍</el-tag>
-           <div class="pl-3"> <el-button type="danger">ប្ដូរវ៉េនធ្វេីការ</el-button></div>
-          </div>
+    <div class="pb-4" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+  <el-tag type="primary" size="large">វេនការងារប្រចាំសប្ដាហ៍</el-tag>
+
+  <el-select v-model="formData.branch_id" placeholder="ជ្រើសរើសសាខា" style="width: 180px" size="large">
+    <el-option v-for="branch in branches" :key="branch.id" :label="branch.name" :value="branch.id" />
+  </el-select>
+
+  <el-select v-model="formData.shift_id" placeholder="ជ្រើសរើសវេន" style="width: 260px" size="large">
+    <el-option v-for="shift in shifts" :key="shift.id" :label="shift.name" :value="shift.id" />
+  </el-select>
+
+  <el-text
+    v-for="session in shiftsession"
+    :key="session.id"
+    type="danger"
+    size="large"
+  >
+    {{ `${session.session_name} : ${session.start_time} - ${session.end_time}` }}
+  </el-text>
+
+ <el-button type="danger" :loading="loading" @click="SubmitUpdate">
+  ប្ដូរវ៉េនធ្វេីការ
+</el-button>
+</div>
 
           <div class="shift-week">
             <div
@@ -536,7 +556,7 @@ v-model="showCreateSalary"
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits } from "vue";
+import { ref, computed, defineProps, defineEmits, onMounted, reactive, watch } from "vue";
 import api from "../services/api";
 import EmployeeUpdateDialog from "../components/EmployeeUpdateDialog.vue";
 import EducationUpdateDialog from "../components/EducationUpdateDialog.vue";
@@ -545,7 +565,10 @@ import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue
 import WorkExperienceCreateDialog from "../components/WorkExperienceCreateDialog.vue";
 import SalaryUpdateDialog from "../components/SalaryUpdateDialog.vue";
 import SalaryCreateDialog from "../components/SalaryCreateDialog.vue";
-import { changeshiftpattern } from "../services/employee";
+import { changeshift, changeshiftpattern } from "../services/employee";
+import { fetchBranch } from "../services/branch";
+import { fetchShift } from '../services/shift'
+import { fetchShiftSession } from '../services/shiftsession'
 import {
   Edit,
   View,
@@ -561,6 +584,15 @@ import {
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 const changingShiftId = ref(null);
+const branches = ref([])
+const shifts = ref([])
+const shiftsession = ref([])
+const loading = ref(false)
+const formData = reactive({
+  employee_id: null,
+  branch_id:                null,
+  shift_id:                 null,
+})
 async function handleChangeShift(id) {
   try {
     changingShiftId.value = id;
@@ -639,6 +671,64 @@ async function downloadImage(url, filename) {
     ElMessage.error("ទាញយករូបភាពមិនបានសម្រេច");
   }
 }
+async function load(fn, target) {
+  loading.value = true
+  try {
+    const res = await fn()
+    target.value = res.data.data
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || e?.message || 'Load failed')
+  } finally {
+    loading.value = false
+  }
+}
+onMounted(async()=>{
+  load(fetchBranch,branches)
+})
+watch(() => formData.branch_id, async (v)=>{
+  shifts.value = []; 
+  shiftsession.value = [];
+  formData.shift_id = null
+  if (!v) return
+  try {
+    shifts.value = (await fetchShift(v)).data.data
+
+  }catch(e){
+    ElMessage.error(e?.message || 'failed')
+  }
+})
+
+watch(() => formData.shift_id, async (v)=>{
+  shiftsession.value = []
+  if(!v) return
+  try{
+shiftsession.value = (await fetchShiftSession(v)).data.data
+  }catch(e){
+ElMessage.error(e?.message)
+  }
+})
+
+const SubmitUpdate = async () => {
+  if (!formData.shift_id) {
+    ElMessage.warning("សូមជ្រើសរើសវេនការងារជាមុន");
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await changeshift({
+      employee_id: props.employee?.employees?.[0]?.id,  // ✅ read from props directly
+      shift_id: formData.shift_id,
+    });
+    ElMessage.success("ផ្លាស់ប្ដូរវេនការងារបានសម្រេច");
+    emit("refresh");
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || "ផ្លាស់ប្ដូរវេនការងារមិនបានសម្រេច");
+  } finally {
+    loading.value = false;
+  }
+};
+
 </script>
 
 <style scoped>
