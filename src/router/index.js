@@ -12,7 +12,7 @@ import Login from '../views/login.vue'
 import Profile from '../views/Profile.vue'
 import Users from '../views/Users.vue'
 import Reports from '../views/Reports.vue'
-
+import AttendanceCreate from '../components/AttendanceCreate.vue'
 const routes = [
   {
     path: '/login',
@@ -34,6 +34,12 @@ const routes = [
         name: 'Home',
         component: Home,
         meta: { title: 'Home' }
+      },
+      {
+        path: 'attendance',
+        name: 'Attendance',
+        component: AttendanceCreate,
+        meta: {title: 'Attendance',requiresAuth: true}
       },
       {
         path: 'about',
@@ -79,7 +85,7 @@ router.beforeEach((to, from) => {
   
   // Check if route is for guests only (like login page)
   if (to.meta.guestOnly && auth.isAuthenticated) {
-    return '/home'
+    return '/attendance'
   }
   
   // Update page title

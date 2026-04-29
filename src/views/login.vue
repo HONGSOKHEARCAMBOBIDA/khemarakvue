@@ -2,12 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useAuthStore1 } from '../stores/user'
 import { loginApi } from '../services/auth'
 import { ElMessage } from 'element-plus'
 import logo from '../assets/logo.png'
 const router = useRouter()
 const auth = useAuthStore()
-
+const userdata = useAuthStore1()
 const form = ref({
   username: '',
   password: ''
@@ -19,10 +20,11 @@ async function handleLogin() {
   try {
     const response = await loginApi(form.value)
     const token = response.data.data.Token 
-    const user = response.data.data
-    auth.login(token, user)
+    const user = response.data.data    
+    auth.login(token)
+    userdata.login(user)
     ElMessage.success('Login successful!')
-    await router.replace('/home')
+    await router.replace('/attendance')
   } catch (error) {
     ElMessage.error(error)
   } finally {

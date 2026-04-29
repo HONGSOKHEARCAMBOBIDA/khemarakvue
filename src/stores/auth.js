@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { getToken, setToken, removeToken } from '../utils/token'
+import { removeAuth,getAuth } from '../utils/userdata'
 // បង្កេីត store
 export const useAuthStore = defineStore('auth',{
     
@@ -9,7 +10,7 @@ export const useAuthStore = defineStore('auth',{
 
     state: ()=>({
         token : getToken() || null,
-        user: null
+        user: getAuth()
     }),
 
     // state គឺ data ដែល global
@@ -27,7 +28,7 @@ export const useAuthStore = defineStore('auth',{
     actions: {
         login(token,user){
             this.token = token
-            this.user = user
+            //this.user = user
             setToken(token)
             // save token to state
 
@@ -37,6 +38,7 @@ export const useAuthStore = defineStore('auth',{
             this.user = null
             removeToken()
             // remove token from state
+            removeAuth()
         }
     }
 })
