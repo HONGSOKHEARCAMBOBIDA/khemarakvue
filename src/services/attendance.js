@@ -13,3 +13,7 @@ export const checkout = (formData) => api.post('check.out', formData, {
     'Content-Type': 'multipart/form-data'
   }
 })
+
+export function fetchsession(){
+  return api.get(`/view.shift.session`)
+}
