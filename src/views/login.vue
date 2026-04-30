@@ -21,10 +21,10 @@ async function handleLogin() {
   try {
     const response = await loginApi(form.value)
     const token = response.data.data.Token 
-    const user = response.data.data    
+    const user = response.data.data 
     auth.login(token)
     userdata.login(user)
-          ElNotification({
+    ElNotification({
     title: 'ជោគជ័យ',
     message: 'ចូលប្រព័ន្ធបានជោគជ័យ',
     position: 'top-left',
