@@ -5,8 +5,8 @@
         <div class="header-content">
           <div class="logo">សាកលវិទ្យាល័យខេមរៈ ខេត្តបាត់ដំបង</div>
           <div class="nav-buttons">
-            <el-button type="primary" plain @click="navigateTo('/users')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
-            <el-button type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/users')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
           </div>
           <div class="user-info">
             <el-dropdown @command="handleCommand">
@@ -43,14 +43,19 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { ArrowDown } from '@element-plus/icons-vue'
-
+import { useAuthStore1 } from '../stores/user'
+import { computed } from 'vue'
 const router = useRouter()
 const auth = useAuthStore()
-
+const authstore = useAuthStore1()
 const navigateTo = (path) => {
   router.push(path)
 }
-
+// importance
+const hasAdminOrHR = computed(() => {
+  const parts = authstore.parts ?? []  // 👈 fallback to empty array
+  return parts.some(p => p.part_name === 'Admin' || p.part_name === 'HR')
+})
 const handleCommand = (command) => {
   if (command === 'logout') {
     auth.logout()

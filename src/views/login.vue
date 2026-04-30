@@ -6,6 +6,7 @@ import { useAuthStore1 } from '../stores/user'
 import { loginApi } from '../services/auth'
 import { ElMessage } from 'element-plus'
 import logo from '../assets/logo.png'
+import { ElNotification } from 'element-plus'
 const router = useRouter()
 const auth = useAuthStore()
 const userdata = useAuthStore1()
@@ -23,10 +24,20 @@ async function handleLogin() {
     const user = response.data.data    
     auth.login(token)
     userdata.login(user)
-    ElMessage.success('Login successful!')
+          ElNotification({
+    title: 'ជោគជ័យ',
+    message: 'ចូលប្រព័ន្ធបានជោគជ័យ',
+    position: 'top-left',
+    type: 'success',
+  })
     await router.replace('/attendance')
   } catch (error) {
-    ElMessage.error(error)
+     ElNotification({
+    title: 'បរាជ័យ',
+    message: 'ព្យាយាមម្ដងទៀត',
+    position: 'top-left',
+    type: 'error',
+  })
   } finally {
     loading.value = false
   }

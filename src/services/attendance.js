@@ -6,3 +6,10 @@ export const createattendance = (formData) => api.post('check.in', formData, {
     'Content-Type': 'multipart/form-data'
   }
 })
+
+
+export const checkout = (formData) => api.post('check.out', formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  }
+})
