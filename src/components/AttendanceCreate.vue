@@ -82,7 +82,12 @@
   }
   function validateNote() {
     if ((isLate.value || isLeftEarly.value) && !noteInput.value.trim()) {
-      ElMessage.error("សូមបញ្ចូលមូលហេតុ (ចាំបាច់)");
+      ElNotification({
+        title: "បរាជ័យ",
+        message: "សូមបញ្ចូលមូលហេតុ (ចាំបាច់)",
+        position: "top-left",
+        type: "error"
+      })
       return false;
     }
     return true;
@@ -141,26 +146,42 @@
     }
   }
 
-  const suggestions = [
-    { value: "ចុះខេត្តបន្ទាន់" },
-    { value: "ណាត់ជួបពេទ្យ" },
-    { value: "អត់ស្រួលខ្លួន" },
-    { value: "មានរឿងបន្ទាន់" },
-    { value: "ធ្វេីឯកសារបន្ទាន់" },
-  ];
-  const suggestionlate = [
-    { value: "អធ្យាស្រ័យខ្ញុំមកយឺត" },
-    { value: "ស្ទះផ្លូវ" },
-    { value: "ខូចយាន្តជំនិះ" },
-  ];
-  const suggestionleftearly = [
-    { value: "ចុះខេត្តបន្ទាន់" },
-    { value: "ណាត់ជួបពេទ្យ" },
-    { value: "អត់ស្រួលខ្លួន" },
-    { value: "មានរឿងបន្ទាន់" },
-    { value: "ធ្វេីឯកសារបន្ទាន់" },
-  ];
-
+const suggestions = [
+  { value: "ចុះខេត្តបន្ទាន់" },
+  { value: "ណាត់ជួបពេទ្យ" },
+  { value: "អត់ស្រួលខ្លួន" },
+  { value: "មានរឿងបន្ទាន់" },
+  { value: "ធ្វើឯកសារបន្ទាន់" },
+  { value: "បញ្ហាគ្រួសារ" },
+  { value: "មានពិធីបុណ្យ" },
+  { value: "ដឹកជញ្ជូនកូន/គ្រួសារ" },
+  { value: "បញ្ហាសុខភាពគ្រួសារ" },
+  { value: "ការងារផ្ទាល់ខ្លួន" },
+];
+const suggestionlate = [
+  { value: "អធ្យាស្រ័យខ្ញុំមកយឺត" },
+  { value: "ស្ទះផ្លូវ" },
+  { value: "ខូចយាន្តជំនិះ" },
+  { value: "ភ្លៀងខ្លាំង" },
+  { value: "មានហេតុការណ៍ចរាចរណ៍" },
+  { value: "ភ្ញាក់យឺត" },
+  { value: "រង់ចាំដឹកជញ្ជូន" },
+  { value: "បញ្ហាគ្រួសារព្រឹកនេះ" },
+  { value: "កូនឈឺត្រូវយកទៅពេទ្យ" },
+  { value: "បញ្ហាផ្លូវដឹកជញ្ជូនសាធារណៈ" },
+];
+const suggestionleftearly = [
+  { value: "ចុះខេត្តបន្ទាន់" },
+  { value: "ណាត់ជួបពេទ្យ" },
+  { value: "អត់ស្រួលខ្លួន" },
+  { value: "មានរឿងបន្ទាន់" },
+  { value: "ធ្វើឯកសារបន្ទាន់" },
+  { value: "មានកម្មវិធីគ្រួសារ" },
+  { value: "យកកូនចេញពីសាលា" },
+  { value: "បញ្ហាសុខភាព" },
+  { value: "មានភ្ញៀវមកផ្ទះ" },
+  { value: "បញ្ហាផ្ទាល់ខ្លួនបន្ទាន់" },
+];
   function querySearch(queryString, cb) {
     let source = suggestions;
 
@@ -210,9 +231,9 @@
           <el-row align="middle" :gutter="12" style="margin-bottom: 14px">
           
               <el-text tag="p" size="large" style="font-weight: 700; margin: 0">
-                បញ្ចូលវត្តមាន
+                ម៉ោងធ្វេីការ :
               </el-text>
-              <el-text class="pl-4" type="primary">
+              <el-text class="pl-4" type="primary" size="large" style="font-weight: 500;">
                 {{ session.start_time }} - {{ session.end_time }}
               </el-text>
             
@@ -355,7 +376,7 @@
 
           <!-- ── Buttons ── -->
           <el-row :gutter="12">
-            <el-col :span="12">
+            <el-col :span="24">
               <el-button
                 v-if="session.show_check_in == true"
                 type="primary"
@@ -368,10 +389,10 @@
                 🟢 ចូលធ្វេីការ
               </el-button>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-button
               v-if="session.show_check_out == true"
-                type="danger"
+                type="warning"
                 size="large"
                 :disabled="locationStatus !== 'ready' || submitting"
                 :loading="submitting"
