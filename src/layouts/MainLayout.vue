@@ -7,6 +7,7 @@
           <div class="nav-buttons">
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/users')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/attendanceview')">បញ្ជីវត្តមាន</el-button>
           </div>
           <div class="user-info">
             <el-dropdown @command="handleCommand">

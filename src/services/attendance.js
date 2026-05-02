@@ -17,3 +17,7 @@ export const checkout = (formData) => api.post('check.out', formData, {
 export function fetchsession(){
   return api.get(`/view.shift.session`)
 }
+
+export function fetchAttendance(params ={}){
+  return api.get(`/view.attendance`,{params});
+}

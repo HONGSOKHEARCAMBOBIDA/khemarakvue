@@ -13,6 +13,7 @@ import Profile from '../views/Profile.vue'
 import Users from '../views/Users.vue'
 import Reports from '../views/Reports.vue'
 import AttendanceCreate from '../components/AttendanceCreate.vue'
+import AttendanceView from '../views/AttendanceView.vue'
 const routes = [
   {
     path: '/login',
@@ -34,6 +35,12 @@ const routes = [
         name: 'Home',
         component: Home,
         meta: { title: 'Home' }
+      },
+      {
+        path: 'attendanceview',
+        name: 'attendanceView',
+        component: AttendanceView,
+        meta: {title: 'AttendanceView',requiresAuth: true}
       },
       {
         path: 'attendance',
