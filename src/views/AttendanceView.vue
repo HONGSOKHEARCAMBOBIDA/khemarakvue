@@ -301,8 +301,7 @@ function onStatusClear() {
       <!-- Avatar -->
       <el-table-column label="" width="60">
         <template #default="{ row }">
-          <el-avatar :size="40" :src="getImage(row)">
-            {{ row.employee_name_en?.slice(0,1) }}
+          <el-avatar :size="55" :src="getImage(row)">
           </el-avatar>
         </template>
       </el-table-column>
