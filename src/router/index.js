@@ -14,6 +14,7 @@ import Users from '../views/Users.vue'
 import Reports from '../views/Reports.vue'
 import AttendanceCreate from '../components/AttendanceCreate.vue'
 import AttendanceView from '../views/AttendanceView.vue'
+import Leave from '../views/Leave.vue'
 const routes = [
   {
     path: '/login',
@@ -47,6 +48,12 @@ const routes = [
         name: 'Attendance',
         component: AttendanceCreate,
         meta: {title: 'Attendance',requiresAuth: true}
+      },
+      {
+        path: 'leave',
+        name: 'Leave',
+        component: Leave
+
       },
       {
         path: 'about',
