@@ -10,10 +10,10 @@ import {
 import { fetchBranch } from '../services/branch'
 import { getuser } from '../services/userservice'
 import { fetchOffice } from '../services/office'
-import { Search, Refresh } from '@element-plus/icons-vue'
-import { previewLeavePDF, downloadLeavePDF } from '../utils/generateLeavePDF'
+import { Search, Refresh, View } from '@element-plus/icons-vue'
+const imageUrl = new URL('@public/image.png', import.meta.url).href
 
-// ── state ─────────────────────────────────────────────────────────────────
+
 const loading     = ref(false)
 const leave       = ref([])
 const leavetype   = ref([])
@@ -22,32 +22,20 @@ const branch      = ref([])
 const user        = ref([])
 const office      = ref([])
 
-// ── PDF preview dialog ────────────────────────────────────────────────────
+// ── preview dialog ────────────────────────────────────────────────────────
 const previewVisible = ref(false)
-const previewUrl     = ref('')      // blob URL fed to <iframe>
-const previewRow     = ref(null)    // current row (for download button)
+const previewRow     = ref(null)
 
 function openPreview(row) {
   previewRow.value = row
-  previewUrl.value = previewLeavePDF(row)   // generate blob URL
   previewVisible.value = true
 }
 
-function closePreview() {
-  previewVisible.value = false
-  // Release the blob URL from memory
-  if (previewUrl.value) {
-    URL.revokeObjectURL(previewUrl.value)
-    previewUrl.value = ''
-  }
-  previewRow.value = null
+function printPreview() {
+  window.print()
 }
+// ─────────────────────────────────────────────────────────────────────────
 
-function handleDownload() {
-  if (previewRow.value) downloadLeavePDF(previewRow.value)
-}
-
-// ── filters & pagination ──────────────────────────────────────────────────
 function getToday() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -317,13 +305,13 @@ const getProviderType = (phone) => {
           </template>
         </el-table-column>
 
-        <!-- ── action column: opens preview dialog ── -->
+        <!-- ── action column ── -->
         <el-table-column label="សកម្មភាព" width="100" align="center" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="មើលលម្អិត" placement="top">
               <el-button
                 type="primary"
-                :icon="'View'"
+                :icon="View"
                 circle
                 size="small"
                 plain
@@ -349,38 +337,183 @@ const getProviderType = (phone) => {
       </div>
     </el-card>
 
-    <!-- ════════════════════════════════════════════════════════════════
-         PDF PREVIEW DIALOG
-         ════════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════
+         A4 PREVIEW DIALOG
+    ══════════════════════════════════════════════════════ -->
     <el-dialog
       v-model="previewVisible"
-      title="មើលទម្រង់ច្បាប់ឈប់សម្រាក"
-      width="860px"
-      top="4vh"
-      :before-close="closePreview"
+      width="900px"
+      top="30px"
       destroy-on-close
+      class="preview-dialog"
+      :show-close="true"
     >
-      <!-- iframe shows the PDF blob -->
-      <iframe
-        v-if="previewUrl"
-        :src="previewUrl"
-        class="pdf-iframe"
-        frameborder="0"
-      />
-
-      <!-- dialog footer: close + download -->
-      <template #footer>
-        <el-button @click="closePreview">បិទ</el-button>
-        <el-button type="primary" @click="handleDownload">
-          ទាញយក PDF
-        </el-button>
+      <template #header>
+        <div class="dialog-header">
+          <span>មើលលម្អិតច្បាប់ឈប់សម្រាក</span>
+          <el-button type="primary" size="small" @click="printPreview" style="margin-left:12px">
+            🖨 បោះពុម្ព
+          </el-button>
+        </div>
       </template>
+
+      <div class="a4-wrapper" id="print-area">
+        <div class="a4-page" v-if="previewRow">
+
+          <!-- ── document header ── -->
+          <div class="doc-header">
+            <div class="doc-logo-area">
+              <!-- Replace src with your actual logo -->
+              <div class="doc-logo-placeholder">LOGO</div>
+            </div>
+           <div class="doc-title-area">
+  <div class="doc-company-kh">ព្រះរាជាណាចក្រកម្ពុជា</div>
+  <div class="doc-title-main">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
+  <div class="logo-center">
+    <img src="/image.png" alt="Logo" width="100" height="100">
+  </div>
+</div>
+            <div class="doc-ref-area">
+              <div class="ref-row"><span>លេខ​​​​​​ :</span> <span>{{ previewRow.id }}</span></div>
+              <div class="ref-row"><span>ថ្ងៃទី :</span> <span>{{ previewRow.start_date }}</span></div>
+            </div>
+          </div>
+
+          <div class="doc-divider"></div>
+
+          <!-- ── status badge ── -->
+          <div class="status-bar">
+            <span class="status-label">ស្ថានភាព :</span>
+            <span class="status-badge" :class="`status-${previewRow.status_leave_id}`">
+              {{ previewRow.status_leave_name }}
+            </span>
+          </div>
+
+          <!-- ── employee info section ── -->
+          <div class="section-title">I. ព័ត៌មានបុគ្គលិក</div>
+          <div class="info-grid">
+            <div class="info-row">
+              <div class="info-cell">
+                <span class="info-label">លេខកូដបុគ្គលិក</span>
+                <span class="info-value">{{ previewRow.employee_code || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">ឈ្មោះ (ខ្មែរ)</span>
+                <span class="info-value">{{ previewRow.employee_name_kh || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">ឈ្មោះ (អង់គ្លេស)</span>
+                <span class="info-value">{{ previewRow.employee_name_en || '—' }}</span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-cell">
+                <span class="info-label">ភេទ</span>
+                <span class="info-value">
+                  {{ previewRow.employee_gender === 1 ? 'ប្រុស' : previewRow.employee_gender === 2 ? 'ស្រី' : '—' }}
+                </span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">លេខទូរសព្ទ</span>
+                <span class="info-value">{{ formDataPhone(previewRow.employee_phone) }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">បណ្តាញ</span>
+                <span class="info-value">{{ getProvider(previewRow.employee_phone) }}</span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-cell">
+                <span class="info-label">មុខតំណែង</span>
+                <span class="info-value">{{ previewRow.position_name || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">ការិយាល័យ</span>
+                <span class="info-value">{{ previewRow.office_name || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">សាខា</span>
+                <span class="info-value">{{ previewRow.branch_name || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── leave details section ── -->
+          <div class="section-title">II. ព័ត៌មានច្បាប់</div>
+          <div class="info-grid">
+            <div class="info-row">
+              <div class="info-cell">
+                <span class="info-label">ប្រភេទច្បាប់</span>
+                <span class="info-value highlight">{{ previewRow.leave_type_name || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">រយៈពេលសុំ</span>
+                <span class="info-value highlight">{{ previewRow.duration_value }} {{ previewRow.duration_unit_name_kh }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">ការបង្ហាញ</span>
+                <span class="info-value">{{ previewRow.duration_display || '—' }}</span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-cell">
+                <span class="info-label">ថ្ងៃចាប់ផ្ដើម</span>
+                <span class="info-value">{{ previewRow.start_date || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">ថ្ងៃបញ្ចប់</span>
+                <span class="info-value">{{ previewRow.end_date || '—' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="info-label">ប្រភេទកាត់ប្រាក់</span>
+                <span class="info-value">{{ previewRow.deduct_type_name || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── reason ── -->
+          <div class="section-title">III. មូលហេតុ</div>
+          <div class="reason-box">
+            {{ previewRow.description || 'គ្មានមូលហេតុ' }}
+          </div>
+
+          <!-- ── approval section ── -->
+          <div class="section-title">IV. ការអនុម័ត</div>
+          <div class="approval-grid">
+            <div class="approval-cell">
+              <div class="approval-label">អ្នកស្នើ</div>
+              <div class="approval-sign-area"></div>
+              <div class="approval-name">{{ previewRow.employee_name_kh }}</div>
+              <div class="approval-date">ថ្ងៃទី: ___________</div>
+            </div>
+            <div class="approval-cell">
+              <div class="approval-label">អ្នកផ្ទៀងផ្ទាត់</div>
+              <div class="approval-sign-area"></div>
+              <div class="approval-name">___________________</div>
+              <div class="approval-date">ថ្ងៃទី: ___________</div>
+            </div>
+            <div class="approval-cell">
+              <div class="approval-label">អ្នកអនុម័ត</div>
+              <div class="approval-sign-area"></div>
+              <div class="approval-name">{{ previewRow.approve_by_name || '___________________' }}</div>
+              <div class="approval-date">ថ្ងៃទី: ___________</div>
+            </div>
+          </div>
+
+          <!-- ── footer ── -->
+          <div class="doc-footer">
+            <div class="footer-note">ឯកសារនេះបានបង្កើតដោយប្រព័ន្ធគ្រប់គ្រងធនធានមនុស្ស</div>
+          </div>
+
+        </div>
+      </div>
     </el-dialog>
 
   </div>
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Moul&display=swap');
 .leave-page {
   padding: 20px;
   background: #f5f7fa;
@@ -416,17 +549,224 @@ const getProviderType = (phone) => {
   padding-top: 16px;
 }
 
-/* PDF iframe fills the dialog body */
-.pdf-iframe {
-  width: 100%;
-  height: 78vh;
-  border: none;
-  border-radius: 4px;
-  background: #eee;
-}
-
 :deep(.el-table__header-wrapper th) {
   background-color: #409eff !important;
   color: #ffffff !important;
+}
+
+/* ── Dialog header ── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ── A4 wrapper (scrollable area inside dialog) ── */
+.a4-wrapper {
+  background: #e8e8e8;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  min-height: 500px;
+}
+
+/* ── A4 page itself ── */
+.a4-page {
+  width: 794px;          /* A4 at 96dpi */
+  min-height: 1123px;
+  background: #ffffff;
+  padding: 48px 56px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  font-size: 13px;
+  color: #1a1a2e;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* ── Document header ── */
+.doc-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.doc-logo-placeholder {
+  width: 72px;
+  height: 72px;
+  border: 2px dashed #c0c0c0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.doc-title-area {
+  flex: 1;
+  text-align: center;
+}
+.doc-company-kh  { font-size: 19px; color: #000000; margin-bottom: 4px;font-family: "Moul", serif;font-weight: 100; }
+.doc-title-main  { font-size: 18px; font-weight: 700; color: #000000; letter-spacing: 0.5px;font-family: "Moul", serif;font-weight: 100; }
+.doc-title-en    { font-size: 13px; color: #666; letter-spacing: 2px; margin-top: 4px; }
+
+.doc-ref-area {
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+.ref-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+
+/* ── Divider ── */
+.doc-divider {
+  height: 3px;
+  background: linear-gradient(to right, #1a3a6b, #409eff, #1a3a6b);
+  margin: 12px 0 16px;
+  border-radius: 2px;
+}
+
+/* ── Status bar ── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.status-label { font-size: 13px; font-weight: 600; }
+.status-badge {
+  padding: 3px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.status-1 { background: #fef3c7; color: #92400e; border-color: #fbbf24; }
+.status-2 { background: #d1fae5; color: #065f46; border-color: #34d399; }
+.status-3 { background: #fee2e2; color: #991b1b; border-color: #f87171; }
+.status-4 { background: #e0e7ff; color: #3730a3; border-color: #818cf8; }
+
+/* ── Section title ── */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a3a6b;
+  background: #eef4ff;
+  border-left: 4px solid #409eff;
+  padding: 5px 10px;
+  margin: 16px 0 10px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ── Info grid ── */
+.info-grid { display: flex; flex-direction: column; gap: 0; }
+.info-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid #dce3f0;
+  border-top: none;
+  &:first-child { border-top: 1px solid #dce3f0; }
+}
+.info-row:first-child { border-top: 1px solid #dce3f0; }
+
+.info-cell {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-right: 1px solid #dce3f0;
+}
+.info-cell:last-child { border-right: none; }
+
+.info-label {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 3px;
+  font-weight: 500;
+}
+.info-value {
+  font-size: 13px;
+  color: #1a1a2e;
+  font-weight: 600;
+}
+.info-value.highlight { color: #1a3a6b; }
+
+/* ── Reason box ── */
+.reason-box {
+  border: 1px solid #dce3f0;
+  border-radius: 4px;
+  padding: 12px 14px;
+  min-height: 64px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #333;
+  background: #fafbff;
+}
+
+/* ── Approval grid ── */
+.approval-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid #dce3f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.approval-cell {
+  padding: 12px;
+  text-align: center;
+  border-right: 1px solid #dce3f0;
+}
+.approval-cell:last-child { border-right: none; }
+
+.approval-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a3a6b;
+  margin-bottom: 8px;
+}
+.approval-sign-area {
+  height: 70px;
+  border-bottom: 1px dashed #bbb;
+  margin-bottom: 8px;
+}
+.approval-name { font-size: 12px; color: #333; margin-bottom: 4px; }
+.approval-date { font-size: 11px; color: #888; }
+
+/* ── Footer ── */
+.doc-footer {
+  position: absolute;
+  bottom: 32px;
+  left: 56px;
+  right: 56px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 8px;
+  text-align: center;
+}
+.footer-note { font-size: 10px; color: #aaa; }
+
+.logo-center img {
+  margin: 0 auto;
+}
+
+
+/* ── Print styles ── */
+@media print {
+  .leave-page       { display: none; }
+  .preview-dialog   { display: none; }
+  .a4-wrapper       { padding: 0; background: none; }
+  .a4-page          { box-shadow: none; margin: 0; }
+
+  #print-area {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    z-index: 9999;
+    background: white;
+  }
 }
 </style>
