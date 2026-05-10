@@ -10,8 +10,10 @@ import {
 import { fetchBranch } from '../services/branch'
 import { getuser } from '../services/userservice'
 import { fetchOffice } from '../services/office'
-import { Calendar, Search, Filter, Refresh } from '@element-plus/icons-vue'
+import { Search, Refresh } from '@element-plus/icons-vue'
+import { previewLeavePDF, downloadLeavePDF } from '../utils/generateLeavePDF'
 
+// ── state ─────────────────────────────────────────────────────────────────
 const loading     = ref(false)
 const leave       = ref([])
 const leavetype   = ref([])
@@ -20,6 +22,32 @@ const branch      = ref([])
 const user        = ref([])
 const office      = ref([])
 
+// ── PDF preview dialog ────────────────────────────────────────────────────
+const previewVisible = ref(false)
+const previewUrl     = ref('')      // blob URL fed to <iframe>
+const previewRow     = ref(null)    // current row (for download button)
+
+function openPreview(row) {
+  previewRow.value = row
+  previewUrl.value = previewLeavePDF(row)   // generate blob URL
+  previewVisible.value = true
+}
+
+function closePreview() {
+  previewVisible.value = false
+  // Release the blob URL from memory
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = ''
+  }
+  previewRow.value = null
+}
+
+function handleDownload() {
+  if (previewRow.value) downloadLeavePDF(previewRow.value)
+}
+
+// ── filters & pagination ──────────────────────────────────────────────────
 function getToday() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -45,9 +73,9 @@ function buildParams() {
   if (f.start_date?.trim())      p.start_date      = f.start_date.trim()
   if (f.end_date?.trim())        p.end_date        = f.end_date.trim()
   if (f.employee_id)             p.employee_id     = f.employee_id
-  if (f.branch_id)               p.branch_id       = f.branch_id  
-  if (f.office_id)               p.office_id       = f.office_id   
-  if (f.status_leave_id)         p.status_leave_id = f.status_leave_id  
+  if (f.branch_id)               p.branch_id       = f.branch_id
+  if (f.office_id)               p.office_id       = f.office_id
+  if (f.status_leave_id)         p.status_leave_id = f.status_leave_id
   if (f.leave_type_id)           p.leave_type_id   = f.leave_type_id
   return p
 }
@@ -57,7 +85,7 @@ async function loadLeave(params = {}) {
   try {
     const res = await fetchLeave(params)
     leave.value = res.data.data
-    pagination.value.total = res.data.pagination.totalCount  
+    pagination.value.total = res.data.pagination.totalCount
   } catch (e) {
     ElMessage.error(e?.response?.data?.message || e?.message || 'Load failed')
   } finally {
@@ -73,7 +101,6 @@ async function loadLookup(fn, target) {
     ElMessage.error(e?.response?.data?.message || e?.message || 'Load failed')
   }
 }
-
 
 function onPageChange(newPage) {
   pagination.value.page = newPage
@@ -96,7 +123,6 @@ function resetFilters() {
   loadLeave(buildParams())
 }
 
-
 function statusType(id) {
   const map = { 1: 'warning', 2: 'success', 3: 'danger', 4: 'info' }
   return map[id] ?? 'info'
@@ -110,12 +136,10 @@ onMounted(() => {
   loadLookup(fetchOffice, office)
 })
 
-
 watch(() => formDataParam.value.search, () => {
   clearTimeout(searchTimer)
   searchTimer = setTimeout(() => { pagination.value.page = 1; loadLeave(buildParams()) }, 300)
 })
-
 
 watch(() => formDataParam.value.branch_id, async (v) => {
   pagination.value.page = 1
@@ -127,172 +151,114 @@ watch(() => formDataParam.value.branch_id, async (v) => {
   loadLeave(buildParams())
 })
 
-watch(() => formDataParam.value.employee_id,    () => { pagination.value.page = 1; loadLeave(buildParams()) })
-watch(() => formDataParam.value.office_id,      () => { pagination.value.page = 1; loadLeave(buildParams()) })
-watch(() => formDataParam.value.status_leave_id,() => { pagination.value.page = 1; loadLeave(buildParams()) })
-watch(() => formDataParam.value.leave_type_id,  () => { pagination.value.page = 1; loadLeave(buildParams()) })
-watch(() => formDataParam.value.start_date,     () => { pagination.value.page = 1; loadLeave(buildParams()) })
-watch(() => formDataParam.value.end_date,       () => { pagination.value.page = 1; loadLeave(buildParams()) })
+watch(() => formDataParam.value.employee_id,     () => { pagination.value.page = 1; loadLeave(buildParams()) })
+watch(() => formDataParam.value.office_id,       () => { pagination.value.page = 1; loadLeave(buildParams()) })
+watch(() => formDataParam.value.status_leave_id, () => { pagination.value.page = 1; loadLeave(buildParams()) })
+watch(() => formDataParam.value.leave_type_id,   () => { pagination.value.page = 1; loadLeave(buildParams()) })
+watch(() => formDataParam.value.start_date,      () => { pagination.value.page = 1; loadLeave(buildParams()) })
+watch(() => formDataParam.value.end_date,        () => { pagination.value.page = 1; loadLeave(buildParams()) })
+
+// ── phone helpers ─────────────────────────────────────────────────────────
+const formDataPhone = (phone) => {
+  if (!phone) return '-'
+  const cleaned = phone.replace(/\D/g, '')
+  if (cleaned.length === 9 || cleaned.length === 10) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3')
+  }
+  return phone
+}
+
+const getProvider = (phone) => {
+  if (!phone) return 'Unknown'
+  const c = phone.replace(/\D/g, '')
+  if (['010','015','016','069','070','081','086','093','096','098'].some(p => c.startsWith(p))) return 'Smart'
+  if (['011','012','014','017','061','076','078','079','089','092','095'].some(p => c.startsWith(p))) return 'Cellcard'
+  if (['031','036','038','039','071','085','087','088','090','097','099'].some(p => c.startsWith(p))) return 'Metfone'
+  if (['066','068','077'].some(p => c.startsWith(p))) return 'Seatel'
+  if (c.startsWith('018')) return 'Cootel'
+  return 'Other'
+}
+
+const getProviderType = (phone) => {
+  const map = { Smart: 'success', Cellcard: 'danger', Metfone: 'primary' }
+  return map[getProvider(phone)] ?? 'info'
+}
 </script>
 
 <template>
   <div class="leave-page">
+
+    <!-- ── page header ── -->
     <div class="page-header">
       <div class="header-left">
-       
-        <div>
-          <el-text size="large">ការគ្រប់គ្រងច្បាប់ឈប់សម្រាក</el-text>
-        </div>
+        <el-text size="large">ការគ្រប់គ្រងច្បាប់ឈប់សម្រាក</el-text>
       </div>
       <el-button :icon="Refresh" circle plain @click="resetFilters" title="Reset filters" />
     </div>
 
+    <!-- ── filters ── -->
     <el-card class="filter-card" shadow="never">
       <div class="filter-grid">
-        <el-input
-          v-model="formDataParam.search"
-          placeholder="ស្វែងរក​ឈ្មោះបុគ្គលិក..."
-          :prefix-icon="Search"
-          clearable
-         
-        />
-
-        <el-date-picker
-          v-model="formDataParam.start_date"
-          type="date"
-          placeholder="ថ្ងៃចាប់ផ្ដើម"
-          value-format="YYYY-MM-DD"
-          style="width:100%"
-        />
-        <el-date-picker
-          v-model="formDataParam.end_date"
-          type="date"
-          placeholder="ថ្ងៃបញ្ចប់"
-          value-format="YYYY-MM-DD"
-          style="width:100%"
-        />
-
-        <el-select
-          v-model="formDataParam.branch_id"
-          placeholder="សាខា"
-          clearable
-          filterable
-          style="width:100%"
-        >
-          <el-option
-            v-for="b in branch"
-            :key="b.id"
-            :label="b.name"
-            :value="b.id"
-          />
+        <el-input v-model="formDataParam.search" placeholder="ស្វែងរក​ឈ្មោះបុគ្គលិក..." :prefix-icon="Search" clearable />
+        <el-date-picker v-model="formDataParam.start_date" type="date" placeholder="ថ្ងៃចាប់ផ្ដើម" value-format="YYYY-MM-DD" style="width:100%" />
+        <el-date-picker v-model="formDataParam.end_date"   type="date" placeholder="ថ្ងៃបញ្ចប់"    value-format="YYYY-MM-DD" style="width:100%" />
+        <el-select v-model="formDataParam.branch_id" placeholder="សាខា" clearable filterable style="width:100%">
+          <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
         </el-select>
-
-
-        <el-select
-          v-model="formDataParam.employee_id"
-          placeholder="បុគ្គលិក"
-          clearable
-          filterable
-          :disabled="!formDataParam.branch_id"
-          style="width:100%"
-        >
-          <el-option
-            v-for="u in user"
-            :key="u.id"
-            :label="u.name"
-            :value="u.id"
-          />
+        <el-select v-model="formDataParam.employee_id" placeholder="បុគ្គលិក" clearable filterable :disabled="!formDataParam.branch_id" style="width:100%">
+          <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
         </el-select>
-
-        <el-select
-          v-model="formDataParam.office_id"
-          placeholder="ការិយាល័យ"
-          clearable
-          filterable
-          style="width:100%"
-        >
-          <el-option
-            v-for="o in office"
-            :key="o.id"
-            :label="o.name"
-            :value="o.id"
-          />
+        <el-select v-model="formDataParam.office_id" placeholder="ការិយាល័យ" clearable filterable style="width:100%">
+          <el-option v-for="o in office" :key="o.id" :label="o.name" :value="o.id" />
         </el-select>
-
-        <el-select
-          v-model="formDataParam.leave_type_id"
-          placeholder="ប្រភេទច្បាប់"
-          clearable
-          style="width:100%"
-        >
-          <el-option
-            v-for="lt in leavetype"
-            :key="lt.id"
-            :label="lt.name"
-            :value="lt.id"
-          />
+        <el-select v-model="formDataParam.leave_type_id" placeholder="ប្រភេទច្បាប់" clearable style="width:100%">
+          <el-option v-for="lt in leavetype" :key="lt.id" :label="lt.name" :value="lt.id" />
         </el-select>
-
-        <el-select
-          v-model="formDataParam.status_leave_id"
-          placeholder="ស្ថានភាព"
-          clearable
-          style="width:100%"
-        >
-          <el-option
-            v-for="st in statusleave"
-            :key="st.id"
-            :label="st.name"
-            :value="st.id"
-          />
+        <el-select v-model="formDataParam.status_leave_id" placeholder="ស្ថានភាព" clearable style="width:100%">
+          <el-option v-for="st in statusleave" :key="st.id" :label="st.name" :value="st.id" />
         </el-select>
       </div>
     </el-card>
 
+    <!-- ── table ── -->
     <el-card class="table-card" shadow="never">
-      <el-table
-        :data="leave"
-        v-loading="loading"
-        stripe
-        border
-        row-key="id"
-        style="width:100%"
-        empty-text="គ្មានទិន្នន័យ"
-      >
+      <el-table :data="leave" v-loading="loading" stripe border row-key="id" style="width:100%" empty-text="គ្មានទិន្នន័យ">
+
         <el-table-column type="index" label="ល.រ" width="55" align="center" fixed />
+
         <el-table-column label="លេខកូដ" min-width="130" fixed>
           <template #default="{ row }">
-            <div class="employee-cell">
-              <div>
-                <div class="emp-name-kh">{{ row.employee_code }}</div>
-              </div>
-            </div>
+            <div class="emp-name-kh">{{ row.employee_code }}</div>
           </template>
         </el-table-column>
 
         <el-table-column label="បុគ្គលិក" min-width="170" fixed>
           <template #default="{ row }">
-            <div class="employee-cell">
-              <div>
-                <div class="emp-name-kh">{{ row.employee_name_kh }}</div>
-                <el-text type="success" size="small">{{ row.employee_name_en }}</el-text>
-              </div>
-            </div>
+            <div class="emp-name-kh">{{ row.employee_name_kh }}</div>
+            <el-text type="success" size="small">{{ row.employee_name_en }}</el-text>
           </template>
         </el-table-column>
 
-        <el-table-column label="ភេទ" min-widht="70" fixed align="center">
-          <template #default="{row}">
-            <el-tag type="primary">
-              {{ row?.employee_gender === 1 ? "ប្រុស" : row?.employee_gender === 2 ? "ស្រី" : "—" }}
+        <el-table-column label="លេខទូរសព្ទ" min-width="170" fixed>
+          <template #default="{ row }">
+            <span class="fw-bold">{{ formDataPhone(row.employee_phone) }}</span>
+            <el-tag size="small" :type="getProviderType(row.employee_phone)" effect="light" style="margin-left:6px">
+              {{ getProvider(row.employee_phone) }}
             </el-tag>
           </template>
+        </el-table-column>
 
+        <el-table-column label="ភេទ" min-width="70" fixed align="center">
+          <template #default="{ row }">
+            <el-tag type="primary">
+              {{ row.employee_gender === 1 ? 'ប្រុស' : row.employee_gender === 2 ? 'ស្រី' : '—' }}
+            </el-tag>
+          </template>
         </el-table-column>
 
         <el-table-column label="មុខតំណែង / ការិយាល័យ" min-width="180" align="center">
           <template #default="{ row }">
-            <div class="two-line ">
+            <div class="two-line">
               <el-text type="primary" size="small">{{ row.position_name }}</el-text>
               <el-text type="warning" size="small">{{ row.office_name }}</el-text>
             </div>
@@ -304,11 +270,13 @@ watch(() => formDataParam.value.end_date,       () => { pagination.value.page = 
             <el-tag type="primary" effect="light" size="large">{{ row.leave_type_name }}</el-tag>
           </template>
         </el-table-column>
+
         <el-table-column label="សុំច្បាប់" min-width="70" align="center">
-          <template #default="{row}">
+          <template #default="{ row }">
             <el-text>{{ row.duration_value }} {{ row.duration_unit_name_kh }}</el-text>
           </template>
         </el-table-column>
+
         <el-table-column label="រយៈពេល" min-width="150" align="center">
           <template #default="{ row }">
             <div class="two-line center">
@@ -327,47 +295,46 @@ watch(() => formDataParam.value.end_date,       () => { pagination.value.page = 
           </template>
         </el-table-column>
 
-        <!-- Branch -->
-        <el-table-column prop="branch_name" label="សាខា" min-width="130" align="center"/>
+        <el-table-column prop="branch_name" label="សាខា" min-width="130" align="center" />
 
-        <!-- Description -->
         <el-table-column label="មូលហេតុ" min-width="140" align="center">
           <template #default="{ row }">
             <el-text>{{ row.description || '—' }}</el-text>
           </template>
         </el-table-column>
 
-        <!-- Approved by -->
         <el-table-column label="អនុម័តដោយ" min-width="130" align="center">
           <template #default="{ row }">
             <span>{{ row.approve_by_name || '—' }}</span>
           </template>
         </el-table-column>
 
-        <!-- Status -->
         <el-table-column label="ស្ថានភាព" min-width="130" align="center">
           <template #default="{ row }">
-            <el-tag
-              :type="statusType(row.status_leave_id)"
-              effect="light"
-              size="large"
-            >
+            <el-tag :type="statusType(row.status_leave_id)" effect="light" size="large">
               {{ row.status_leave_name }}
             </el-tag>
           </template>
         </el-table-column>
 
-        <!-- Actions -->
+        <!-- ── action column: opens preview dialog ── -->
         <el-table-column label="សកម្មភាព" width="100" align="center" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="មើលលម្អិត" placement="top">
-              <el-button type="primary" :icon="'View'" circle size="small" plain />
+              <el-button
+                type="primary"
+                :icon="'View'"
+                circle
+                size="small"
+                plain
+                @click="openPreview(row)"
+              />
             </el-tooltip>
           </template>
         </el-table-column>
+
       </el-table>
 
-      <!-- Pagination -->
       <div class="pagination-wrap">
         <el-pagination
           v-model:current-page="pagination.page"
@@ -381,6 +348,35 @@ watch(() => formDataParam.value.end_date,       () => { pagination.value.page = 
         />
       </div>
     </el-card>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         PDF PREVIEW DIALOG
+         ════════════════════════════════════════════════════════════════ -->
+    <el-dialog
+      v-model="previewVisible"
+      title="មើលទម្រង់ច្បាប់ឈប់សម្រាក"
+      width="860px"
+      top="4vh"
+      :before-close="closePreview"
+      destroy-on-close
+    >
+      <!-- iframe shows the PDF blob -->
+      <iframe
+        v-if="previewUrl"
+        :src="previewUrl"
+        class="pdf-iframe"
+        frameborder="0"
+      />
+
+      <!-- dialog footer: close + download -->
+      <template #footer>
+        <el-button @click="closePreview">បិទ</el-button>
+        <el-button type="primary" @click="handleDownload">
+          ទាញយក PDF
+        </el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -389,89 +385,44 @@ watch(() => formDataParam.value.end_date,       () => { pagination.value.page = 
   padding: 20px;
   background: #f5f7fa;
   min-height: 100vh;
-
 }
 
-/* Header */
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
 }
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.header-icon {
-  font-size: 28px;
-  color: #409eff;
-}
-.page-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: #1d2939;
-  line-height: 1.3;
-}
-.page-sub {
-  margin: 0;
-  font-size: 12px;
-  color: #98a2b3;
-  font-family: 'Inter', sans-serif;
-}
+.header-left { display: flex; align-items: center; gap: 12px; }
 
-/* Filter card */
-.filter-card {
-  margin-bottom: 16px;
-  border-radius: 3px;
-}
-.filter-grid {
+.filter-card  { margin-bottom: 16px; border-radius: 3px; }
+.filter-grid  {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 5px;
 }
 
-/* Table card */
-.table-card {
-  border-radius: 3px;
-}
+.table-card { border-radius: 3px; }
 
-/* Employee cell */
-.employee-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.emp-avatar {
-  background: #409eff;
-  color: #fff;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.emp-name-kh {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1d2939;
-}
-.emp-name-en {
-  font-size: 11px;
-  color: #98a2b3;
-  font-family: 'Inter', sans-serif;
-}
+.emp-name-kh { font-size: 13px; font-weight: 600; color: #1d2939; }
 
-/* Two-line cells */
-.two-line { display: flex; flex-direction: column; gap: 2px; }
+.two-line        { display: flex; flex-direction: column; gap: 2px; }
 .two-line.center { align-items: center; }
-.line-main { font-size: 13px; color: #344054; font-weight: 500; }
-.line-sub  { font-size: 11px; color: #98a2b3; }
-
+.line-main       { font-size: 13px; color: #344054; font-weight: 500; }
 
 .pagination-wrap {
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
+}
+
+/* PDF iframe fills the dialog body */
+.pdf-iframe {
+  width: 100%;
+  height: 78vh;
+  border: none;
+  border-radius: 4px;
+  background: #eee;
 }
 
 :deep(.el-table__header-wrapper th) {
