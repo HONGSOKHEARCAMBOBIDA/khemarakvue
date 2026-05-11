@@ -32,9 +32,19 @@ function openPreview(row) {
 }
 
 function printPreview() {
+  const printContent = document.getElementById("print-area").innerHTML;
+  const originalBody = document.body.innerHTML;
+
+  document.body.innerHTML = `
+    <div style="background:white;">
+      ${printContent}
+    </div>
+  `;
+
   window.print();
+  document.body.innerHTML = originalBody;
+  window.location.reload(); 
 }
-// ─────────────────────────────────────────────────────────────────────────
 
 function getToday() {
   return new Date().toISOString().slice(0, 10);
@@ -201,7 +211,6 @@ watch(
   },
 );
 
-// ── phone helpers ─────────────────────────────────────────────────────────
 const formDataPhone = (phone) => {
   if (!phone) return "-";
   const cleaned = phone.replace(/\D/g, "");
@@ -260,6 +269,16 @@ const getProvider = (phone) => {
 const getProviderType = (phone) => {
   const map = { Smart: "success", Cellcard: "danger", Metfone: "primary" };
   return map[getProvider(phone)] ?? "info";
+};
+
+const khmerMonths = [
+  "មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា",
+  "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"
+];
+const toKhmerMonth = (dateStr) => {
+  if (!dateStr) return "";
+  const monthIndex = parseInt(dateStr.split("-")[1], 10) - 1;
+  return khmerMonths[monthIndex] ?? "";
 };
 </script>
 
@@ -399,7 +418,7 @@ const getProviderType = (phone) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="បុគ្គលិក" min-width="170" fixed>
+        <el-table-column label="បុគ្គលិក" min-width="140" fixed>
           <template #default="{ row }">
             <div class="emp-name-kh">{{ row.employee_name_kh }}</div>
             <el-text type="success" size="small">{{
@@ -461,7 +480,7 @@ const getProviderType = (phone) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="សុំច្បាប់" min-width="70" align="center">
+        <el-table-column label="សុំច្បាប់" min-width="90" align="center">
           <template #default="{ row }">
             <el-text
               >{{ row.duration_value }} {{ row.duration_unit_name_kh }}</el-text
@@ -469,7 +488,7 @@ const getProviderType = (phone) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="រយៈពេល" min-width="150" align="center">
+        <el-table-column label="រយៈពេល" min-width="170" align="center">
           <template #default="{ row }">
             <div class="two-line center">
               <span class="line-main">{{ row.duration_display }}</span>
@@ -564,19 +583,30 @@ const getProviderType = (phone) => {
       top="30px"
       destroy-on-close
       class="preview-dialog"
-      :show-close="true"
+      :show-close="false"
     >
       <template #header>
         <div class="dialog-header">
           <span>មើលលម្អិតច្បាប់ឈប់សម្រាក</span>
-          <el-button
+<el-row>
+            <el-button
             type="primary"
             size="small"
             @click="printPreview"
             style="margin-left: 12px"
           >
-            🖨 បោះពុម្ព
+             បោះពុម្ព
           </el-button>
+          <el-button
+            type="danger"
+            size="small"
+           @click="previewVisible = false"
+            style="margin-left: 12px"
+          >
+             ចាកចេញ
+          </el-button>
+          
+</el-row>
         </div>
       </template>
 
@@ -587,91 +617,178 @@ const getProviderType = (phone) => {
               <div>
                 <div class="pl-7">
                   <el-image
-                  :src="logo"
-                  style="width: 80px; height: 80px"
-                  fit="cover"
-                />
+                    :src="logo"
+                    style="width: 80px; height: 80px"
+                    fit="cover"
+                  />
                 </div>
-         <div class="flex flex-col">
-  <el-text class="doc-company-kh1">សាកលវិទ្យាល័យខេមរៈ</el-text>
-  <el-text class="doc-company-kh2">KEHMARAK UNIVERSITY</el-text>
-</div>
+                <div class="flex flex-col">
+                  <el-text class="doc-company-kh1">សាកលវិទ្យាល័យខេមរៈ</el-text>
+                  <el-text class="doc-company-kh2">KEHMARAK UNIVERSITY</el-text>
+                </div>
               </div>
             </div>
 
-              <div class="doc-title-area">
+            <div class="doc-title-area">
               <div class="doc-company-kh">ព្រះរាជាណាចក្រកម្ពុជា</div>
               <div class="doc-title-main">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
-              <div class="logo-center">
+              <div class="pl-28">
                 <img src="/image.png" alt="Logo" width="100" height="100" />
               </div>
             </div>
-            <div class="pr-20 pl-20">
-
-            </div>
-
+            <div class="pr-20 pl-20"></div>
           </div>
 
-         <div class="text-center p-3">
-  <el-text class="doc-company-kh1">
-    ពាក្យសុំអនុញ្ញាតច្បាប់
-  </el-text>
-</div>
+          <div class="text-center p-3">
+            <el-text class="doc-company-kh1"> ពាក្យសុំអនុញ្ញាតច្បាប់ </el-text>
+          </div>
 
-         
+          <div class="pl-10">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >គោត្តនាម-នាមខ្លួន.............{{
+                previewRow.employee_name_kh
+              }}...............អក្សរឡាតាំង..........{{
+                previewRow.employee_name_en
+              }}...........ភេទ........{{
+                previewRow.employee_gender == 1
+                  ? "ប្រុស"
+                  : previewRow.employee_gender == 2
+                    ? "ស្រី"
+                    : "មិនកំណត់"
+              }}......</el-text
+            >
+          </div>
 
+          <div class="pt-3">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >ID.......{{
+                previewRow.employee_code
+              }}........ជាបុគ្គលិកការិយាល័យ..........{{
+                previewRow.office_name
+              }}...........មុខតំណែង........{{
+                previewRow.position_name
+              }}......</el-text
+            >
+          </div>
 
-<div class="pl-10 ">
-            <el-text  style="white-space: nowrap; color: black; display: inline-block;">គោត្តនាម-នាមខ្លួន.............{{ previewRow.employee_name_kh }}...............អក្សរឡាតាំង..........{{ previewRow.employee_name_en }}...........ភេទ........{{
-    previewRow.employee_gender == 1
-      ? "ប្រុស"
-      : previewRow.employee_gender == 2
-      ? "ស្រី"
-      : "មិនកំណត់"
-  }}......</el-text>
-</div>
+          <div class="pt-3">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >នៃសាកលវិទ្យាល័យខេមរៈ សាខាខេត្តបាត់ដំបង។</el-text
+            >
+          </div>
 
-<div class="pt-3">
-            <el-text  style="white-space: nowrap; color: black; display: inline-block;">ID.......{{ previewRow.employee_code }}........ជាបុគ្គលិកការិយាល័យ..........{{ previewRow.office_name }}...........មុខតំណែង........{{
-    previewRow.position_name
-  }}......</el-text>
-</div>
+          <div class="text-center p-3">
+            <el-text class="doc-company-kh1" tag="ins"> សូមគោរពជូន </el-text>
+          </div>
+          <div class="text-center">
+            <el-text class="doc-company-kh1">
+              លោកស្រីនាយិកាប្រតិបត្តិ នៃសាកលវិទ្យាល័យខេមរៈ សាខាខេត្តបាត់ដំបង
+            </el-text>
+          </div>
+          <div class="text-start pt-3 flex gap-2">
+            <el-text class="doc-company-kh1"> តាមរយៈ ៖ </el-text>
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >ការិយាល័យរដ្ឋបាល និងធនធានមនុស្ស</el-text
+            >
+          </div>
+          <div class="text-start pt-3 flex gap-2">
+            <el-text class="doc-company-kh1"> កម្មវត្ថុ ៖ </el-text>
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >សុំអនុញ្ញាតច្បាប់ឈប់សម្រាកចំនួន......{{
+                previewRow.duration_value
+              }}
+              {{ previewRow.duration_unit_name_kh }}......គិតចាប់ពីថ្ងៃទី....{{
+                previewRow.start_date.split("-")[2]
+              }}.......ខែ.....{{ toKhmerMonth(previewRow.start_date) }}.......
+              ឆ្នាំ.....{{
+                previewRow.start_date.split("-")[0]
+              }}....</el-text>
+            
+          </div>
+          <div class="pl-14 pt-3">
+                          <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >រហូតដល់ថ្ងៃទី....{{
+                previewRow.end_date.split("-")[2]
+              }}.......ខែ.....{{ toKhmerMonth(previewRow.end_date) }}.......
+              ឆ្នាំ.....{{
+                previewRow.end_date.split("-")[0]
+              }}។</el-text>
+          </div>
+          <div class="text-start pt-3 flex gap-2">
+            <el-text class="doc-company-kh1"> មូលហេតុ ៖ </el-text>
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >.........................................................................{{
+                previewRow.description
+              }}....................................................................</el-text
+            >
+          </div>
+          <div class="pl-10 pt-3">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >ខ្ញុំបាទ/នាងខ្ញុំសូមសន្យាថានឹងចូលមកធ្វេីការវិញនៅថ្ងៃទី.....{{
+                previewRow.back_date.split("-")[2]
+              }}.......ខែ.....{{
+                toKhmerMonth(previewRow.back_date)
+              }}......ឆ្នាំ.....{{
+                previewRow.back_date.split("-")[0]
+              }}....ជាកំណត់។</el-text
+            >
+          </div>
+          <div class="pl-10 pt-3">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >អាស្រ័យហេតុដូចបានជម្រាបជូនខាងលេី
+              សូមលោកស្រីនាយិកាប្រតិបត្តិមេត្តាអនុញ្ញាតច្បាប់ឲ្យខ្ញុំបាទ/នាងខ្ញុំ</el-text
+            >
+          </div>
 
-<div class="pt-3">
-            <el-text  style="white-space: nowrap; color: black; display: inline-block;">នៃសាកលវិទ្យាល័យខេមរៈ សាខាខេត្តបាត់ដំបង។</el-text>
-</div>
+          <div class="text-start pt-5 flex gap-2">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+            >
+              បានឈប់សម្រាកដោយក្ដីអនុគ្រោះ។
+            </el-text>
+          </div>
 
-         <div class="text-center p-3">
-  <el-text class="doc-company-kh1" tag="ins">
-    សូមគោរពជូន
-  </el-text>
-</div>
-       <div class="text-center">
-  <el-text class="doc-company-kh1" >
-    លោកស្រីនាយិកាប្រតិបត្តិ នៃសាកលវិទ្យាល័យខេមរៈ សាខាខេត្តបាត់ដំបង
-  </el-text>
-</div>
-<div class="text-start pt-3 flex gap-2">
-  <el-text class="doc-company-kh1" >
-   តាមរយៈ ៖ 
-  </el-text>
-            <el-text  style="white-space: nowrap; color: black; display: inline-block;">ការិយាល័យរដ្ឋបាល និងធនធានមនុស្ស</el-text>
+          <div class="pl-10 pt-6">
+            <el-text
+              style="white-space: nowrap; color: black; display: inline-block"
+              >សូមលោកស្រីនាយិកាប្រតិបត្តិ
+              មេត្តាទទួលនូវការគោរពពីខ្ញុំបាទ/នាងខ្ញុំ។</el-text
+            >
+          </div>
 
-</div>
-<div class="text-start pt-3 flex gap-2">
-  <el-text class="doc-company-kh1" >
-   កម្មវត្ថុ ៖ 
-  </el-text>
-            <el-text  style="white-space: nowrap; color: black; display: inline-block;">សុំអនុញ្ញាតច្បាប់ឈប់សម្រាកចំនួន......{{ previewRow.duration_value}} {{ previewRow.duration_unit_name_kh }}......គិតចាប់ពីថ្ងៃទី....{{ previewRow.start_date.split('-')[2] }}.......ខែ.....{{ previewRow.start_date.split('-')[1] }}.......
-ឆ្នាំ.....{{ previewRow.start_date.split('-')[0] }}..............</el-text>
+          <div class="pt-6 flex justify-end">
+            <el-text style="white-space: nowrap; color: black">
+              បាត់ដំបង ថ្ងៃទី.........ខែ..........ឆ្នាំ...........
+            </el-text>
+          </div>
 
-</div>
+          <div class="pt-3 pr-10 flex justify-end gap-2">
+            <el-text class="doc-company-kh1"> ហត្ថលេខា និងឈ្មោះ </el-text>
+          </div>
 
-
+          
+          <div class="pl-10 pt-1">
+            <el-text style="white-space: nowrap; color: black"
+              >បានឃេីញ និងឯកភាព</el-text
+            >
+          </div>
+          <div class="pl-12 pt-3">
+            <el-text class="doc-company-kh1"> នាយិកាប្រតិបត្តិ </el-text>
+          </div>
           <!-- ── footer ── -->
           <div class="doc-footer">
             <div class="footer-note">
-              ឯកសារនេះបានបង្កើតដោយប្រព័ន្ធគ្រប់គ្រងធនធានមនុស្ស
+              អាសយដ្ឋាន៖ ភូមិកម្មករ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង
+              ទូរសព្ទទំនាក់ទំនង៖ ០១២ ៨២៥ ២៥៦ / ០៩៨ ៨២៥ ២៥៦
             </div>
           </div>
         </div>
@@ -745,55 +862,38 @@ const getProviderType = (phone) => {
   color: #ffffff !important;
 }
 
-/* ── Dialog header ── */
 .dialog-header {
   display: flex;
   align-items: center;
   font-size: 16px;
   font-weight: 600;
+  justify-content: space-between;
 }
 
-/* ── A4 wrapper (scrollable area inside dialog) ── */
 .a4-wrapper {
-  background: #e8e8e8;
+  background: #2980b9;
   padding: 24px;
   display: flex;
   justify-content: center;
   min-height: 500px;
 }
 
-/* ── A4 page itself ── */
 .a4-page {
-  width: 794px; /* A4 at 96dpi */
+  width: 794px;
   min-height: 1123px;
   background: #ffffff;
   padding: 48px 56px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
   font-size: 13px;
   color: #1a1a2e;
   box-sizing: border-box;
   position: relative;
 }
 
-/* ── Document header ── */
 .doc-header {
   display: flex;
   align-items: flex-start;
   gap: 20px;
   margin-bottom: 12px;
-}
-
-.doc-logo-placeholder {
-  width: 72px;
-  height: 72px;
-  border: 2px dashed #c0c0c0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #aaa;
-  font-size: 11px;
-  flex-shrink: 0;
 }
 
 .doc-title-area {
@@ -828,216 +928,31 @@ const getProviderType = (phone) => {
   font-family: "Moul", serif;
   font-weight: 100;
 }
-.doc-title-en {
-  font-size: 13px;
-  color: #666;
-  letter-spacing: 2px;
-  margin-top: 4px;
-}
-
-.doc-ref-area {
-  text-align: right;
-  font-size: 12px;
-  color: #555;
-  flex-shrink: 0;
-  min-width: 120px;
-}
-.ref-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-/* ── Divider ── */
-.doc-divider {
-  height: 3px;
-  background: linear-gradient(to right, #1a3a6b, #409eff, #1a3a6b);
-  margin: 12px 0 16px;
-  border-radius: 2px;
-}
-
-/* ── Status bar ── */
-.status-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.status-label {
-  font-size: 13px;
-  font-weight: 600;
-}
-.status-badge {
-  padding: 3px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid;
-}
-.status-1 {
-  background: #fef3c7;
-  color: #92400e;
-  border-color: #fbbf24;
-}
-.status-2 {
-  background: #d1fae5;
-  color: #065f46;
-  border-color: #34d399;
-}
-.status-3 {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #f87171;
-}
-.status-4 {
-  background: #e0e7ff;
-  color: #3730a3;
-  border-color: #818cf8;
-}
-
-/* ── Section title ── */
-.section-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1a3a6b;
-  background: #eef4ff;
-  border-left: 4px solid #409eff;
-  padding: 5px 10px;
-  margin: 16px 0 10px;
-  border-radius: 0 4px 4px 0;
-}
-
-/* ── Info grid ── */
-.info-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.info-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border: 1px solid #dce3f0;
-  border-top: none;
-  &:first-child {
-    border-top: 1px solid #dce3f0;
-  }
-}
-.info-row:first-child {
-  border-top: 1px solid #dce3f0;
-}
-
-.info-cell {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 12px;
-  border-right: 1px solid #dce3f0;
-}
-.info-cell:last-child {
-  border-right: none;
-}
-
-.info-label {
-  font-size: 11px;
-  color: #888;
-  margin-bottom: 3px;
-  font-weight: 500;
-}
-.info-value {
-  font-size: 13px;
-  color: #1a1a2e;
-  font-weight: 600;
-}
-.info-value.highlight {
-  color: #1a3a6b;
-}
-
-/* ── Reason box ── */
-.reason-box {
-  border: 1px solid #dce3f0;
-  border-radius: 4px;
-  padding: 12px 14px;
-  min-height: 64px;
-  font-size: 13px;
-  line-height: 1.8;
-  color: #333;
-  background: #fafbff;
-}
-
-/* ── Approval grid ── */
-.approval-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  border: 1px solid #dce3f0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 4px;
-}
-.approval-cell {
-  padding: 12px;
-  text-align: center;
-  border-right: 1px solid #dce3f0;
-}
-.approval-cell:last-child {
-  border-right: none;
-}
-
-.approval-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #1a3a6b;
-  margin-bottom: 8px;
-}
-.approval-sign-area {
-  height: 70px;
-  border-bottom: 1px dashed #bbb;
-  margin-bottom: 8px;
-}
-.approval-name {
-  font-size: 12px;
-  color: #333;
-  margin-bottom: 4px;
-}
-.approval-date {
-  font-size: 11px;
-  color: #888;
-}
-
-/* ── Footer ── */
 .doc-footer {
   position: absolute;
-  bottom: 32px;
+  bottom: 42px;
   left: 56px;
   right: 56px;
-  border-top: 1px solid #e0e0e0;
   padding-top: 8px;
   text-align: center;
 }
 .footer-note {
-  font-size: 10px;
-  color: #aaa;
+  font-size: 12px;
+  color: #000000;
 }
-
-.logo-center img {
-  margin: 0 auto;
-}
-
-/* ── Print styles ── */
 @media print {
-  .leave-page {
-    display: none;
-  }
-  .preview-dialog {
-    display: none;
-  }
-  .a4-wrapper {
-    padding: 0;
-    background: none;
-  }
-  .a4-page {
-    box-shadow: none;
+  @page {
+    size: A4;
     margin: 0;
+  }
+  body * {
+    visibility: hidden !important;
+    margin: 0;
+  }
+
+  #print-area .a4-page,
+  #print-area .a4-page * {
+    visibility: visible !important;
   }
 
   #print-area {
@@ -1045,8 +960,9 @@ const getProviderType = (phone) => {
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 9999;
     background: white;
   }
+
+
 }
 </style>
