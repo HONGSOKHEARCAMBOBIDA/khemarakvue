@@ -17,3 +17,7 @@ export function fetchLeaveDurationUnit(){
 export function fetchStatusLeave(){
     return api.get(`view.status.leave`)
 }
+
+export function approveLeave(id,formData){
+    return api.put(`approve.leave/${id}`,formData)
+}

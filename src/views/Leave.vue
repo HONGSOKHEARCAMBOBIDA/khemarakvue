@@ -7,11 +7,12 @@ import {
   fetchLeaveDurationUnit,
   fetchLeaveType,
   fetchStatusLeave,
+  approveLeave
 } from "../services/leave";
 import { fetchBranch } from "../services/branch";
 import { getuser } from "../services/userservice";
 import { fetchOffice } from "../services/office";
-import { Search, Refresh, View } from "@element-plus/icons-vue";
+import { Search, Refresh, View ,Check} from "@element-plus/icons-vue";
 import logo from "../assets/logo.png";
 const imageUrl = new URL("@public/image.png", import.meta.url).href;
 
@@ -28,6 +29,41 @@ const previewRow = ref(null);
 const createVisible = ref(false);
 const createLoading = ref(false);
 const createFormRef = ref(null);
+// leave
+const approveVisible = ref(false);
+const approveRow = ref(null);
+const approveStatusId = ref(null);
+const approveLoading = ref(false);
+
+function openApprove(row) {
+  approveRow.value = row;
+  approveStatusId.value = row.status_leave_id ?? null;
+  approveVisible.value = true;
+}
+const submitApprove = async () => {
+  if (!approveStatusId.value) {
+    ElMessage.warning('សូមជ្រើសស្ថានភាព!');
+    return;
+  }
+  try {
+    approveLoading.value = true;
+    const fd = new FormData();
+    fd.append('status_leave', approveStatusId.value);
+    const res = await approveLeave(approveRow.value.id, fd);
+    if (res.status === 200 || res.status === 201) {
+      ElMessage.success('អនុម័តបានជោគជ័យ!');
+      approveVisible.value = false;
+      loadLeave(buildParams());
+    } else {
+      ElMessage.error('មានបញ្ហា: សូមពិនិត្យម្តងទៀត');
+    }
+  } catch (error) {
+    ElMessage.error('អនុម័តមិនជោគជ័យ: ' + (error.response?.data?.message || error.message));
+  } finally {
+    approveLoading.value = false;
+  }
+};
+
 function openPreview(row) {
   previewRow.value = row;
   previewVisible.value = true;
@@ -120,6 +156,8 @@ const submitForm = async () => {
       if(res.status === 200 || res.status === 201){
         ElMessage.success('បង្កើតអ្នកច្បាប់បានជោគជ័យ!')
         resetCreateForm()
+        createVisible.value = false
+        loadLeave(buildParams())
 
       }else{
         ElMessage.error('មានបញ្ហា៖ ' + (response.data?.message || 'សូមពិនិត្យម្តងទៀត'))
@@ -659,6 +697,18 @@ const toKhmerNumber = (num) => {
                 @click="openPreview(row)"
               />
             </el-tooltip>
+            <el-tooltip content="អនុម័ត" placement="top">
+      <el-button
+        type="success"
+        circle
+        size="small"
+        plain
+        style="margin-left:6px"
+        @click="openApprove(row)"
+      >
+        <el-icon><Check /></el-icon>
+      </el-button>
+    </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -944,8 +994,6 @@ const toKhmerNumber = (num) => {
         </div>
       </div>
     </el-dialog>
-
-    <!-- ── create dialog ── -->
 <el-dialog
   v-model="createVisible"
   title="បង្កើតច្បាប់ឈប់សម្រាក"
@@ -1083,6 +1131,54 @@ const toKhmerNumber = (num) => {
     <el-button @click="createVisible = false">បោះបង់</el-button>
     <el-button type="success" :loading="createLoading" @click="submitForm">
       រក្សាទុក
+    </el-button>
+  </template>
+</el-dialog>
+<el-dialog
+  v-model="approveVisible"
+  title="អនុម័តច្បាប់ឈប់សម្រាក"
+  width="400px"
+  destroy-on-close
+>
+  <div v-if="approveRow" style="margin-bottom:16px">
+    <el-descriptions :column="1" border size="small">
+      <el-descriptions-item label="បុគ្គលិក">
+        {{ approveRow.employee_name_kh }}
+      </el-descriptions-item>
+      <el-descriptions-item label="ប្រភេទច្បាប់">
+        {{ approveRow.leave_type_name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="រយៈពេល">
+        {{ approveRow.start_date }} → {{ approveRow.end_date }}
+      </el-descriptions-item>
+    </el-descriptions>
+  </div>
+
+  <el-form label-position="top">
+    <el-form-item label="ជ្រើសស្ថានភាព" required>
+      <el-select
+        v-model="approveStatusId"
+        placeholder="ស្ថានភាព"
+        style="width:100%"
+      >
+        <el-option
+          v-for="st in statusleave"
+          :key="st.id"
+          :label="st.name"
+          :value="st.id"
+        />
+      </el-select>
+    </el-form-item>
+  </el-form>
+
+  <template #footer>
+    <el-button @click="approveVisible = false">បោះបង់</el-button>
+    <el-button
+      type="success"
+      :loading="approveLoading"
+      @click="submitApprove"
+    >
+      អនុម័ត
     </el-button>
   </template>
 </el-dialog>
