@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import {
+  createLeave,
   fetchLeave,
   fetchLeaveDurationUnit,
   fetchLeaveType,
@@ -21,15 +22,20 @@ const statusleave = ref([]);
 const branch = ref([]);
 const user = ref([]);
 const office = ref([]);
-
-// ── preview dialog ────────────────────────────────────────────────────────
+const leavedurationunit = ref([])
 const previewVisible = ref(false);
 const previewRow = ref(null);
-
+const createVisible = ref(false);
+const createLoading = ref(false);
+const createFormRef = ref(null);
 function openPreview(row) {
   previewRow.value = row;
   previewVisible.value = true;
 }
+function openCreate() {
+  createVisible.value = true;
+}
+
 
 function printPreview() {
   const printContent = document.getElementById("print-area").innerHTML;
@@ -57,9 +63,93 @@ const formDataParam = ref({
   status_leave_id: null,
   leave_type_id: null,
   start_date: getToday(),
-  end_date: getToday(),
+  end_date: '',
   search: "",
 });
+
+const formData = reactive({
+  leave_type_id: null,
+  start_date: '',
+  end_date: '',
+  back_date: '',
+  description: '',
+  approve_by: null,
+  duration_value: null,
+  duration_unit_id: null
+})
+
+function buildFormData(){
+  const fd = new FormData()
+
+  const scalars = [
+    'start_date','end_date','back_date','description'
+  ]
+
+  scalars.forEach(k => {
+    if(formData[k] !== null && formData[k] !== undefined && formData[k] !== ''){
+      fd.append(k,formData[k])
+    }
+  })
+
+  const numerics = [
+    ['leave_type_id',formData.leave_type_id],
+    ['approve_by',formData.approve_by],
+    ['duration_value',formData.duration_value],
+    ['duration_unit_id',formData.duration_unit_id]
+  ]
+
+  numerics.forEach(([k,v])=>{
+    if(v !== null && v !== undefined) fd.append(k,v)
+  })
+
+  return fd
+
+}
+
+const submitForm = async () => {
+  if(!createFormRef.value) return
+  await createFormRef.value.validate(async (valid)=>{
+    if(!valid){
+      ElMessage.warning('សូមបំពេញព័ត៌មានឲ្យបានត្រឹមត្រូវ!')
+      return
+    }
+    try{
+      createLoading.value = true
+      const fd = buildFormData()
+      const res = await createLeave(fd)
+      if(res.status === 200 || res.status === 201){
+        ElMessage.success('បង្កើតអ្នកច្បាប់បានជោគជ័យ!')
+        resetCreateForm()
+
+      }else{
+        ElMessage.error('មានបញ្ហា៖ ' + (response.data?.message || 'សូមពិនិត្យម្តងទៀត'))
+      }
+
+    } catch (error) {
+      ElMessage.error(
+        'បង្កើតច្បាប់មិនជោគជ័យ៖ ' +
+        (error.response?.data?.message || error.message)
+      )
+    } finally {
+      createLoading.value = false
+    }
+  })
+}
+
+const resetCreateForm = () => {
+  if(createFormRef.value) createFormRef.value.resetFields()
+  Object.assign(formData,{
+    leave_type_id: null,
+    start_date: '',
+    end_date: '',
+    back_date: '',
+    description: '',
+    approve_by: null,
+    duration_value: '',
+    duration_unit_id: null
+})
+
+}
 
 const pagination = ref({ page: 1, pageSize: 10, total: 0 });
 let searchTimer = null;
@@ -140,6 +230,7 @@ onMounted(() => {
   loadLookup(fetchLeaveType, leavetype);
   loadLookup(fetchStatusLeave, statusleave);
   loadLookup(fetchOffice, office);
+  loadLookup(fetchLeaveDurationUnit,leavedurationunit)
 });
 
 watch(
@@ -280,6 +371,11 @@ const toKhmerMonth = (dateStr) => {
   const monthIndex = parseInt(dateStr.split("-")[1], 10) - 1;
   return khmerMonths[monthIndex] ?? "";
 };
+const toKhmerNumber = (num) => {
+  if (num === null || num === undefined) return ''
+  const map = { '0':'០','1':'១','2':'២','3':'៣','4':'៤','5':'៥','6':'៦','7':'៧','8':'៨','9':'៩' }
+  return String(num).replace(/[0-9]/g, d => map[d])
+}
 </script>
 
 <template>
@@ -390,12 +486,16 @@ const toKhmerMonth = (dateStr) => {
             :value="st.id"
           />
         </el-select>
+<el-button type="success" @click="openCreate">
+  បង្កើតថ្មី
+</el-button>
       </div>
     </el-card>
 
     <!-- ── table ── -->
     <el-card class="table-card" shadow="never">
-      <el-table
+    <div style="overflow-x: auto;">
+        <el-table
         :data="leave"
         v-loading="loading"
         stripe
@@ -409,16 +509,16 @@ const toKhmerMonth = (dateStr) => {
           label="ល.រ"
           width="55"
           align="center"
-          fixed
+          
         />
 
-        <el-table-column label="លេខកូដ" min-width="130" fixed>
+        <el-table-column label="លេខកូដ" min-width="130" >
           <template #default="{ row }">
             <div class="emp-name-kh">{{ row.employee_code }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column label="បុគ្គលិក" min-width="140" fixed>
+        <el-table-column label="បុគ្គលិក" min-width="140" >
           <template #default="{ row }">
             <div class="emp-name-kh">{{ row.employee_name_kh }}</div>
             <el-text type="success" size="small">{{
@@ -427,7 +527,7 @@ const toKhmerMonth = (dateStr) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="លេខទូរសព្ទ" min-width="170" fixed>
+        <el-table-column label="លេខទូរសព្ទ" min-width="170" >
           <template #default="{ row }">
             <span class="fw-bold">{{ formDataPhone(row.employee_phone) }}</span>
             <el-tag
@@ -441,7 +541,7 @@ const toKhmerMonth = (dateStr) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="ភេទ" min-width="70" fixed align="center">
+        <el-table-column label="ភេទ" min-width="70"  align="center">
           <template #default="{ row }">
             <el-tag type="primary">
               {{
@@ -546,7 +646,7 @@ const toKhmerMonth = (dateStr) => {
           label="សកម្មភាព"
           width="100"
           align="center"
-          fixed="right"
+          
         >
           <template #default="{ row }">
             <el-tooltip content="មើលលម្អិត" placement="top">
@@ -562,6 +662,7 @@ const toKhmerMonth = (dateStr) => {
           </template>
         </el-table-column>
       </el-table>
+    </div>
 
       <div class="pagination-wrap">
         <el-pagination
@@ -587,7 +688,7 @@ const toKhmerMonth = (dateStr) => {
     >
       <template #header>
         <div class="dialog-header">
-          <span>មើលលម្អិតច្បាប់ឈប់សម្រាក</span>
+          <span>មើលលម្អិតច្បាប់</span>
 <el-row>
             <el-button
             type="primary"
@@ -602,6 +703,7 @@ const toKhmerMonth = (dateStr) => {
             size="small"
            @click="previewVisible = false"
             style="margin-left: 12px"
+            plain
           >
              ចាកចេញ
           </el-button>
@@ -613,7 +715,7 @@ const toKhmerMonth = (dateStr) => {
       <div class="a4-wrapper" id="print-area">
         <div class="a4-page" v-if="previewRow">
           <div class="doc-header">
-            <div class="doc-logo-area">
+            <div class="pt-7">
               <div>
                 <div class="pl-7">
                   <el-image
@@ -700,24 +802,24 @@ const toKhmerMonth = (dateStr) => {
             <el-text
               style="white-space: nowrap; color: black; display: inline-block"
               >សុំអនុញ្ញាតច្បាប់ឈប់សម្រាកចំនួន......{{
-                previewRow.duration_value
+                toKhmerNumber(previewRow.duration_value)
               }}
               {{ previewRow.duration_unit_name_kh }}......គិតចាប់ពីថ្ងៃទី....{{
-                previewRow.start_date.split("-")[2]
+                toKhmerNumber(previewRow.start_date.split("-")[2])
               }}.......ខែ.....{{ toKhmerMonth(previewRow.start_date) }}.......
               ឆ្នាំ.....{{
-                previewRow.start_date.split("-")[0]
+                toKhmerNumber(previewRow.start_date.split("-")[0])
               }}....</el-text>
             
           </div>
           <div class="pl-14 pt-3">
-                          <el-text
+            <el-text
               style="white-space: nowrap; color: black; display: inline-block"
               >រហូតដល់ថ្ងៃទី....{{
-                previewRow.end_date.split("-")[2]
+                toKhmerNumber(previewRow.end_date.split("-")[2])
               }}.......ខែ.....{{ toKhmerMonth(previewRow.end_date) }}.......
               ឆ្នាំ.....{{
-                previewRow.end_date.split("-")[0]
+               toKhmerNumber( previewRow.end_date.split("-")[0])
               }}។</el-text>
           </div>
           <div class="text-start pt-3 flex gap-2">
@@ -733,11 +835,11 @@ const toKhmerMonth = (dateStr) => {
             <el-text
               style="white-space: nowrap; color: black; display: inline-block"
               >ខ្ញុំបាទ/នាងខ្ញុំសូមសន្យាថានឹងចូលមកធ្វេីការវិញនៅថ្ងៃទី.....{{
-                previewRow.back_date.split("-")[2]
+               toKhmerNumber( previewRow.back_date.split("-")[2])
               }}.......ខែ.....{{
                 toKhmerMonth(previewRow.back_date)
               }}......ឆ្នាំ.....{{
-                previewRow.back_date.split("-")[0]
+                toKhmerNumber(previewRow.back_date.split("-")[0])
               }}....ជាកំណត់។</el-text
             >
           </div>
@@ -775,6 +877,54 @@ const toKhmerMonth = (dateStr) => {
             <el-text class="doc-company-kh1"> ហត្ថលេខា និងឈ្មោះ </el-text>
           </div>
 
+          <div v-if="previewRow.office_id == 2" class="pl-40 pt-6 pb-4">
+  <el-text style="white-space: nowrap; color: black; display: inline-block">
+    បានឃើញ និងបញ្ជាក់ថា...........................................
+  </el-text>
+  <div class="pt-3">
+    <el-text style="white-space: nowrap; color: black">
+      បាត់ដំបង ថ្ងៃទី.........ខែ..........ឆ្នាំ...........
+    </el-text>
+    <div class="pt-3">
+      <el-text class="doc-company-kh1">ប្រធានការិយាល័យរដ្ឋបាលនិងធនធានមនុស្ស</el-text>
+    </div>
+  </div>
+</div>
+
+<div v-else-if="previewRow.office_id == 1 || previewRow.office_id == 3" >
+  <div class="pl-1 pt-5">
+  <el-text style="white-space: nowrap; color: black; display: inline-block">
+    បានឃើញ និងបញ្ជាក់ថា...........................................
+  </el-text>
+  <div class="pt-3">
+    <el-text style="white-space: nowrap; color: black">
+      បាត់ដំបង ថ្ងៃទី..................ខែ..................ឆ្នាំ.............
+    </el-text>
+    <div class="pt-3 pl-14">
+      <el-text class="doc-company-kh1">ប្រធានការិយាល័យសិក្សា</el-text>
+    </div>
+  </div>
+  </div>
+
+  <div class="flex flex-col justify-end  pr-10">
+<div class="flex justify-end">
+    <el-text style="white-space: nowrap; color: black;">
+    បានឃើញ និងបញ្ជូនជូននាយិកា......................................
+  </el-text>
+</div>
+<div class="flex justify-end">
+    <el-text style="white-space: nowrap; color: black" class="pt-3">
+    បាត់ដំបង ថ្ងៃទី..................ខែ..................ឆ្នាំ.............
+  </el-text>
+</div>
+<div class="flex justify-end">
+    <el-text class="doc-company-kh1 pt-3">ប្រធានការិយាល័យរដ្ឋបាល</el-text>
+</div>
+</div>
+</div>
+
+
+
           
           <div class="pl-10 pt-1">
             <el-text style="white-space: nowrap; color: black"
@@ -794,6 +944,148 @@ const toKhmerMonth = (dateStr) => {
         </div>
       </div>
     </el-dialog>
+
+    <!-- ── create dialog ── -->
+<el-dialog
+  v-model="createVisible"
+  title="បង្កើតច្បាប់ឈប់សម្រាក"
+  width="560px"
+  destroy-on-close
+  @close="resetForm"
+>
+  <el-form
+    ref="createFormRef"
+    :model="formData"
+    label-position="top"
+    label-width="auto"
+  >
+    <el-row :gutter="12">
+      <el-col :span="8">
+        <el-form-item
+          label="ប្រភេទច្បាប់"
+          prop="leave_type_id"
+          :rules="[{ required: true, message: 'សូមជ្រើសប្រភេទច្បាប់' }]"
+        >
+          <el-select v-model="formData.leave_type_id" placeholder="ជ្រើសប្រភេទ" style="width:100%">
+            <el-option v-for="lt in leavetype" :key="lt.id" :label="lt.name" :value="lt.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+       <el-col :span="8">
+        <el-form-item label="សាខា">
+          <el-select v-model="formDataParam.branch_id" placeholder="ជ្រើសសាខា" clearable style="width:100%">
+            <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="8">
+        <el-form-item label="អនុម័តដោយ" prop="approve_by">
+          <el-select v-model="formData.approve_by" placeholder="ជ្រើសអ្នកអនុម័ត" clearable style="width:100%">
+            <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="12">
+      <el-col :span="12">
+        <el-form-item
+          label="ថ្ងៃចាប់ផ្ដើម"
+          prop="start_date"
+          :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃចាប់ផ្ដើម' }]"
+        >
+          <el-date-picker
+            v-model="formData.start_date"
+            type="date"
+            placeholder="ថ្ងៃចាប់ផ្ដើម"
+            value-format="YYYY-MM-DD"
+            style="width:100%"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item
+          label="ថ្ងៃបញ្ចប់"
+          prop="end_date"
+          :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃបញ្ចប់' }]"
+        >
+          <el-date-picker
+            v-model="formData.end_date"
+            type="date"
+            placeholder="ថ្ងៃបញ្ចប់"
+            value-format="YYYY-MM-DD"
+            style="width:100%"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-form-item
+      label="ថ្ងៃត្រឡប់មកវិញ"
+      prop="back_date"
+      :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃត្រឡប់' }]"
+    >
+      <el-date-picker
+        v-model="formData.back_date"
+        type="date"
+        placeholder="ថ្ងៃត្រឡប់មកវិញ"
+        value-format="YYYY-MM-DD"
+        style="width:100%"
+      />
+    </el-form-item>
+
+    <el-row :gutter="12">
+      <el-col :span="12">
+        <el-form-item
+          label="រយៈពេល"
+          prop="duration_value"
+          :rules="[{ required: true, message: 'សូមបញ្ចូលរយៈពេល' }]"
+        >
+          <el-input-number
+            v-model="formData.duration_value"
+            :min="0.5"
+            :step="0.5"
+            :precision="1"
+            placeholder="ចំនួន"
+            style="width:100%"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item
+          label="ឯកតារយៈពេល"
+          prop="duration_unit_id"
+          :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
+        >
+          <el-select v-model="formData.duration_unit_id" placeholder="ជ្រើស" style="width:100%">
+            <el-option
+              v-for="u in leavedurationunit"
+              :key="u.id"
+              :label="u.name_km"
+              :value="u.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-form-item label="មូលហេតុ" prop="description">
+      <el-input
+        v-model="formData.description"
+        type="textarea"
+        :rows="3"
+        placeholder="ពិពណ៌នាមូលហេតុ..."
+      />
+    </el-form-item>
+  </el-form>
+
+  <template #footer>
+    <el-button @click="createVisible = false">បោះបង់</el-button>
+    <el-button type="success" :loading="createLoading" @click="submitForm">
+      រក្សាទុក
+    </el-button>
+  </template>
+</el-dialog>
   </div>
 </template>
 
@@ -824,8 +1116,9 @@ const toKhmerMonth = (dateStr) => {
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 5px;
+  gap: 8px;
 }
+
 
 .table-card {
   border-radius: 3px;
@@ -962,7 +1255,57 @@ const toKhmerMonth = (dateStr) => {
     width: 100%;
     background: white;
   }
+}
+@media (max-width: 768px) {
+  .leave-page {
+    padding: 10px;
+  }
 
+  .filter-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .table-card {
+    overflow-x: auto;
+  }
 
+  :deep(.el-table) {
+    min-width: 900px;
+  }
+
+  .pagination-wrap {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  :deep(.el-pagination) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  :deep(.el-dialog) {
+    width: 95% !important;
+    margin: 10px auto !important;
+  }
+
+  .a4-wrapper {
+    padding: 8px;
+  }
+
+  .a4-page {
+    width: 100%;
+    min-width: 0;
+    padding: 24px 16px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 480px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 </style>
