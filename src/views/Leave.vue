@@ -7,12 +7,13 @@ import {
   fetchLeaveDurationUnit,
   fetchLeaveType,
   fetchStatusLeave,
-  approveLeave
+  approveLeave,
+  updateleave
 } from "../services/leave";
 import { fetchBranch } from "../services/branch";
 import { getuser } from "../services/userservice";
 import { fetchOffice } from "../services/office";
-import { Search, Refresh, View ,Check} from "@element-plus/icons-vue";
+import { Search, Refresh, View ,Check,Edit} from "@element-plus/icons-vue";
 import logo from "../assets/logo.png";
 const imageUrl = new URL("@public/image.png", import.meta.url).href;
 
@@ -34,6 +35,83 @@ const approveVisible = ref(false);
 const approveRow = ref(null);
 const approveStatusId = ref(null);
 const approveLoading = ref(false);
+
+// edit leave
+const editVisible = ref(false)
+const editLoading = ref(false)
+const editFormRef = ref(null)
+const editRow = ref(null)
+
+const editFormData = reactive({
+  leave_type_id: null,
+  start_date: '',
+  end_date: '',
+  back_date: '',
+  description: '',
+  approve_by: null,
+  duration_value: null,
+  duration_unit_id: null,
+  branch_id: null
+})
+
+function openEdit(row) {
+  editRow.value = row
+  Object.assign(editFormData, {
+    leave_type_id: row.leave_type_id,
+    start_date: row.start_date,
+    end_date: row.end_date,
+    back_date: row.back_date,
+    description: row.description,
+    approve_by: row.approve_by_id,
+    duration_value: row.duration_value,
+    duration_unit_id: row.duration_unit_id,
+    branch_id: row.branch_id
+  })
+  editVisible.value = true
+}
+
+function buildEditFormData() {
+  const fd = new FormData()
+  const scalars = ['start_date', 'end_date', 'back_date', 'description']
+  scalars.forEach(k => {
+    if (editFormData[k]) fd.append(k, editFormData[k])
+  })
+  const numerics = [
+    ['leave_type_id', editFormData.leave_type_id],
+    ['approve_by', editFormData.approve_by],
+    ['duration_value', editFormData.duration_value],
+    ['duration_unit_id', editFormData.duration_unit_id]
+  ]
+  numerics.forEach(([k, v]) => {
+    if (v !== null && v !== undefined) fd.append(k, v)
+  })
+  return fd
+}
+
+const submitEdit = async () => {
+  if (!editFormRef.value) return
+  await editFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      ElMessage.warning('សូមបំពេញព័ត៌មានឲ្យបានត្រឹមត្រូវ!')
+      return
+    }
+    try {
+      editLoading.value = true
+      const fd = buildEditFormData()
+      const res = await updateleave(editRow.value.id, fd)
+      if (res.status === 200 || res.status === 201) {
+        ElMessage.success('កែប្រែបានជោគជ័យ!')
+        editVisible.value = false
+        loadLeave(buildParams())
+      }
+    } catch (error) {
+      const msg = error.response?.data?.error || error.response?.data?.message || error.message
+      ElMessage.error('កែប្រែមិនជោគជ័យ: ' + msg)
+    } finally {
+      editLoading.value = false
+    }
+  })
+}
 
 function openApprove(row) {
   approveRow.value = row;
@@ -57,9 +135,10 @@ const submitApprove = async () => {
     } else {
       ElMessage.error('មានបញ្ហា: សូមពិនិត្យម្តងទៀត');
     }
-  } catch (error) {
-    ElMessage.error('អនុម័តមិនជោគជ័យ: ' + (error.response?.data?.message || error.message));
-  } finally {
+  }catch (error) {
+    const msg = error.response?.data?.error
+    ElMessage.error('អនុម័តមិនជោគជ័យ: ' + msg);
+}finally {
     approveLoading.value = false;
   }
 };
@@ -288,6 +367,7 @@ watch(
     pagination.value.page = 1;
     user.value = [];
     formDataParam.value.employee_id = null;
+    formData.approve_by = null
     if (v) {
       try {
         user.value = (await getuser(v)).data.data;
@@ -296,6 +376,18 @@ watch(
     loadLeave(buildParams());
   },
 );
+
+watch(
+  () => editFormData.branch_id,
+  async (v) => {
+    user.value = [];  
+    if (v) {
+      try {
+        user.value = (await getuser(v)).data.data;
+      } catch {}
+    }
+  }
+)
 
 watch(
   () => formDataParam.value.employee_id,
@@ -682,21 +774,34 @@ const toKhmerNumber = (num) => {
         <!-- ── action column ── -->
         <el-table-column
           label="សកម្មភាព"
-          width="100"
+          width="120"
           align="center"
           
         >
           <template #default="{ row }">
             <el-tooltip content="មើលលម្អិត" placement="top">
-              <el-button
-                type="primary"
-                :icon="View"
-                circle
-                size="small"
-                plain
-                @click="openPreview(row)"
-              />
+<el-button
+  type="primary"
+  :icon="View"
+  circle
+  size="small"
+  plain
+  @click="openPreview(row)"
+  :disabled="row.status_leave_id === 1 || row.status_leave_id === 3"
+/>
             </el-tooltip>
+                <el-tooltip content="កែប្រែ" placement="top">
+      <el-button
+        type="warning"
+        :icon="Edit"
+        circle
+        size="small"
+        plain
+        style="margin-left:6px"
+        :disabled="row.status_leave_id !== 1"
+        @click="openEdit(row)"
+      />
+    </el-tooltip>
             <el-tooltip content="អនុម័ត" placement="top">
       <el-button
         type="success"
@@ -1137,7 +1242,7 @@ const toKhmerNumber = (num) => {
 <el-dialog
   v-model="approveVisible"
   title="អនុម័តច្បាប់ឈប់សម្រាក"
-  width="400px"
+  width="700px"
   destroy-on-close
 >
   <div v-if="approveRow" style="margin-bottom:16px">
@@ -1149,7 +1254,13 @@ const toKhmerNumber = (num) => {
         {{ approveRow.leave_type_name }}
       </el-descriptions-item>
       <el-descriptions-item label="រយៈពេល">
-        {{ approveRow.start_date }} → {{ approveRow.end_date }}
+        {{ approveRow.duration_value }} {{ approveRow.duration_unit_name_kh }} ចាប់តាំងពី {{ approveRow.start_date }} រហូតដល់ {{ approveRow.end_date }}
+      </el-descriptions-item>
+      <el-descriptions-item label="ថ្ងៃចូលធ្វេីការវិញ">
+        {{ approveRow.back_date }}
+      </el-descriptions-item>
+      <el-descriptions-item label="មូលហេតុ">
+        {{ approveRow.description }}
       </el-descriptions-item>
     </el-descriptions>
   </div>
@@ -1179,6 +1290,114 @@ const toKhmerNumber = (num) => {
       @click="submitApprove"
     >
       អនុម័ត
+    </el-button>
+  </template>
+</el-dialog>
+<el-dialog
+  v-model="editVisible"
+  title="កែប្រែច្បាប់ឈប់សម្រាក"
+  width="660px"
+  destroy-on-close
+>
+  <el-form
+    ref="editFormRef"
+    :model="editFormData"
+    label-position="top"
+  >
+    <el-row :gutter="12">
+      <el-col :span="8">
+        <el-form-item
+          label="ប្រភេទច្បាប់"
+          prop="leave_type_id"
+          :rules="[{ required: true, message: 'សូមជ្រើសប្រភេទច្បាប់' }]"
+        >
+          <el-select v-model="editFormData.leave_type_id" style="width:100%">
+            <el-option v-for="lt in leavetype" :key="lt.id" :label="lt.name" :value="lt.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="8">
+        <el-form-item label="សាខា">
+          <el-select v-model="editFormData.branch_id" placeholder="ជ្រើសសាខា" clearable style="width:100%">
+            <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="8">
+        <el-form-item label="អនុម័តដោយ" prop="approve_by">
+          <el-select v-model="editFormData.approve_by" clearable style="width:100%">
+            <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="12">
+      <el-col :span="12">
+        <el-form-item
+          label="ថ្ងៃចាប់ផ្ដើម"
+          prop="start_date"
+          :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃចាប់ផ្ដើម' }]"
+        >
+          <el-date-picker v-model="editFormData.start_date" type="date"
+            value-format="YYYY-MM-DD" style="width:100%" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item
+          label="ថ្ងៃបញ្ចប់"
+          prop="end_date"
+          :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃបញ្ចប់' }]"
+        >
+          <el-date-picker v-model="editFormData.end_date" type="date"
+            value-format="YYYY-MM-DD" style="width:100%" />
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-form-item
+      label="ថ្ងៃត្រឡប់មកវិញ"
+      prop="back_date"
+      :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃត្រឡប់' }]"
+    >
+      <el-date-picker v-model="editFormData.back_date" type="date"
+        value-format="YYYY-MM-DD" style="width:100%" />
+    </el-form-item>
+
+    <el-row :gutter="12">
+      <el-col :span="12">
+        <el-form-item
+          label="រយៈពេល"
+          prop="duration_value"
+          :rules="[{ required: true, message: 'សូមបញ្ចូលរយៈពេល' }]"
+        >
+          <el-input-number v-model="editFormData.duration_value"
+            :min="0.5" :step="0.5" :precision="1" style="width:100%" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item
+          label="ឯកតារយៈពេល"
+          prop="duration_unit_id"
+          :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
+        >
+          <el-select v-model="editFormData.duration_unit_id" style="width:100%">
+            <el-option v-for="u in leavedurationunit" :key="u.id"
+              :label="u.name_km" :value="u.id" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-form-item label="មូលហេតុ">
+      <el-input v-model="editFormData.description" type="textarea" :rows="3" />
+    </el-form-item>
+  </el-form>
+
+  <template #footer>
+    <el-button @click="editVisible = false">បោះបង់</el-button>
+    <el-button type="warning" :loading="editLoading" @click="submitEdit">
+      រក្សាទុក
     </el-button>
   </template>
 </el-dialog>

@@ -21,3 +21,7 @@ export function fetchStatusLeave(){
 export function approveLeave(id,formData){
     return api.put(`approve.leave/${id}`,formData)
 }
+
+export function updateleave(id,formData){
+    return api.put(`edit.leave/${id}`,formData)
+}
