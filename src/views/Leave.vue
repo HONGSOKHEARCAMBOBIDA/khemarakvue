@@ -981,7 +981,7 @@ const toKhmerNumber = (num) => {
             <el-text class="doc-company-kh1"> មូលហេតុ ៖ </el-text>
             <el-text
               style="white-space: nowrap; color: black; display: inline-block"
-              >.........................................................................{{
+              >................................................................{{
                 previewRow.description
               }}....................................................................</el-text
             >
