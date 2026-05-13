@@ -15,6 +15,7 @@ import Reports from '../views/Reports.vue'
 import AttendanceCreate from '../components/AttendanceCreate.vue'
 import AttendanceView from '../views/AttendanceView.vue'
 import Leave from '../views/Leave.vue'
+import Loan from '../views/loan.vue'
 const routes = [
   {
     path: '/login',
@@ -54,6 +55,11 @@ const routes = [
         name: 'Leave',
         component: Leave
 
+      },
+      {
+        path: 'loan',
+        name: 'Loan',
+        component: Loan
       },
       {
         path: 'about',

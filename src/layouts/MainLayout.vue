@@ -9,6 +9,7 @@
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/attendanceview')">បញ្ជីវត្តមាន</el-button>
             <el-button type="primary" plain @click="navigateTo('/leave')">ច្បាប់</el-button>
+            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/loan')">កម្ចី</el-button>
           </div>
 
           <div class="header-right">
