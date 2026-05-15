@@ -1551,7 +1551,7 @@ const toKhmerNumber = (num) => {
 @media print {
   @page {
     size: A4;
-    margin: 0;
+   margin: 0.8cm;
   }
   body * {
     visibility: hidden !important;

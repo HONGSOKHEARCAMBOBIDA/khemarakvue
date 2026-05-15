@@ -1,12 +1,12 @@
 <script setup>
 import { onMounted, reactive, ref, watch, computed } from 'vue';
-import { ElMessage } from 'element-plus';
-import { fetchloan, createloan } from '../services/loan';
+import { ElMessage,ElMessageBox  } from 'element-plus';
+import { fetchloan, createloan,deleteloan } from '../services/loan';
 import { fetchBranch } from '../services/branch';
 import { fetchCurrency } from '../services/currency';
 import { getuser } from '../services/userservice';
-import { Search, Refresh, View, Check, Edit, Plus, Close, Calendar, Money, User } from "@element-plus/icons-vue";
-
+import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
+import { markRaw } from 'vue'
 // ─── State ────────────────────────────────────────────────────────────────────
 const loading = ref(false);
 const submitting = ref(false);
@@ -83,6 +83,31 @@ async function loadLoan(params = {}) {
   }
 }
 
+async function handleDelete(row) {
+  try {
+    await ElMessageBox.confirm(
+      `តើអ្នកចង់លុបកម្ចី ${row.employee_name} : ${Number(row.loan_amount).toLocaleString()} ${row.currency_code} មែនទេ?`,
+      'បញ្ជាក់ការលុប',
+      {
+        confirmButtonText: 'លុប',
+        cancelButtonText: 'បោះបង់',
+        type: 'warning',
+        icon: markRaw(Delete),
+      }
+    );
+    await deleteloan(row.id);
+    ElMessage.success('លុបកម្ចីបានជោគជ័យ');
+    loadLoan(buildParams());
+  } catch (e) {
+    if (e === 'cancel') {
+      ElMessage.info('ការលុបត្រូវបានបោះបង់');
+    } else {
+     const msg = e.response?.data?.error || e.response?.data?.message || e.message
+      ElMessage.error(msg);
+    }
+  }
+}
+
 async function loadLookup(fn, target) {
   try {
     const res = await fn();
@@ -122,11 +147,8 @@ function openCreate() {
   drawerVisible.value = true;
 }
 
-function openView(row) {
-  drawerMode.value = 'view';
-  selectedLoan.value = row;
-  drawerVisible.value = true;
-}
+
+
 
 function closeDrawer() {
   drawerVisible.value = false;
@@ -316,11 +338,11 @@ onMounted(() => {
 
         <el-table-column prop="code" label="លេខកូដកម្ចី" width="200" border>
           <template #default="{ row }">
-            <span class="loan-code">{{ row.code }}</span>
+            <el-link>{{ row.code }}<el-icon class="el-icon--right"><icon-view /></el-icon></el-link>
           </template>
         </el-table-column>
 
-        <el-table-column label="ឈ្មោះបុគ្គលិក" width="250">
+        <el-table-column label="ឈ្មោះបុគ្គលិក" width="200">
           <template #default="{ row }">
             <div class="emp-cell">
               <div>
@@ -330,12 +352,12 @@ onMounted(() => {
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="លេខទូរសព្ទ" width="200" align="center">
+        <el-table-column label="លេខទូរសព្ទ" width="180" align="center">
           <template #default="{ row }">
             <el-text>{{ row.employee_contact }}</el-text>
           </template>
         </el-table-column>
-        <el-table-column label="ឈ្មោះអ្នកអនុម័ត" width="200" align="center">
+        <el-table-column label="ឈ្មោះអ្នកអនុម័ត" width="180" align="center">
           <template #default="{ row }">
             <el-text>{{ row.approve_by_name }}</el-text>
           </template>
@@ -358,7 +380,7 @@ onMounted(() => {
         <!-- Branch -->
         <el-table-column prop="branch_name" label="សាខា" width="220" align="center">
           <template #default="{ row }">
-            <span class="branch-tag">{{ row.branch_name }}</span>
+            <el-text tag="b" >{{ row.branch_name }}</el-text>
           </template>
         </el-table-column>
 
@@ -367,7 +389,7 @@ onMounted(() => {
         <!-- Duration -->
         <el-table-column label="រយៈពេលកម្ចី" width="150" align="center">
           <template #default="{ row }">
-            <span class="duration-badge">{{ row.loan_duration }}ខែ</span>
+            <el-text tag="b" >{{ row.loan_duration }} ខែ</el-text>
           </template>
         </el-table-column>
 
@@ -380,7 +402,7 @@ onMounted(() => {
           </template>
         </el-table-column>
 
-        <el-table-column label="គោលបំណង" width="120">
+        <el-table-column label="គោលបំណង" width="210">
           <template #default="{ row }">
             <div class="">
               <span class="dr-from">{{ row.loan_purpose }}</span>
@@ -402,22 +424,12 @@ onMounted(() => {
         <el-table-column label="សកម្មភាព" width="110" align="center" fixed="right">
           <template #default="{ row }">
             <div class="action-btns">
-              <el-tooltip content="View Details" placement="top">
-                <button class="action-btn view" @click="openView(row)">
-                  <el-icon>
-                    <View />
-                  </el-icon>
-                </button>
-              </el-tooltip>
+              <el-tooltip content="Delete" placement="top">
+
+  <el-button type="danger" :icon="Delete" circle @click="handleDelete(row)" ></el-button>
+</el-tooltip>
               <el-tooltip content="Schedule" placement="top">
-                <button class="action-btn expand" @click="toggleExpand(row)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                </button>
+                <el-button type="success" :icon="Calendar" circle @click="toggleExpand(row)"></el-button>
               </el-tooltip>
             </div>
           </template>
@@ -513,49 +525,7 @@ onMounted(() => {
       </template>
 
       <!-- View Mode -->
-      <template v-else-if="drawerMode === 'view' && selectedLoan">
-        <div class="view-loan">
 
-          <div class="view-amount-hero">
-            <span class="hero-label">ទំហំកម្ចី</span>
-            <span class="hero-amount">{{ Number(selectedLoan.loan_amount).toLocaleString() }} <span class="hero-cur">{{
-              selectedLoan.currency_code }}</span></span>
-            <span class="hero-dur">{{ selectedLoan.loan_duration }} ខែ · {{ selectedLoan.loan_start_date }} → {{
-              selectedLoan.loan_end_date }}</span>
-          </div>
-
-          <div class="view-grid">
-            <div class="view-field">
-              <span class="vf-label">បុគ្គលិក</span>
-              <span class="vf-value">{{ selectedLoan.employee_name }}</span>
-            </div>
-            <div class="view-field">
-              <span class="vf-label">លេខកូដបុគ្គលិក</span>
-              <span class="vf-value">{{ selectedLoan.employee_code }}</span>
-            </div>
-            <div class="view-field">
-              <span class="vf-label">សាខា</span>
-              <span class="vf-value">{{ selectedLoan.branch_name }}</span>
-            </div>
-            <div class="view-field">
-              <span class="vf-label">លេខទូរសព្ទ</span>
-              <span class="vf-value">{{ selectedLoan.employee_contact }}</span>
-            </div>
-            <div class="view-field">
-              <span class="vf-label">អនុម័តដោយ</span>
-              <span class="vf-value">{{ selectedLoan.approve_by_name || '—' }}</span>
-            </div>
-            <div class="view-field">
-              <span class="vf-label">ថ្ងៃអនុម័ត</span>
-              <span class="vf-value">{{ selectedLoan.approve_date || '—' }}</span>
-            </div>
-            <div class="view-field full">
-              <span class="vf-label">គោលបំណង</span>
-              <span class="vf-value">{{ selectedLoan.loan_purpose || '—' }}</span>
-            </div>
-          </div>
-        </div>
-      </template>
     </el-drawer>
   </div>
 </template>
@@ -671,7 +641,7 @@ onMounted(() => {
 .emp-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding-top: 10px;
 }
 
 .emp-avatar {
@@ -1150,5 +1120,9 @@ onMounted(() => {
 :deep(.el-table__expanded-cell .el-table__header-wrapper th) {
   background-color: #2980b9 !important;
   color: #ffffff !important;
+}
+.action-btn.delete {
+  background: #fff1f2;
+  color: #ef4444;
 }
 </style>

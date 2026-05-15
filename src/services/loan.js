@@ -14,3 +14,7 @@ export function createloan(data) {
   form.append('loan_duration',   data.loan_duration);
   return api.post('/add.loan', form); 
 }
+
+export function deleteloan(id){
+  return api.delete(`delete.loan/${id}`)
+}
