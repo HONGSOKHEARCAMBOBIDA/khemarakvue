@@ -7,7 +7,31 @@ import { fetchCurrency } from '../services/currency';
 import { getuser } from '../services/userservice';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
 import { markRaw } from 'vue'
+import { fetchRecieve } from '../services/recieve';
 // ─── State ────────────────────────────────────────────────────────────────────
+
+// recieve
+
+const recieveDialogVisible = ref(false);
+const recieveLoading = ref(false);
+const recieveData = ref([]);
+const selectedLoanId = ref(null)
+
+async function openRecieve(row) {
+  selectedLoanId.value = row.id;
+  recieveDialogVisible.value = true;
+  recieveLoading.value = true;
+  try {
+    const res = await fetchRecieve(row.id);
+    recieveData.value = res.data.data;
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || e?.message || "Failed to load receives");
+  } finally {
+    recieveLoading.value = false;
+  }
+}
+
+
 const loading = ref(false);
 const submitting = ref(false);
 const loans = ref([]);
@@ -336,11 +360,14 @@ onMounted(() => {
           </template>
         </el-table-column>
 
-        <el-table-column prop="code" label="លេខកូដកម្ចី" width="200" border>
-          <template #default="{ row }">
-            <el-link>{{ row.code }}<el-icon class="el-icon--right"><icon-view /></el-icon></el-link>
-          </template>
-        </el-table-column>
+<el-table-column prop="code" label="លេខកូដកម្ចី" width="200">
+  <template #default="{ row }">
+    <el-link type="primary" @click="openRecieve(row)">
+      {{ row.code }}
+      <el-icon class="el-icon--right"><icon-view /></el-icon>
+    </el-link>
+  </template>
+</el-table-column>
 
         <el-table-column label="ឈ្មោះបុគ្គលិក" width="200">
           <template #default="{ row }">
@@ -527,6 +554,58 @@ onMounted(() => {
       <!-- View Mode -->
 
     </el-drawer>
+    <el-dialog
+  v-model="recieveDialogVisible"
+  title="ប្រវត្តិទទួលប្រាក់"
+  width="1000px"
+  destroy-on-close
+   class="recieve-dialog" 
+>
+  <div v-loading="recieveLoading">
+    <div v-if="!recieveLoading && recieveData.length === 0" style="text-align:center; padding: 40px 0; color: #9ca3af;">
+      មិនមានទិន្នន័យ
+    </div>
+
+    <div v-for="(r, index) in recieveData" :key="r.id" class="recieve-card">
+      <div class="recieve-card-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="recieve-code">{{ r.code }}</span>
+          <el-tag type="danger" size="small">{{ r.currency_code }}</el-tag>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px; font-size:.82rem; color:#6b7280;">
+          <span><el-icon><Calendar /></el-icon> {{ r.receive_date }}</span>
+          <span><el-icon><User /></el-icon> {{ r.recieve_by_name }}</span>
+          <span class="recieve-total">{{ Number(r.total_receive).toLocaleString() }} {{ r.currency_code }}</span>
+        </div>
+      </div>
+
+      <el-table :data="r.recieve_detaild" size="small" class="inner-table" style="margin-top:10px;" border>
+        <el-table-column label="ល.រ" type="index" width="60" align="center"/>
+        <el-table-column label="ប្រាក់ដើម" align="right" width="180">
+          <template #default="{ row: d }">
+            <span class="amt">{{ Number(d.principal).toLocaleString() }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="ការប្រាក់" align="right" width="180">
+          <template #default="{ row: d }">
+            <span class="amt">{{ Number(d.rate).toLocaleString() }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="សរុប" align="right">
+          <template #default="{ row: d }">
+            <span class="amt" style="font-weight:900; color:#3b5bdb;">
+              {{ Number(d.income).toLocaleString() }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+
+  <template #footer>
+    <el-button @click="recieveDialogVisible = false">បិទ</el-button>
+  </template>
+</el-dialog>
   </div>
 </template>
 
@@ -1124,5 +1203,44 @@ onMounted(() => {
 .action-btn.delete {
   background: #fff1f2;
   color: #ef4444;
+}
+.recieve-card {
+  border: 0.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  background: #fff;
+}
+
+.recieve-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.recieve-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .78rem;
+  font-weight: 600;
+  background: #3b813f;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.recieve-total {
+  font-weight: 900;
+  color: #1a1f36;
+  font-size: .98rem;
+}
+/* ✅ Only applies inside the receive dialog */
+:deep(.recieve-dialog .el-table__header-wrapper th) {
+  background-color: #2980b9 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: .76rem !important;
 }
 </style>
