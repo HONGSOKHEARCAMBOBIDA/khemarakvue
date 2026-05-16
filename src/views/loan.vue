@@ -573,8 +573,8 @@ onMounted(() => {
           <el-tag type="danger" size="small">{{ r.currency_code }}</el-tag>
         </div>
         <div style="display:flex; align-items:center; gap:16px; font-size:.82rem; color:#6b7280;">
-          <span><el-icon><Calendar /></el-icon> {{ r.receive_date }}</span>
-          <span><el-icon><User /></el-icon> {{ r.recieve_by_name }}</span>
+         <el-icon style="color: red;" :size="20"><Calendar /></el-icon><el-text tag="b">{{  r.receive_date }}</el-text>
+          <el-text type="primary" tag="b">ទទួលដោយ ៖ {{ r.recieve_by_name }}</el-text>
           <span class="recieve-total">{{ Number(r.total_receive).toLocaleString() }} {{ r.currency_code }}</span>
         </div>
       </div>
@@ -583,28 +583,32 @@ onMounted(() => {
         <el-table-column label="ល.រ" type="index" width="60" align="center"/>
         <el-table-column label="ប្រាក់ដើម" align="right" width="180">
           <template #default="{ row: d }">
-            <span class="amt">{{ Number(d.principal).toLocaleString() }}</span>
+            <el-text tag="b" style="color: black;" >{{Number(d.principal).toLocaleString()  }}</el-text>
           </template>
         </el-table-column>
         <el-table-column label="ការប្រាក់" align="right" width="180">
           <template #default="{ row: d }">
-            <span class="amt">{{ Number(d.rate).toLocaleString() }}</span>
+            <el-text tag="b" style="color: black;" >{{  Number(d.rate).toLocaleString() }}</el-text>
+          </template>
+        </el-table-column>
+          <el-table-column label="កាត់ក្នុងថ្ងៃបេីកប្រាក់ខែ" align="right" width="180">
+          <template #default="{ row: d }">
+            <el-text tag="b" style="color: black;" >{{  d.payroll_date }}</el-text>
+          </template>
+        </el-table-column>
+               <el-table-column label="ប្រភេទប្រាក់ខែ" align="right" width="180">
+          <template #default="{ row: d }">
+            <el-text tag="b" style="color: black;" >{{  d.payroll_type }}</el-text>
           </template>
         </el-table-column>
         <el-table-column label="សរុប" align="right">
           <template #default="{ row: d }">
-            <span class="amt" style="font-weight:900; color:#3b5bdb;">
-              {{ Number(d.income).toLocaleString() }}
-            </span>
+            <el-text tag="b" style="color: black;" >{{ Number(d.income).toLocaleString() }}</el-text>
           </template>
         </el-table-column>
       </el-table>
     </div>
   </div>
-
-  <template #footer>
-    <el-button @click="recieveDialogVisible = false">បិទ</el-button>
-  </template>
 </el-dialog>
   </div>
 </template>
@@ -1223,12 +1227,11 @@ onMounted(() => {
 
 .recieve-code {
   font-family: 'JetBrains Mono', monospace;
-  font-size: .78rem;
+  font-size: .88rem;
   font-weight: 600;
   background: #3b813f;
   color: #ffffff;
   padding: 3px 8px;
-  border-radius: 6px;
 }
 
 .recieve-total {
@@ -1241,6 +1244,6 @@ onMounted(() => {
   background-color: #2980b9 !important;
   color: #ffffff !important;
   font-weight: 600 !important;
-  font-size: .76rem !important;
+  font-size: .86rem !important;
 }
 </style>
