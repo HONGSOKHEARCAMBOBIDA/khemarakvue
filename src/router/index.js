@@ -16,6 +16,7 @@ import AttendanceCreate from '../components/AttendanceCreate.vue'
 import AttendanceView from '../views/AttendanceView.vue'
 import Leave from '../views/Leave.vue'
 import Loan from '../views/loan.vue'
+import Payroll from '../views/Payroll.vue'
 const routes = [
   {
     path: '/login',
@@ -60,6 +61,11 @@ const routes = [
         path: 'loan',
         name: 'Loan',
         component: Loan
+      },
+      {
+        path: 'payroll',
+        name: 'Payroll',
+        component: Payroll
       },
       {
         path: 'about',

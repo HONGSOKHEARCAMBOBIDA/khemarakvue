@@ -1,0 +1,413 @@
+<script setup>
+import { onMounted, ref } from 'vue';
+import { ElMessage } from 'element-plus';
+import { fetchdrafpayroll, fetchpayrolltype } from '../services/payroll';
+import { fetchBranch } from '../services/branch';
+import { fetchCurrency } from '../services/currency';
+import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete,ChatDotRound  } from "@element-plus/icons-vue";
+import { computed } from 'vue';
+const loading = ref(false);
+const payrolldraft = ref([]);
+const payrolltype = ref([]);
+const branch = ref([]);
+const currency = ref([]);
+
+const formDataParam = ref({
+  currency: null,
+  branch: null,
+  payroll: null,
+});
+
+function buildParams() {
+  const p = {};
+  const f = formDataParam.value;
+  if (f.currency) p.currency = f.currency;
+  if (f.branch)   p.branch   = f.branch;
+  if (f.payroll)  p.payroll  = f.payroll;
+  return p;
+}
+
+async function loadpayrolldraft() {
+  const params = buildParams();
+  if (!params.currency || !params.branch || !params.payroll) {
+    ElMessage.warning('សូមជ្រើសរើសសាខា រូបិយប័ណ្ណ និងប្រភេទប្រាក់ខែ');
+    return;
+  }
+  loading.value = true;
+  try {
+    const res = await fetchdrafpayroll(params);
+    payrolldraft.value = res.data.data;
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || e?.message || 'Failed to load payroll');
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function loadLookup(fn, target) {
+  try {
+    const res = await fn();
+    target.value = res.data.data;
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || e?.message || 'Load failed');
+  }
+}
+
+function handleReset() {
+  formDataParam.value = { currency: null, branch: null, payroll: null };
+  payrolldraft.value = [];
+}
+
+onMounted(() => {
+  loadLookup(fetchpayrolltype, payrolltype);
+  loadLookup(fetchBranch,      branch);
+  loadLookup(fetchCurrency,    currency);
+});
+const totals = computed(() => {
+  const sum = (key) => payrolldraft.value.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
+  return {
+    base_salary:     sum('base_salary'),
+    half_salary:     sum('half_salary'),
+    total_deduction: sum('total_deduction'),
+    net_salary:      sum('net_salary'),
+  };
+});
+</script>
+
+<template>
+  <div class="payroll-draft-page">
+    <el-card class="filter-card" shadow="never">
+      <el-form :model="formDataParam" inline label-position="top" class="filter-form">
+
+        <el-form-item label="សាខា" class="filter-item">
+          <el-select
+            v-model="formDataParam.branch"
+            placeholder="ជ្រើសរើសសាខា"
+            clearable
+            filterable
+            style="width: 200px"
+          >
+            <el-option
+              v-for="b in branch"
+              :key="b.id"
+              :label="b.name"
+              :value="b.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="រូបិយប័ណ្ណ" class="filter-item">
+          <el-select
+            v-model="formDataParam.currency"
+            placeholder="ជ្រើសរើសរូបិយប័ណ្ណ"
+            clearable
+            style="width: 180px"
+          >
+            <el-option
+              v-for="c in currency"
+              :key="c.id"
+              :label="c.name"
+              :value="c.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="ប្រភេទប្រាក់ខែ" class="filter-item">
+          <el-select
+            v-model="formDataParam.payroll"
+            placeholder="ជ្រើសរើសប្រភេទ"
+            clearable
+            style="width: 180px"
+          >
+            <el-option
+              v-for="pt in payrolltype"
+              :key="pt.id"
+              :label="pt.name"
+              :value="pt.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label=" " class="filter-item filter-item--actions">
+          <el-button type="primary" :loading="loading" @click="loadpayrolldraft">
+            <el-icon><Search /></el-icon>&nbsp;ស្វែងរក
+          </el-button>
+          <el-button @click="handleReset" type="warning" plain>
+            <el-icon><Refresh /></el-icon>&nbsp;លុបការស្វែងរក
+          </el-button>
+        </el-form-item>
+
+      </el-form>
+    </el-card>
+    <el-card class="table-card" shadow="never" v-loading="loading">
+      <el-empty
+        v-if="!loading && (!payrolldraft || payrolldraft.length === 0)"
+        description="មិនទាន់មានទិន្នន័យ "
+        :image-size="120"
+      />
+
+      <template v-else>
+        <el-table
+          :data="payrolldraft"
+          stripe
+          border
+          style="width: 100%"
+          show-summary
+          :summary-method="() => []"
+        >
+          <el-table-column type="index" label="ល.រ" width="50" align="center" fixed="left" />
+          <el-table-column label="ឈ្មោះបុគ្គលិក" width="240" fixed="left">
+            <template #default="{ row }">
+                <div>
+                  <el-text tag="b" style="color: black;">{{ row.employee_name }}</el-text>
+                </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="branch_name" label="សាខា" width="170">
+            <template #default="{ row }">
+              <el-tag size="large" type="primary" effect="plain">{{ row.branch_name }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="ថ្ងៃធ្វើការ" width="150" align="center">
+            <template #default="{ row }">
+              <el-tag size="small" type="success">{{ row.total_work_day }} ថ្ងៃ</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="ប្រាក់ខែគោល" width="150" align="right">
+            <template #default="{ row }">
+              <el-text type="primary" tag="b">{{ row.base_salary }} {{ row.currency_symbol }}</el-text>
+            </template>
+          </el-table-column>
+          <el-table-column label="ប្រាក់ជូលប្រចាំថ្ងៃ" width="160" align="right">
+            <template #default="{ row }">
+              <el-text tag="b" style="color: black;">{{ row.daily_rate }} {{ row.currency_symbol }}</el-text>
+            </template>
+          </el-table-column>
+          <el-table-column label="ប្រាក់ខែពាក់កណ្ដាល" width="205" align="right">
+            <template #default="{ row }">
+              <el-text tag="b" style="color: black;">{{ row.half_salary }} {{ row.currency_symbol }}</el-text>
+            </template>
+          </el-table-column>
+          <el-table-column label="កាត់ បសស" width="205" align="center">
+            <template #default="{ row }">
+              <el-input 
+              v-model="row.pensionfund"
+              :rows="1"
+              :autosize="{ minRows: 1, maxRows: 3 }"
+              size="large"
+             > 
+              <template #append>{{ row.currency_symbol }}</template>
+             </el-input>
+             
+            </template>
+          </el-table-column>
+          <el-table-column label="កាត់កម្ចី" width="180" align="center">
+           
+           <template #default="{ row }">
+              <el-input 
+              v-model="row.loan_deduction"
+              :rows="1"
+              :autosize="{ minRows: 1, maxRows: 3 }"
+              size="large"
+             >
+              <template #append>{{ row.currency_symbol }}</template>
+             </el-input> 
+            </template>
+          </el-table-column>
+          <el-table-column label="កាត់សរុប" width="130" align="right">
+            <template #default="{ row }"> 
+              <el-text tag="b" type="danger">{{ row.total_deduction }}  {{ row.currency_symbol }}</el-text>
+            </template>
+          </el-table-column>
+          <el-table-column label="ប្រាក់ខែត្រូវបេីក" min-width="140" align="center" fixed="right">
+
+                 
+           <template #default="{ row }">
+              <el-input 
+              v-model="row.net_salary"
+              :rows="1"
+              :autosize="{ minRows: 1, maxRows: 3 }"
+              size="large"
+             > 
+             <template #append>{{ row.currency_symbol }}</template>
+             </el-input> 
+            </template>
+          </el-table-column>
+   <el-table-column label="មតិ" width="180" align="center">
+  <template #default="{ row }">
+    <el-input
+      v-model="row.comment"
+      type="textarea"
+      :rows="1"
+      :autosize="{ minRows: 1, maxRows: 3 }"
+      placeholder="បញ្ចូលមតិ..."
+      size="small"
+    />
+  </template>
+</el-table-column>
+        </el-table>
+        <div class="totals-row">
+          <span class="totals-row__label">សរុប</span>
+          <div class="totals-row__cells">
+            <div class="totals-cell">
+              <el-text tag="b" style="color:black;">ប្រាក់ខែគោល</el-text>
+              <div class="totals-cell__val">{{ (totals.base_salary) }}</div>
+              <template>
+                
+              </template>
+            </div>
+            <div class="totals-cell">
+              <el-text tag="b" style="color:black;">ប្រាក់ខែពាក់កណ្ដាល</el-text>
+              <div class="totals-cell__val totals-cell__val--blue">{{ (totals.half_salary) }}</div>
+            </div>
+            <div class="totals-cell">
+              <el-text tag="b" style="color:black;">កាត់សរុប</el-text>
+              <div class="totals-cell__val totals-cell__val--warn">-{{ (totals.total_deduction) }}</div>
+            </div>
+            <div class="">
+              <el-text tag="b" style="color:black;">ប្រាក់ខែសុទ្ធ</el-text>
+              <div class="totals-cell__val totals-cell__val--net">{{ (totals.net_salary) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- row count -->
+        <div class="row-count">
+          សរុបបុគ្គលិក: <strong>{{ payrolldraft.length }}</strong> នាក់
+        </div>
+      </template>
+    </el-card>
+
+  </div>
+</template>
+
+<style scoped>
+.payroll-draft-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.page-header__icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.page-header__title h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d2939;
+}
+.page-header__title p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+}
+
+/* ── Filter card ─────────────────────────────────────────────── */
+.filter-card {
+  border: 1px solid #e5e7eb;
+}
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+.filter-item {
+  margin-bottom: 0 !important;
+}
+.filter-item--actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-card {
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.emp-avatar {
+  background: #3b82f6;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.emp-meta {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+
+
+
+/* ── Totals footer ───────────────────────────────────────────── */
+.totals-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #f7f8f8;
+  border: 1px solid #e5e7eb;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.totals-row__label {
+  font-weight: 900;
+  font-size: 20px;
+  color: #0a0a0a;
+  white-space: nowrap;
+}
+.totals-row__cells {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.totals-cell {
+  text-align: right;
+}
+.totals-cell--highlight {
+  padding: 6px 12px;
+  background: #ecfdf5;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+}
+.totals-cell__label {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+.totals-cell__val {
+  font-weight: 700;
+  font-size: 14px;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+.totals-cell__val--blue { color: #2563eb; }
+.totals-cell__val--warn { color: #d97706; }
+.totals-cell__val--net  { color: #059669; font-size: 16px; }
+
+/* ── Row count ───────────────────────────────────────────────── */
+.row-count {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+}
+:deep(.el-table__header-wrapper th) {
+  background-color: #409eff !important;
+  color: #ffffff !important;
+}
+</style>
