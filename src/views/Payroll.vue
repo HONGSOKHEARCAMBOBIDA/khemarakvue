@@ -6,11 +6,13 @@ import { fetchBranch } from '../services/branch';
 import { fetchCurrency } from '../services/currency';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete,ChatDotRound  } from "@element-plus/icons-vue";
 import { computed } from 'vue';
+import { fetechbonustype } from '../services/bonus';
 const loading = ref(false);
 const payrolldraft = ref([]);
 const payrolltype = ref([]);
 const branch = ref([]);
 const currency = ref([]);
+const bonustype = ref([]);
 
 const formDataParam = ref({
   currency: null,
@@ -62,19 +64,45 @@ onMounted(() => {
   loadLookup(fetchpayrolltype, payrolltype);
   loadLookup(fetchBranch,      branch);
   loadLookup(fetchCurrency,    currency);
+  loadLookup(fetechbonustype,bonustype);
 });
+
+
+const formatMoney = (value) => {
+  return (Math.round(value * 100) / 100).toFixed(2);
+};
+
+const gethalfSalary = (row) => {
+  const workday = Number(row.total_work_day) || 0;
+  const dailyrate = Number(row.daily_rate) || 0;
+  return workday * dailyrate;
+}
+
+const getDeduction = (row) => {
+  const pension = Number(row.pensionfund) || 0;
+  const loan    = Number(row.loan_deduction) || 0;
+  return pension + loan;
+};
+
+const getNetSalary = (row) => {
+  
+  const half    = gethalfSalary(row)
+  const pension = Number(row.pensionfund) || 0;
+  const loan    = Number(row.loan_deduction) || 0;
+  const bonus   = row.is_bonus ? (Number(row.bonus_amount) || 0) : 0;
+  return half - pension - loan + bonus;
+};
+
 const totals = computed(() => {
   const sum = (key) => payrolldraft.value.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
   return {
     base_salary:     sum('base_salary'),
-    half_salary:     sum('half_salary'),
-    total_deduction: sum('total_deduction'),
-    net_salary:      sum('net_salary'),
+    half_salary:     payrolldraft.value.reduce((acc,row) => acc + gethalfSalary(row),0),
+    total_deduction: payrolldraft.value.reduce((acc, row) => acc + getDeduction(row), 0),
+    total_bonus:     payrolldraft.value.reduce((acc, row) => acc + (row.is_bonus ? (Number(row.bonus_amount) || Number(row.bonus_amount)) : 0), 0), // NEW
+    net_salary:      payrolldraft.value.reduce((acc, row) => acc + getNetSalary(row), 0),
   };
 });
-const formatMoney = (value) => {
-  return (Math.round(value * 100) / 100).toFixed(2);
-};
 </script>
 
 <template>
@@ -159,7 +187,7 @@ const formatMoney = (value) => {
           :summary-method="() => []"
         >
           <el-table-column type="index" label="ល.រ" width="50" align="center" fixed="left" />
-          <el-table-column label="ឈ្មោះបុគ្គលិក" width="240" fixed="left">
+          <el-table-column label="ឈ្មោះបុគ្គលិក" width="150" fixed="left">
             <template #default="{ row }">
                 <div>
                   <el-text tag="b" style="color: black;">{{ row.employee_name }}</el-text>
@@ -171,27 +199,31 @@ const formatMoney = (value) => {
               <el-tag size="large" type="primary" effect="plain">{{ row.branch_name }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="ថ្ងៃធ្វើការ" width="150" align="center">
-            <template #default="{ row }">
-              <el-tag size="small" type="success">{{ row.total_work_day }} ថ្ងៃ</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="ប្រាក់ខែគោល" width="150" align="right">
+          <el-table-column label="ប្រាក់ខែគោល" width="110" align="center">
             <template #default="{ row }">
               <el-text type="primary" tag="b">{{ row.base_salary }} {{ row.currency_symbol }}</el-text>
             </template>
           </el-table-column>
-          <el-table-column label="ប្រាក់ជូលប្រចាំថ្ងៃ" width="160" align="right">
+          <el-table-column label="ប្រាក់ជូលប្រចាំថ្ងៃ" width="120" align="center">
             <template #default="{ row }">
               <el-text tag="b" style="color: black;">{{ row.daily_rate }} {{ row.currency_symbol }}</el-text>
             </template>
           </el-table-column>
-          <el-table-column label="ប្រាក់ខែពាក់កណ្ដាល" width="205" align="right">
-            <template #default="{ row }">
-              <el-text tag="b" style="color: black;">{{ row.half_salary }} {{ row.currency_symbol }}</el-text>
+          <el-table-column label="ថ្ងៃធ្វេីការ" width="80" align="center">
+            <template #default="{row}">
+<el-input
+  v-model="row.total_work_day"
+  :rows="1"
+  :autosize="{ minRows: 1, maxRows: 3 }"
+/>
             </template>
           </el-table-column>
-          <el-table-column label="កាត់ បសស" width="205" align="center">
+          <el-table-column label="ពាក់កណ្ដាល" width="110" align="center">
+            <template #default="{ row }">
+              <el-text tag="b" style="color: black;">{{ formatMoney(gethalfSalary(row)) }} {{ row.currency_symbol }}</el-text>
+            </template>
+          </el-table-column>
+          <el-table-column label="កាត់ បសស" width="170" align="center">
             <template #default="{ row }">
               <el-input 
               v-model="row.pensionfund"
@@ -204,7 +236,7 @@ const formatMoney = (value) => {
              
             </template>
           </el-table-column>
-          <el-table-column label="កាត់កម្ចី" width="180" align="center">
+          <el-table-column label="កាត់កម្ចី" width="170" align="center">
            
            <template #default="{ row }">
               <el-input 
@@ -217,26 +249,65 @@ const formatMoney = (value) => {
              </el-input> 
             </template>
           </el-table-column>
-          <el-table-column label="កាត់សរុប" width="130" align="right">
-            <template #default="{ row }"> 
-              <el-text tag="b" type="danger">{{ row.total_deduction }}  {{ row.currency_symbol }}</el-text>
+          <el-table-column label="កាត់សរុប" width="110" align="center">
+            <template #default="{row}">
+              <el-text tag="b" type="danger">
+                {{ formatMoney(getDeduction(row)) }} {{ row.currency_symbol }}
+              </el-text>
             </template>
           </el-table-column>
-          <el-table-column label="ប្រាក់ខែត្រូវបេីក" min-width="140" align="center" fixed="right">
-
-                 
-           <template #default="{ row }">
-              <el-input 
-              v-model="row.net_salary"
-              :rows="1"
-              :autosize="{ minRows: 1, maxRows: 3 }"
-              size="large"
-             > 
-             <template #append>{{ row.currency_symbol }}</template>
-             </el-input> 
+          <el-table-column label="មានប្រាក់រង្វាន់" width="110" align="center">
+            <template #default="{ row }">
+              <el-switch
+                v-model="row.is_bonus"
+                active-color="#409eff"
+                inactive-color="#dcdfe6"
+              />
             </template>
           </el-table-column>
-   <el-table-column label="មតិ" width="180" align="center">
+ 
+          <el-table-column label="ប្រភេទប្រាក់រង្វាន់" width="180" align="center">
+            <template #default="{ row }">
+              <el-select
+                v-model="row.bonus_type"
+                placeholder="រើសប្រភេទ"
+                clearable
+                :disabled="!row.is_bonus"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="bt in bonustype"
+                  :key="bt.id"
+                  :label="bt.name"
+                  :value="bt.id"
+                />
+              </el-select>
+            </template>
+          </el-table-column>
+ 
+          <el-table-column label="ចំនួនប្រាក់រង្វាន់" width="185" align="center">
+            <template #default="{ row }">
+              <el-input
+                v-model="row.bonus_amount"
+                :rows="1"
+                :autosize="{ minRows: 1, maxRows: 3 }"
+                :disabled="!row.bonus_type"
+                size="large"
+                type="number"
+                min="0"
+              >
+                <template #append>{{ row.currency_symbol }}</template>
+              </el-input>
+            </template>
+          </el-table-column>
+<el-table-column label="ប្រាក់ខែត្រូវបេីក" min-width="140" align="center" fixed="right">
+  <template #default="{ row }">
+    <el-text tag="b" type="success" style="font-size: 14px;">
+      {{ formatMoney(getNetSalary(row)) }} {{ row.currency_symbol }}
+    </el-text>
+  </template>
+</el-table-column>
+   <el-table-column label="ផ្សេងៗ" width="150" align="center">
   <template #default="{ row }">
     <el-input
       v-model="row.comment"
@@ -273,10 +344,8 @@ const formatMoney = (value) => {
             </div>
           </div>
         </div>
-
-        <!-- row count -->
         <div class="row-count">
-          សរុបបុគ្គលិក: <strong>{{ payrolldraft.length }}</strong> នាក់
+          <el-text tag="b" style="color: black;"> សរុបបុគ្គលិក: {{ payrolldraft.length }} នាក់</el-text>
         </div>
       </template>
     </el-card>
@@ -318,14 +387,13 @@ const formatMoney = (value) => {
   letter-spacing: 0.5px;
 }
 
-/* ── Filter card ─────────────────────────────────────────────── */
 .filter-card {
   border: 1px solid #e5e7eb;
 }
 .filter-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 1px;
   align-items: flex-end;
 }
 .filter-item {
@@ -341,11 +409,7 @@ const formatMoney = (value) => {
   overflow: hidden;
 }
 
-.emp-avatar {
-  background: #3b82f6;
-  font-size: 13px;
-  flex-shrink: 0;
-}
+
 
 .emp-meta {
   font-size: 11px;
@@ -353,9 +417,6 @@ const formatMoney = (value) => {
 }
 
 
-
-
-/* ── Totals footer ───────────────────────────────────────────── */
 .totals-row {
   display: flex;
   align-items: center;
@@ -402,7 +463,6 @@ const formatMoney = (value) => {
 .totals-cell__val--warn { color: #d97706; }
 .totals-cell__val--net  { color: #059669; font-size: 16px; }
 
-/* ── Row count ───────────────────────────────────────────────── */
 .row-count {
   margin-top: 8px;
   font-size: 12px;
