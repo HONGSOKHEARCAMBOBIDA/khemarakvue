@@ -72,6 +72,9 @@ const totals = computed(() => {
     net_salary:      sum('net_salary'),
   };
 });
+const formatMoney = (value) => {
+  return (Math.round(value * 100) / 100).toFixed(2);
+};
 </script>
 
 <template>
@@ -251,22 +254,22 @@ const totals = computed(() => {
           <div class="totals-row__cells">
             <div class="totals-cell">
               <el-text tag="b" style="color:black;">ប្រាក់ខែគោល</el-text>
-              <div class="totals-cell__val">{{ (totals.base_salary) }}</div>
+              <div class="totals-cell__val" >{{ (totals.base_salary) }} {{ payrolldraft[0].currency_symbol }}</div>
               <template>
                 
               </template>
             </div>
             <div class="totals-cell">
               <el-text tag="b" style="color:black;">ប្រាក់ខែពាក់កណ្ដាល</el-text>
-              <div class="totals-cell__val totals-cell__val--blue">{{ (totals.half_salary) }}</div>
+              <div class="totals-cell__val totals-cell__val--blue">{{ (totals.half_salary.toFixed(2)) }} {{ payrolldraft[0].currency_symbol }}</div>
             </div>
             <div class="totals-cell">
               <el-text tag="b" style="color:black;">កាត់សរុប</el-text>
-              <div class="totals-cell__val totals-cell__val--warn">-{{ (totals.total_deduction) }}</div>
+              <div class="totals-cell__val totals-cell__val--warn">{{ (totals.total_deduction.toFixed(2)) }} {{ payrolldraft[0].currency_symbol }}</div>
             </div>
             <div class="">
-              <el-text tag="b" style="color:black;">ប្រាក់ខែសុទ្ធ</el-text>
-              <div class="totals-cell__val totals-cell__val--net">{{ (totals.net_salary) }}</div>
+              <el-text tag="b" style="color:black;">ប្រាក់ខែត្រូវបេីកសរុប</el-text>
+              <div class="totals-cell__val totals-cell__val--net">{{ (totals.net_salary.toFixed(2)) }} {{ payrolldraft[0].currency_symbol }}</div>
             </div>
           </div>
         </div>
@@ -391,7 +394,7 @@ const totals = computed(() => {
 }
 .totals-cell__val {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 18px;
   color: #111827;
   font-variant-numeric: tabular-nums;
 }
