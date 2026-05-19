@@ -8,9 +8,6 @@ import { getuser } from '../services/userservice';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
 import { markRaw } from 'vue'
 import { fetchRecieve } from '../services/recieve';
-// ─── State ────────────────────────────────────────────────────────────────────
-
-// recieve
 
 const recieveDialogVisible = ref(false);
 const recieveLoading = ref(false);
@@ -19,15 +16,16 @@ const selectedLoanId = ref(null)
 
 async function openRecieve(row) {
   selectedLoanId.value = row.id;
+  recieveData.value = [];         
   recieveDialogVisible.value = true;
   recieveLoading.value = true;
   try {
     const res = await fetchRecieve(row.id);
-    recieveData.value = res.data.data;
+    recieveData.value = res.data.data ?? [];
   } catch (e) {
     ElMessage.error(e?.response?.data?.message || e?.message || "Failed to load receives");
   } finally {
-    recieveLoading.value = false;
+    recieveLoading.value = false;   
   }
 }
 
@@ -294,8 +292,6 @@ onMounted(() => {
 
       <el-button type="warning" plain :icon="Refresh" @click="resetFilters">លុបការស្វែងរក</el-button>
     </div>
-
-    <!-- ── Table ──────────────────────────────────────────────────────── -->
     <div class="table-card">
       <el-table :data="loans" v-loading="loading" row-key="id" :expand-row-keys="expandedRows.map(String)"
         class="loan-table">
@@ -554,15 +550,16 @@ onMounted(() => {
       <!-- View Mode -->
 
     </el-drawer>
-    <el-dialog
+   <el-dialog
   v-model="recieveDialogVisible"
   title="ប្រវត្តិទទួលប្រាក់"
   width="1000px"
   destroy-on-close
-   class="recieve-dialog" 
+  class="recieve-dialog"
+  @closed="recieveData = []; recieveLoading = false;"
 >
-  <div v-loading="recieveLoading">
-    <div v-if="!recieveLoading && recieveData.length === 0" style="text-align:center; padding: 40px 0; color: #9ca3af;">
+  <div  v-loading="recieveLoading" style="min-height: 200px;">
+    <div v-if="recieveData.length === 0" style="text-align:center; padding: 40px 0; color: #9ca3af;">
       មិនមានទិន្នន័យ
     </div>
 
@@ -583,12 +580,12 @@ onMounted(() => {
         <el-table-column label="ល.រ" type="index" width="60" align="center"/>
         <el-table-column label="ប្រាក់ដើម" align="right" width="180">
           <template #default="{ row: d }">
-            <el-text tag="b" style="color: black;" >{{Number(d.principal).toLocaleString()  }}</el-text>
+            <el-text tag="b" style="color: black;" >{{Number(d.principal).toLocaleString()  }} {{ d.currency_name }}</el-text>
           </template>
         </el-table-column>
         <el-table-column label="ការប្រាក់" align="right" width="180">
           <template #default="{ row: d }">
-            <el-text tag="b" style="color: black;" >{{  Number(d.rate).toLocaleString() }}</el-text>
+            <el-text tag="b" style="color: black;" >{{  Number(d.rate).toLocaleString() }} {{ d.currency_name }}</el-text>
           </template>
         </el-table-column>
           <el-table-column label="កាត់ក្នុងថ្ងៃបេីកប្រាក់ខែ" align="right" width="180">
@@ -603,7 +600,7 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="សរុប" align="right">
           <template #default="{ row: d }">
-            <el-text tag="b" style="color: black;" >{{ Number(d.income).toLocaleString() }}</el-text>
+            <el-text tag="b" style="color: black;" >{{ Number(d.income).toLocaleString() }} {{ d.currency_name }}</el-text>
           </template>
         </el-table-column>
       </el-table>

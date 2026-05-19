@@ -7,3 +7,7 @@ export function fetchdrafpayroll(params = {}){
 export function fetchpayrolltype(){
     return api.get(`/view.payroll.type`)
 }
+
+export function createpayroll(formData){
+    return api.post(`add.payroll`,formData)
+}

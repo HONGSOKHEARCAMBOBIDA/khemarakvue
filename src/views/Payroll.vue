@@ -1,7 +1,8 @@
 <script setup>
+'use strict'
 import { onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import { fetchdrafpayroll, fetchpayrolltype } from '../services/payroll';
+import { fetchdrafpayroll, fetchpayrolltype ,createpayroll} from '../services/payroll';
 import { fetchBranch } from '../services/branch';
 import { fetchCurrency } from '../services/currency';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete,ChatDotRound  } from "@element-plus/icons-vue";
@@ -13,7 +14,53 @@ const payrolltype = ref([]);
 const branch = ref([]);
 const currency = ref([]);
 const bonustype = ref([]);
+const tableRef = ref(null)
+const selectedRows = ref([])
 
+function handleSelectionChange(rows){
+  selectedRows.value = rows;
+}
+
+async function handleSubmit() {
+  if(selectedRows.length === 0){
+    ElMessage.warning('សូមជ្រើសរើសបុគ្គលិកយ៉ាងហោចណាស់មួយ');
+    return
+  }
+  const payload = selectedRows.value.map(row => ({
+    employee_id:     row.employee_id,
+    salary_id:       row.salary_id,
+    branch_id:       row.branch_id,
+    payroll_type_id: Number(formDataParam.value.payroll),
+    basic_salary:    Number(row.base_salary)      || 0,
+    half_salary:     gethalfSalary(row),
+    pension_fund:    Number(row.pensionfund)       || 0,
+    total_work_day:  Number(row.total_work_day)    || 0,
+    payroll_date:    row.payroll_date              || new Date().toISOString().slice(0, 10),
+    loan_deduction:  Number(row.loan_deduction)    || 0,
+    loan_id:         Number(row.loan_id)           || 0,
+    is_bonus:        row.is_bonus                  || false,
+    bonus_type:      Number(row.bonus_type)        || 0,
+    bonus_amount:    Number(row.bonus_amount)      || 0,
+    total_deduction: getDeduction(row),
+    net_salary:      getNetSalary(row),
+    currency_id:     Number(formDataParam.value.currency),
+    note:            row.comment                   || '',
+    comment:         row.comment                   || '',
+  }));
+  loading.value = true;
+  try{
+    await createpayroll(payload);
+    ElMessage.success(`បានបញ្ជូនប្រាក់ខែសម្រាប់ ${payload.length} នាក់`);
+     tableRef.value?.clearSelection();
+     selectedRows.value = [];
+  }catch(e){
+ElMessage.error(e?.response?.data?.message || e?.message || 'Submit failed');
+
+  } finally{
+    loading.value = false;
+  }
+
+}
 const formDataParam = ref({
   currency: null,
   branch: null,
@@ -116,7 +163,7 @@ const totals = computed(() => {
             placeholder="ជ្រើសរើសសាខា"
             clearable
             filterable
-            style="width: 200px"
+            style="width: 250px"
           >
             <el-option
               v-for="b in branch"
@@ -132,7 +179,7 @@ const totals = computed(() => {
             v-model="formDataParam.currency"
             placeholder="ជ្រើសរើសរូបិយប័ណ្ណ"
             clearable
-            style="width: 180px"
+            style="width: 250px"
           >
             <el-option
               v-for="c in currency"
@@ -148,7 +195,7 @@ const totals = computed(() => {
             v-model="formDataParam.payroll"
             placeholder="ជ្រើសរើសប្រភេទ"
             clearable
-            style="width: 180px"
+            style="width: 250px"
           >
             <el-option
               v-for="pt in payrolltype"
@@ -178,15 +225,30 @@ const totals = computed(() => {
       />
 
       <template v-else>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px; gap:8px;">
+  <el-text type="info" style="align-self:center;">
+    បានជ្រើសរើស {{ selectedRows.length }} នាក់
+  </el-text>
+  <el-button
+    type="success"
+    :disabled="selectedRows.length === 0"
+    :loading="loading"
+    @click="handleSubmit"
+  >
+    <el-icon><Check /></el-icon>&nbsp;បញ្ជូនប្រាក់ខែ
+  </el-button>
+</div>
         <el-table
+          ref="tableRef"
           :data="payrolldraft"
           stripe
           border
           style="width: 100%"
+          @selection-change="handleSelectionChange"
           show-summary
           :summary-method="() => []"
         >
-          <el-table-column type="index" label="ល.រ" width="50" align="center" fixed="left" />
+        <el-table-column type="selection" width="55" />
           <el-table-column label="ឈ្មោះបុគ្គលិក" width="150" fixed="left">
             <template #default="{ row }">
                 <div>
@@ -399,10 +461,7 @@ const totals = computed(() => {
 .filter-item {
   margin-bottom: 0 !important;
 }
-.filter-item--actions {
-  display: flex;
-  gap: 8px;
-}
+
 
 .table-card {
   border: 1px solid #e5e7eb;
