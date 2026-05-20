@@ -35,7 +35,7 @@ async function handleSubmit() {
     half_salary:     gethalfSalary(row),
     pension_fund:    Number(row.pensionfund)       || 0,
     total_work_day:  Number(row.total_work_day)    || 0,
-    payroll_date:    row.payroll_date              || new Date().toISOString().slice(0, 10),
+    payroll_date:    formDataParam.value.payroll_date,
     loan_deduction:  Number(row.loan_deduction)    || 0,
     loan_id:         Number(row.loan_id)           || 0,
     is_bonus:        row.is_bonus                  || false,
@@ -65,6 +65,7 @@ const formDataParam = ref({
   currency: null,
   branch: null,
   payroll: null,
+  payroll_date: null,
 });
 
 function buildParams() {
@@ -141,13 +142,13 @@ const getNetSalary = (row) => {
 };
 
 const totals = computed(() => {
-  const sum = (key) => payrolldraft.value.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
+  const rows = selectedRows.value;
   return {
-    base_salary:     sum('base_salary'),
-    half_salary:     payrolldraft.value.reduce((acc,row) => acc + gethalfSalary(row),0),
-    total_deduction: payrolldraft.value.reduce((acc, row) => acc + getDeduction(row), 0),
-    total_bonus:     payrolldraft.value.reduce((acc, row) => acc + (row.is_bonus ? (Number(row.bonus_amount) || Number(row.bonus_amount)) : 0), 0), // NEW
-    net_salary:      payrolldraft.value.reduce((acc, row) => acc + getNetSalary(row), 0),
+    base_salary:     rows.reduce((acc, row) => acc + (Number(row.base_salary) || 0), 0),
+    half_salary:     rows.reduce((acc, row) => acc + gethalfSalary(row), 0),
+    total_deduction: rows.reduce((acc, row) => acc + getDeduction(row), 0),
+    total_bonus:     rows.reduce((acc, row) => acc + (row.is_bonus ? (Number(row.bonus_amount) || 0) : 0), 0),
+    net_salary:      rows.reduce((acc, row) => acc + getNetSalary(row), 0),
   };
 });
 </script>
@@ -206,8 +207,19 @@ const totals = computed(() => {
           </el-select>
         </el-form-item>
 
+<el-form-item label="ថ្ងៃទី" class="filter-item">
+  <el-date-picker
+    v-model="formDataParam.payroll_date"
+    type="date"
+    placeholder="ជ្រើសរើស"
+    format="YYYY-MM-DD"
+    value-format="YYYY-MM-DD"
+    style="width: 100%;"
+  />
+</el-form-item>
+
         <el-form-item label=" " class="filter-item filter-item--actions">
-          <el-button type="primary" :loading="loading" @click="loadpayrolldraft">
+          <el-button type="primary" :loading="loading" @click="loadpayrolldraft" :disabled="!formDataParam.payroll_date">
             <el-icon><Search /></el-icon>&nbsp;ស្វែងរក
           </el-button>
           <el-button @click="handleReset" type="warning" plain>
@@ -248,7 +260,7 @@ const totals = computed(() => {
           show-summary
           :summary-method="() => []"
         >
-        <el-table-column type="selection" width="55" />
+        <el-table-column type="selection" width="55" align="center"/>
           <el-table-column label="ឈ្មោះបុគ្គលិក" width="150" fixed="left">
             <template #default="{ row }">
                 <div>
