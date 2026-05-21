@@ -19,7 +19,7 @@ const formData = ref({
   name:          "",
   branch_id:     null,
   position_id:   null,
-  status_id:     null,
+  status_id:     1,
   office_id:     null,
   department_id: null,
   start_date:    "",
@@ -215,7 +215,7 @@ watch(() => formData.value.end_date, () => {
 
 <template>
   <div class="payroll-page">
-    <el-row :gutter="12" class="summary-row">
+    <!-- <el-row :gutter="12" class="summary-row">
       <el-col :span="6">
         <div class="stat-card">
           <p class="stat-label">បុគ្គលិកសរុប</p>
@@ -240,7 +240,7 @@ watch(() => formData.value.end_date, () => {
           <p class="stat-value">{{ totalNet }}</p>
         </div>
       </el-col>
-    </el-row>
+    </el-row> -->
 
     <el-card class="filter-card" shadow="never">
       <el-row :gutter="10">
@@ -275,14 +275,14 @@ watch(() => formData.value.end_date, () => {
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-select
             v-model="formData.department_id"
-            placeholder="All departments"
+            placeholder="នាយកដ្ឋាន"
             clearable
             style="width: 100%"
           >
             <el-option
               v-for="d in departments"
               :key="d.id"
-              :label="d.name"
+              :label="d.display_name"
               :value="d.id"
             />
           </el-select>
@@ -292,7 +292,7 @@ watch(() => formData.value.end_date, () => {
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-select
             v-model="formData.position_id"
-            placeholder="All positions"
+            placeholder="តួនាទី"
             clearable
             :disabled="!formData.department_id"
             style="width: 100%"
@@ -310,7 +310,7 @@ watch(() => formData.value.end_date, () => {
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-select
             v-model="formData.office_id"
-            placeholder="All offices"
+            placeholder="ការិយាល័យ"
             clearable
             style="width: 100%"
           >
@@ -327,7 +327,7 @@ watch(() => formData.value.end_date, () => {
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-select
             v-model="formData.status_id"
-            placeholder="All statuses"
+            placeholder="ស្ថានភាព"
             clearable
             style="width: 100%"
           >
@@ -345,7 +345,7 @@ watch(() => formData.value.end_date, () => {
           <el-date-picker
             v-model="formData.start_date"
             type="date"
-            placeholder="Start date"
+            placeholder="ចាប់ពី"
             value-format="YYYY-MM-DD"
             style="width: 100%"
           />
@@ -356,7 +356,7 @@ watch(() => formData.value.end_date, () => {
           <el-date-picker
             v-model="formData.end_date"
             type="date"
-            placeholder="End date"
+            placeholder="រហូតដល់"
             value-format="YYYY-MM-DD"
             style="width: 100%"
           />
@@ -381,132 +381,7 @@ watch(() => formData.value.end_date, () => {
         style="width: 100%"
         empty-text="No payroll records found"
       >
-        <!-- Employee -->
-        <el-table-column label="Employee" min-width="200" fixed="left">
-          <template #default="{ row }">
-            <div class="emp-cell">
-              <el-avatar
-                :size="36"
-                :src="getImage([row])"
-                shape="circle"
-              >
-                {{ row.employee_name_en?.charAt(0) }}
-              </el-avatar>
-              <div class="emp-info">
-                <div class="emp-name-en">{{ row.employee_name_en }}</div>
-                <div class="emp-name-kh">{{ row.employee_name_kh }}</div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- Gender -->
-        <el-table-column label="Gender" width="80" align="center">
-          <template #default="{ row }">
-            <span>{{ genderLabel(row.employee_gender) }}</span>
-          </template>
-        </el-table-column>
-
-        <!-- Position -->
-        <el-table-column
-          prop="position_name"
-          label="Position"
-          min-width="150"
-          show-overflow-tooltip
-        />
-
-        <!-- Office -->
-        <el-table-column
-          prop="office_name"
-          label="Office"
-          min-width="140"
-          show-overflow-tooltip
-        />
-
-        <!-- Branch -->
-        <el-table-column
-          prop="branch_name"
-          label="Branch"
-          min-width="130"
-          show-overflow-tooltip
-        />
-
-        <!-- Payroll date -->
-        <el-table-column prop="payroll_date" label="Payroll date" width="115" align="center" />
-
-        <!-- Work days -->
-        <el-table-column prop="total_work_day" label="Days" width="60" align="center" />
-
-        <!-- Basic salary -->
-        <el-table-column label="Basic salary" width="110" align="right">
-          <template #default="{ row }">
-            <span class="amount">${{ parseFloat(row.basic_salary).toFixed(2) }}</span>
-          </template>
-        </el-table-column>
-
-        <!-- Half salary -->
-        <el-table-column label="Half salary" width="100" align="right">
-          <template #default="{ row }">
-            <span class="amount">${{ parseFloat(row.half_salary).toFixed(2) }}</span>
-          </template>
-        </el-table-column>
-
-        <!-- Pension fund -->
-        <el-table-column label="Pension" width="90" align="right">
-          <template #default="{ row }">
-            <span class="amount">${{ parseFloat(row.pensionfund).toFixed(2) }}</span>
-          </template>
-        </el-table-column>
-
-        <!-- Loan deduction -->
-        <el-table-column label="Loan deduct." width="110" align="right">
-          <template #default="{ row }">
-            <span :class="parseFloat(row.loan_deduction) > 0 ? 'amount amount--danger' : 'amount amount--muted'">
-              {{ parseFloat(row.loan_deduction) > 0 ? '-$' + parseFloat(row.loan_deduction).toFixed(2) : '—' }}
-            </span>
-          </template>
-        </el-table-column>
-
-        <!-- Bonus -->
-        <el-table-column label="Bonus" width="110" align="right">
-          <template #default="{ row }">
-            <div v-if="row.is_bonus">
-              <div class="amount amount--success">${{ parseFloat(row.bonus_amount).toFixed(2) }}</div>
-              <div class="sub-label">{{ row.bonus_type_name }}</div>
-            </div>
-            <span v-else class="amount amount--muted">—</span>
-          </template>
-        </el-table-column>
-
-        <!-- Total deduction -->
-        <el-table-column label="Total deduct." width="115" align="right">
-          <template #default="{ row }">
-            <span :class="parseFloat(row.total_deduction) > 0 ? 'amount amount--danger' : 'amount amount--muted'">
-              {{ parseFloat(row.total_deduction) > 0 ? '-$' + parseFloat(row.total_deduction).toFixed(2) : '—' }}
-            </span>
-          </template>
-        </el-table-column>
-
-        <!-- Net salary -->
-        <el-table-column label="Net salary" width="110" align="right">
-          <template #default="{ row }">
-            <span class="amount amount--bold">${{ parseFloat(row.net_salary).toFixed(2) }}</span>
-            <div class="sub-label">{{ row.currency_code }}</div>
-          </template>
-        </el-table-column>
-
-        <!-- Bank -->
-        <el-table-column label="Bank" width="150" show-overflow-tooltip>
-          <template #default="{ row }">
-            <div class="bank-cell">
-              <div class="bank-name">{{ row.bank_name }}</div>
-              <div class="sub-label">{{ row.bank_account_number }}</div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- QR code -->
-        <el-table-column label="QR code" width="70" align="center">
+                 <el-table-column label="QR" width="70" align="center" fixed>
           <template #default="{ row }">
             <el-image
               v-if="row.qr_code_bank_account"
@@ -519,9 +394,101 @@ watch(() => formData.value.end_date, () => {
             <span v-else class="amount amount--muted">—</span>
           </template>
         </el-table-column>
+        <el-table-column label="បុគ្គលិក" min-width="200" fixed>
+          <template #default="{ row }">
+            <div class="emp-cell">
+              <div class="emp-info">
+                <el-text tag="b" style="color: black;">{{ row.employee_name_kh }}</el-text>
+                <div class="emp-name-en">{{ row.employee_name_en }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
 
-        <!-- Status -->
-        <el-table-column label="Status" width="100" align="center">
+        <el-table-column label="ភេទ" width="80" align="center">
+          <template #default="{ row }">
+            <span>{{ genderLabel(row.employee_gender) }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          prop="position_name"
+          label="តួនាទី"
+          min-width="170"
+          show-overflow-tooltip
+        />
+
+        <el-table-column
+          prop="office_name"
+          label="ការិយាល័យ"
+          min-width="140"
+          show-overflow-tooltip
+        />
+
+        <el-table-column
+          prop="branch_name"
+          label="សាខា"
+          min-width="150"
+          show-overflow-tooltip
+        />
+
+        <el-table-column prop="payroll_date" label="ថ្ងៃទីបេីកប្រាក់ខែ" width="115" align="center" />
+
+        <el-table-column prop="total_work_day" label="ថ្ងៃធ្វេីការ" width="90" align="center" />
+
+        <el-table-column label="ប្រាក់ខែគោល" width="110" align="right">
+          <template #default="{ row }">
+            <span class="amount">{{ parseFloat(row.basic_salary).toFixed(2) }} {{ row.currency_name }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="ពាក់កណ្ដាលខែ" width="130" align="right">
+          <template #default="{ row }">
+            <span class="amount">{{ parseFloat(row.half_salary).toFixed(2) }} {{ row.currency_name }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="កាត់ បសស" width="90" align="right">
+          <template #default="{ row }">
+            <span class="amount">{{ parseFloat(row.pensionfund).toFixed(2) }} {{ row.currency_name }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="កាត់កម្ចី" width="110" align="right">
+          <template #default="{ row }">
+           <el-text tag="b" style="color: black;" >{{ row.loan_deduction }} {{ row.currency_name }}</el-text>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="ប្រាក់លេីកទឹកចិត្ត" width="120" align="right">
+          <template #default="{ row }">
+            <el-text v-if="row.is_bonus">{{ row.bonus_amount }} {{ row.currency_name }} <el-tag>{{ row.bonus_type_name }}</el-tag></el-text>
+            <el-text v-else>គ្មាន</el-text>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="កាត់សរុប" width="115" align="right">
+          <template #default="{ row }">
+            <el-text>{{ row.total_deduction }} {{ row.currency_name }}</el-text>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="ប្រាក់ខែទទួលបាន" width="130" align="right">
+          <template #default="{ row }">
+            <el-text tag="b" style="color: forestgreen;">{{ row.net_salary }} {{ row.currency_name }}</el-text>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="ធនាគា" width="150" show-overflow-tooltip>
+          <template #default="{ row }">
+            <div class="bank-cell">
+              <div class="bank-name">{{ row.bank_name }}</div>
+              <el-tag>{{ row.bank_account_number }}</el-tag>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="ស្ថានភាព" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status_name)" size="small">
               {{ row.status_name }}
@@ -530,23 +497,23 @@ watch(() => formData.value.end_date, () => {
         </el-table-column>
 
         <!-- Note -->
-        <el-table-column label="Note" min-width="120" show-overflow-tooltip>
+        <el-table-column label="សំគាល់" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="amount amount--muted">{{ row.note || '—' }}</span>
           </template>
         </el-table-column>
 
         <!-- Action -->
-        <el-table-column label="Action" width="100" align="center" fixed="right">
+        <el-table-column label="សកម្មភាព" width="120" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.show_approve_button"
-              size="small"
-              type="primary"
+              size="large"
+              type="success"
               plain
               @click="handleApprove(row)"
             >
-              Approve
+              អនុម័ត
             </el-button>
             <span v-else class="amount amount--muted">—</span>
           </template>
@@ -627,7 +594,7 @@ watch(() => formData.value.end_date, () => {
 
 /* Table card */
 .table-card {
-  border-radius: 10px;
+  border-radius: 5px;
 }
 .table-card :deep(.el-card__body) {
   padding: 0;
@@ -646,7 +613,7 @@ watch(() => formData.value.end_date, () => {
 .emp-name-en {
   font-size: 13px;
   font-weight: 600;
-  color: #303133;
+  color: #6585c4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -690,5 +657,10 @@ watch(() => formData.value.end_date, () => {
   justify-content: flex-end;
   padding: 14px 16px;
   border-top: 1px solid #ebeef5;
+}
+
+:deep(.el-table__header-wrapper th) {
+  background-color: #409eff !important;
+  color: #ffffff !important;
 }
 </style>
