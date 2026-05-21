@@ -11,3 +11,11 @@ export function fetchpayrolltype(){
 export function createpayroll(formData){
     return api.post(`add.payroll`,formData)
 }
+
+export function fetchpayroll(params = {}){
+    return api.get(`/view.payroll`,{params})
+}
+
+export function fetchpayrollstatus(){
+    return api.get(`view.payroll.status`)
+}
