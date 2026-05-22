@@ -19,3 +19,7 @@ export function fetchpayroll(params = {}){
 export function fetchpayrollstatus(){
     return api.get(`view.payroll.status`)
 }
+
+export function approvepayroll(id){
+    return api.put(`approve.payroll/${id}`)
+}

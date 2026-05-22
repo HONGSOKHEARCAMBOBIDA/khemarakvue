@@ -1,12 +1,12 @@
 <script setup>
 import { onMounted, ref, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { fetchpayroll, fetchpayrollstatus } from "../services/payroll";
+import { fetchpayroll, fetchpayrollstatus,approvepayroll } from "../services/payroll";
 import { fetchBranch } from "../services/branch";
 import { fetchDepartment } from "../services/department";
 import { fetchPosition } from "../services/position";
 import { fetchOffice } from "../services/office";
-
+import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
 const loading = ref(false);
 const payroll  = ref([]);
 const branches      = ref([]);
@@ -73,9 +73,9 @@ function getImageQR(row) {
 function statusTagType(status) {
   if (!status) return "info";
   const s = status.toUpperCase();
-  if (s === "APPROVED") return "success";
+  if (s === "បានបេីក") return "success";
   if (s === "REJECTED") return "danger";
-  if (s === "PENDING")  return "warning";
+  if (s === "កំពុងស្នេីរ")  return "warning";
   return "info";
 }
 
@@ -120,12 +120,13 @@ function onSizeChange(newSize) {
 async function handleApprove(row) {
   try {
     await ElMessageBox.confirm(
-      `Approve payroll for ${row.employee_name_en}?`,
-      "Confirm Approval",
-      { type: "warning", confirmButtonText: "Approve", cancelButtonText: "Cancel" }
+      `ប្រាក់ខែសម្រាប់ ${row.employee_name_kh} ចំនួន ${row.net_salary} ${row.currency_name}?`,
+      "បញ្ជាក់ការយល់ព្រម",
+      { type: "warning", confirmButtonText: "អនុម័ត", cancelButtonText: "ចាកចេញ" }
     );
     // TODO: call your approve API here, e.g.: await approvePayroll(row.id)
-    ElMessage.success("Payroll approved successfully");
+    await approvepayroll(row.id)
+    ElMessage.success("ប្រាក់ខែបានអនុម័តបានជោគជ័យ");
     loadpayroll(buildParams());
   } catch {
     // user cancelled — do nothing
@@ -365,7 +366,7 @@ watch(() => formData.value.end_date, () => {
         <!-- Reset button -->
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-button @click="resetFilters" style="width: 100%">
-            Reset filters
+            លុបការស្វែងរក
           </el-button>
         </el-col>
       </el-row>
@@ -394,7 +395,7 @@ watch(() => formData.value.end_date, () => {
             <span v-else class="amount amount--muted">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="បុគ្គលិក" min-width="200" fixed>
+        <el-table-column label="បុគ្គលិក" min-width="130" fixed>
           <template #default="{ row }">
             <div class="emp-cell">
               <div class="emp-info">
@@ -410,32 +411,6 @@ watch(() => formData.value.end_date, () => {
             <span>{{ genderLabel(row.employee_gender) }}</span>
           </template>
         </el-table-column>
-
-        <el-table-column
-          prop="position_name"
-          label="តួនាទី"
-          min-width="170"
-          show-overflow-tooltip
-        />
-
-        <el-table-column
-          prop="office_name"
-          label="ការិយាល័យ"
-          min-width="140"
-          show-overflow-tooltip
-        />
-
-        <el-table-column
-          prop="branch_name"
-          label="សាខា"
-          min-width="150"
-          show-overflow-tooltip
-        />
-
-        <el-table-column prop="payroll_date" label="ថ្ងៃទីបេីកប្រាក់ខែ" width="115" align="center" />
-
-        <el-table-column prop="total_work_day" label="ថ្ងៃធ្វេីការ" width="90" align="center" />
-
         <el-table-column label="ប្រាក់ខែគោល" width="110" align="right">
           <template #default="{ row }">
             <span class="amount">{{ parseFloat(row.basic_salary).toFixed(2) }} {{ row.currency_name }}</span>
@@ -475,9 +450,42 @@ watch(() => formData.value.end_date, () => {
 
         <el-table-column label="ប្រាក់ខែទទួលបាន" width="130" align="right">
           <template #default="{ row }">
-            <el-text tag="b" style="color: forestgreen;">{{ row.net_salary }} {{ row.currency_name }}</el-text>
+            <el-tag style="font-weight: bold;" size="large" type="success">{{ row.net_salary }} {{ row.currency_name }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="ស្ថានភាព" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="statusTagType(row.status_name)" size="large">
+              {{ row.status_name }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="position_name"
+          label="តួនាទី"
+          min-width="170"
+          show-overflow-tooltip
+        />
+
+        <el-table-column
+          prop="office_name"
+          label="ការិយាល័យ"
+          min-width="140"
+          show-overflow-tooltip
+        />
+
+        <el-table-column
+          prop="branch_name"
+          label="សាខា"
+          min-width="150"
+          show-overflow-tooltip
+        />
+
+        <el-table-column prop="payroll_date" label="ថ្ងៃទីបេីកប្រាក់ខែ" width="115" align="center" />
+
+        <el-table-column prop="total_work_day" label="ថ្ងៃធ្វេីការ" width="90" align="center" />
+
+
 
         <el-table-column label="ធនាគា" width="150" show-overflow-tooltip>
           <template #default="{ row }">
@@ -488,13 +496,7 @@ watch(() => formData.value.end_date, () => {
           </template>
         </el-table-column>
 
-        <el-table-column label="ស្ថានភាព" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status_name)" size="small">
-              {{ row.status_name }}
-            </el-tag>
-          </template>
-        </el-table-column>
+
 
         <!-- Note -->
         <el-table-column label="សំគាល់" min-width="120" show-overflow-tooltip>
@@ -510,10 +512,19 @@ watch(() => formData.value.end_date, () => {
               v-if="row.show_approve_button"
               size="large"
               type="success"
-              plain
+             :icon="Check"
+             circle
               @click="handleApprove(row)"
             >
-              អនុម័ត
+            </el-button>
+            <el-button
+            v-if="row.show_approve_button"
+            size="large"
+            type="danger"
+            :icon="Delete"
+            circle 
+            >
+
             </el-button>
             <span v-else class="amount amount--muted">—</span>
           </template>
