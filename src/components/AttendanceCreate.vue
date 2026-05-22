@@ -212,7 +212,7 @@ const suggestionleftearly = [
 
   <template>
     <el-container
-      style="min-height: 40vh; background: var(--el-fill-color-light)"
+      style="min-height: 40vh; background: var(--el-fill-color-black)"
     >
       <el-main
         style="
@@ -417,4 +417,5 @@ const suggestionleftearly = [
       transform: rotate(360deg);
     }
   }
+  
   </style>

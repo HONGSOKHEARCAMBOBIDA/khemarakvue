@@ -265,6 +265,9 @@ watch(() => formData.value.end_date, () => {
     <el-card class="filter-card" shadow="never">
       <el-row :gutter="10">
         <!-- Name search -->
+         <el-col>
+          
+         </el-col>
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-input
             v-model="formData.name"

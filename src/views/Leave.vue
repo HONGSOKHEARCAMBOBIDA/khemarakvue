@@ -616,7 +616,7 @@ const toKhmerNumber = (num) => {
             :value="st.id"
           />
         </el-select>
-<el-button type="success" @click="openCreate">
+<el-button type="primary" @click="openCreate">
   បង្កើតថ្មី
 </el-button>
       </div>

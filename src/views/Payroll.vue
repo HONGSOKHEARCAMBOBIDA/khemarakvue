@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus';
 import { fetchdrafpayroll, fetchpayrolltype ,createpayroll} from '../services/payroll';
 import { fetchBranch } from '../services/branch';
 import { fetchCurrency } from '../services/currency';
-import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete,ChatDotRound  } from "@element-plus/icons-vue";
+import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete,ChatDotRound ,Back } from "@element-plus/icons-vue";
 import { computed } from 'vue';
 import { fetechbonustype } from '../services/bonus';
 const loading = ref(false);
@@ -157,8 +157,18 @@ const totals = computed(() => {
   <div class="payroll-draft-page">
     <el-card class="filter-card" shadow="never">
       <el-form :model="formDataParam" inline label-position="top" class="filter-form">
-
+<div class="pr-4">
+      <el-button
+      type="primary"
+      
+      @click="$router.back()"
+      :icon="Back"
+      circle
+    >
+    </el-button>
+</div>
         <el-form-item label="សាខា" class="filter-item">
+          
           <el-select
             v-model="formDataParam.branch"
             placeholder="ជ្រើសរើសសាខា"

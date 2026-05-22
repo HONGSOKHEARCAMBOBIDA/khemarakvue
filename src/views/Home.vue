@@ -1,37 +1,103 @@
 <template>
-  <div class="pb-4">
-    <el-row :gutter="10">
-      <el-col :span="4">
-        <el-input v-model="formData.name" placeholder="ស្វែងរក" size="large" />
-      </el-col>
-      <el-col :span="4">
-        <el-select v-model="formData.branch_id" placeholder="ជ្រើសរើសសាខា" style="width:100%" size="large" clearable>
-          <el-option v-for="branch in branches" :key="branch.id" :label="branch.name" :value="branch.id" />
-        </el-select>
-      </el-col>
-      <el-col :span="4">
-        <el-select v-model="formData.department_id" placeholder="ជ្រើសរើសនាយកដ្ឋាន" style="width:100%" size="large" clearable>
-          <el-option v-for="department in departments" :key="department.id" :label="department.display_name" :value="department.id" />
-        </el-select>
-      </el-col>
-      <el-col :span="4">
-        <el-select v-model="formData.position_id" placeholder="ជ្រើសរើសតួនាទី" style="width:100%" size="large" clearable>
-          <el-option v-for="position in positions" :key="position.id" :label="position.display_name" :value="position.id" />
-        </el-select>
-      </el-col>
-      <el-col :span="4">
-        <el-select v-model="formData.office_id" placeholder="ជ្រើសរើសការិយាល័យ" style="width:100%" size="large" clearable>
-          <el-option v-for="office in offices" :key="office.id" :label="office.name" :value="office.id" />
-        </el-select>
-      </el-col>
-      <el-col :span="4">
-        <el-select v-model="formData.is_promote" placeholder="ជ្រើសរើសស្ថានភាព" style="width:100%" size="large" clearable>
-          <el-option label="បានវាយតម្លៃ" :value="1" />
-          <el-option label="មិនទាន់វាយតម្លៃ" :value="0" />
-        </el-select>
-      </el-col>
-    </el-row>
-  </div>
+<div class="pb-4">
+  <el-row :gutter="5" align="middle">
+    <el-col :span="5">
+      <el-input v-model="formData.name" placeholder="ស្វែងរក" size="large" />
+    </el-col>
+
+    <el-col :span="3">
+      <el-select
+        v-model="formData.branch_id"
+        placeholder="ជ្រើសរើសសាខា"
+        style="width:100%"
+        size="large"
+        clearable
+      >
+        <el-option
+          v-for="branch in branches"
+          :key="branch.id"
+          :label="branch.name"
+          :value="branch.id"
+        />
+      </el-select>
+    </el-col>
+
+    <el-col :span="3">
+      <el-select
+        v-model="formData.department_id"
+        placeholder="ជ្រើសរើសនាយកដ្ឋាន"
+        style="width:100%"
+        size="large"
+        clearable
+      >
+        <el-option
+          v-for="department in departments"
+          :key="department.id"
+          :label="department.display_name"
+          :value="department.id"
+        />
+      </el-select>
+    </el-col>
+
+    <el-col :span="3">
+      <el-select
+        v-model="formData.position_id"
+        placeholder="ជ្រើសរើសតួនាទី"
+        style="width:100%"
+        size="large"
+        clearable
+      >
+        <el-option
+          v-for="position in positions"
+          :key="position.id"
+          :label="position.display_name"
+          :value="position.id"
+        />
+      </el-select>
+    </el-col>
+
+    <el-col :span="4">
+      <el-select
+        v-model="formData.office_id"
+        placeholder="ជ្រើសរើសការិយាល័យ"
+        style="width:100%"
+        size="large"
+        clearable
+      >
+        <el-option
+          v-for="office in offices"
+          :key="office.id"
+          :label="office.name"
+          :value="office.id"
+        />
+      </el-select>
+    </el-col>
+
+    <el-col :span="3">
+      <el-select
+        v-model="formData.is_promote"
+        placeholder="ជ្រើសរើសស្ថានភាព"
+        style="width:100%"
+        size="large"
+        clearable
+      >
+        <el-option label="បានវាយតម្លៃ" :value="1" />
+        <el-option label="មិនទាន់វាយតម្លៃ" :value="0" />
+      </el-select>
+    </el-col>
+
+    <el-col :span="3">
+      <el-button
+        type="primary"
+        size="large"
+        style="width:100%"
+        @click="navigateTo('/users')"
+      >
+        បង្កើតបុគ្គលិកថ្មី
+      </el-button>
+    </el-col>
+  </el-row>
+</div>
 
   <EmployeeDetailDrawer v-model="drawerVisible" :employee="selectedEmployee" @refresh="onEmployeeUpdated"/>
 
@@ -42,12 +108,12 @@
       <template #default="scope">
         <div style="display: flex;">
           <el-button  type="primary" plain :icon="View" @click="openDetail(scope.row)">មេីលលំអិត</el-button>
-          <el-button  type="success" plain :icon="Edit">កែប្រែ</el-button>
+          <!-- <el-button  type="success" plain :icon="Edit">កែប្រែ</el-button>
           <el-button  type="warning" plain :icon="Wallet">កែប្រែប្រាក់ខែ</el-button>
           <el-button  type="success" plain :icon="Wallet">ដំឡេីងប្រាក់ខែ</el-button>
           <el-button  type="primary" plain :icon="ArrowUp">វាយតម្លៃការងារ</el-button>
           <el-button  plain :icon="Clock">ដូរវេនការងារ</el-button>
-          <el-button  type="danger" plain :icon="Switch">ដូរថ្ងៃសម្រាក</el-button>
+          <el-button  type="danger" plain :icon="Switch">ដូរថ្ងៃសម្រាក</el-button> -->
         </div>
       </template>
     </el-table-column>
@@ -243,8 +309,9 @@ import {
   ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download
 } from "@element-plus/icons-vue"
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue"
-
+import { useRouter } from "vue-router"
 // ── State ──────────────────────────────────────────────────────────────────
+const router = useRouter()
 const loading        = ref(false)
 const employees      = ref([])
 const drawerVisible  = ref(false)
@@ -253,7 +320,9 @@ const branches       = ref([])
 const departments    = ref([])
 const positions      = ref([])
 const offices        = ref([])
-
+const navigateTo = (path) => {
+  router.push(path)
+}
 const formData = ref({
   name:          "",
   branch_id:     null,

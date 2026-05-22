@@ -1,13 +1,28 @@
+
 <template>
   <div class="user-register-container">
     <el-card class="register-card">
-      <template #header>
-        <div class="flex flex-col gap-4 items-center">
-          <h2>
-            <div class="logo">បង្កើតគណនីអ្នកប្រើប្រាស់ថ្មី</div>
-          </h2>
-        </div>
-      </template>
+<template #header>
+  <div class="flex justify-between items-center">
+    
+    <el-button
+      type="primary"
+      plain
+      @click="$router.back()"
+    >
+      <el-icon class="mr-1">
+        <Back />
+      </el-icon>
+      ត្រឡប់ក្រោយ
+    </el-button>
+
+    <div class="logo">
+      បង្កើតគណនីអ្នកប្រើប្រាស់ថ្មី
+    </div>
+
+    <div style="width:120px"></div>
+  </div>
+</template>
 
       <el-form
         :model="formData"
@@ -561,7 +576,7 @@ import { fetchDistrict } from '../services/district'
 import { fetchCommunce } from '../services/communce'
 import { fetchVillage } from '../services/village'
 import { fetchDayofweek } from '../services/dayofweek'
-import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
+import { Delete, Edit, Search, Share, Upload,Back } from '@element-plus/icons-vue'
 
 const parentBorder = ref(true)
 const formRef       = ref(null)
