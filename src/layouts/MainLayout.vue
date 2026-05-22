@@ -9,22 +9,19 @@
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/attendanceview')">បញ្ជីវត្តមាន</el-button>
             <el-button type="primary" plain @click="navigateTo('/leave')">ច្បាប់</el-button>
-            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/loan')">កម្ចី</el-button>     
-            <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/payroll')">បេីកប្រាក់ខែ</el-button>
+            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/loan')">កម្ចី</el-button>
             <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/payrolllist')">ប្រាក់ខែ</el-button>
           </div>
 
           <div class="header-right">
             <div class="user-info">
               <el-dropdown @command="handleCommand">
-                <span class="user-dropdown">
-                  {{ auth.user?.name || 'User' }}
-                  <el-icon><arrow-down /></el-icon>
-                </span>
+               <span class="user-dropdown">
+  {{ userlogin }}
+  <el-icon><arrow-down /></el-icon>
+</span>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="profile">Profile</el-dropdown-item>
-                    <el-dropdown-item command="settings">Settings</el-dropdown-item>
                     <el-dropdown-item command="logout" divided>Logout</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -41,10 +38,12 @@
 
         <transition name="slide-down">
           <div v-if="menuOpen" class="mobile-nav">
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="mobileNavigateTo('/users')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="mobileNavigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="mobileNavigateTo('/attendanceview')">បញ្ជីវត្តមាន</el-button>
-            <el-button type="primary" plain @click="mobileNavigateTo('/leave')">ច្បាប់</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/users')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/attendanceview')">បញ្ជីវត្តមាន</el-button>
+            <el-button type="primary" plain @click="navigateTo('/leave')">ច្បាប់</el-button>
+            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/loan')">កម្ចី</el-button>
+            <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/payrolllist')">ប្រាក់ខែ</el-button>
           </div>
         </transition>
       </el-header>
@@ -88,15 +87,13 @@ const hasAdminOrHR = computed(() => {
   return parts.some(p => p.part_name === 'Admin' || p.part_name === 'HR')
 })
 
+const userlogin = computed(() => authstore.name)
+
 const handleCommand = (command) => {
   if (command === 'logout') {
     auth.logout()
     router.push('/login')
-  } else if (command === 'profile') {
-    router.push('/profile')
-  } else if (command === 'settings') {
-    router.push('/settings')
-  }
+  } 
 }
 </script>
 

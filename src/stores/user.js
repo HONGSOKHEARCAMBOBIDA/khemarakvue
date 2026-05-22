@@ -16,6 +16,7 @@
         branchRadius: (state) => state.auth?.branch_radius,
         roleId: (state) => state.auth?.role_id,
         parts: (state) => state.auth?.parts,
+        name: (state) => state.auth?.name,
     },  
 
     actions: {

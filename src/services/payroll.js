@@ -23,3 +23,7 @@ export function fetchpayrollstatus(){
 export function approvepayroll(id){
     return api.put(`approve.payroll/${id}`)
 }
+
+export function deletepayroll(id){
+    return api.delete(`delete.payroll/${id}`)
+}

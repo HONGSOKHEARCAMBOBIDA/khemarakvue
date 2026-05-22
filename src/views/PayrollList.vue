@@ -1,11 +1,13 @@
 <script setup>
+import { useRouter } from "vue-router";
 import { onMounted, ref, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { fetchpayroll, fetchpayrollstatus,approvepayroll } from "../services/payroll";
+import { fetchpayroll, fetchpayrollstatus,approvepayroll,deletepayroll } from "../services/payroll";
 import { fetchBranch } from "../services/branch";
 import { fetchDepartment } from "../services/department";
 import { fetchPosition } from "../services/position";
 import { fetchOffice } from "../services/office";
+import { markRaw } from 'vue'
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
 const loading = ref(false);
 const payroll  = ref([]);
@@ -14,7 +16,11 @@ const departments   = ref([]);
 const positions     = ref([]);
 const offices       = ref([]);
 const payrollstatus = ref([]);
+const router = useRouter()
 
+const navigateTo = (path) => {
+  router.push(path)
+}
 const formData = ref({
   name:          "",
   branch_id:     null,
@@ -133,7 +139,20 @@ async function handleApprove(row) {
   }
 }
 
-// ─── Reset filters ────────────────────────────────────────────────────────────
+async function handleDelete(row) {
+  try {
+    await ElMessageBox.confirm(
+      `លុបប្រាក់ខែសម្រាប់ ${row.employee_name_kh} ចំនួន ${row.net_salary} ${row.currency_name}?`,
+      "បញ្ជាក់ការយល់ព្រម",
+      { type: "warning", confirmButtonText: "លុប", cancelButtonText: "ចាកចេញ", icon: markRaw(Delete), }
+    );
+    await deletepayroll(row.id)
+    ElMessage.success("ប្រាក់ខែបានលុបបានជោគជ័យ");
+    loadpayroll(buildParams());
+  } catch {
+  }
+}
+
 function resetFilters() {
   formData.value = {
     name:          "",
@@ -369,6 +388,11 @@ watch(() => formData.value.end_date, () => {
             លុបការស្វែងរក
           </el-button>
         </el-col>
+                <el-col :xs="24" :sm="12" :md="6" :lg="4">
+          <el-button @click="navigateTo('/payroll')" style="width: 100%">
+            បេីកប្រាក់ខែថ្មី
+          </el-button>
+        </el-col>
       </el-row>
     </el-card>
 
@@ -447,7 +471,11 @@ watch(() => formData.value.end_date, () => {
             <el-text>{{ row.total_deduction }} {{ row.currency_name }}</el-text>
           </template>
         </el-table-column>
-
+  <el-table-column label="ថ្ងៃធ្វេីការ" width="90" align="center">
+    <template #default="{row}">
+      <el-text>{{ row.total_work_day }} ថ្ងៃ</el-text>
+    </template>
+  </el-table-column>
         <el-table-column label="ប្រាក់ខែទទួលបាន" width="130" align="right">
           <template #default="{ row }">
             <el-tag style="font-weight: bold;" size="large" type="success">{{ row.net_salary }} {{ row.currency_name }}</el-tag>
@@ -483,7 +511,7 @@ watch(() => formData.value.end_date, () => {
 
         <el-table-column prop="payroll_date" label="ថ្ងៃទីបេីកប្រាក់ខែ" width="115" align="center" />
 
-        <el-table-column prop="total_work_day" label="ថ្ងៃធ្វេីការ" width="90" align="center" />
+        
 
 
 
@@ -523,6 +551,7 @@ watch(() => formData.value.end_date, () => {
             type="danger"
             :icon="Delete"
             circle 
+            @click="handleDelete(row)"
             >
 
             </el-button>
@@ -531,7 +560,7 @@ watch(() => formData.value.end_date, () => {
         </el-table-column>
       </el-table>
 
-      <!-- Pagination -->
+      
       <div class="pagination-row">
         <el-pagination
           v-model:current-page="pagination.page"

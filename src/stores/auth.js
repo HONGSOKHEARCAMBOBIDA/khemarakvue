@@ -28,8 +28,9 @@ export const useAuthStore = defineStore('auth',{
     actions: {
         login(token,user){
             this.token = token
-            //this.user = user
+            // this.user = user
             setToken(token)
+             
             // save token to state
 
         },
