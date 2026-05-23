@@ -2,7 +2,7 @@
 <div class="pb-4">
   <el-row :gutter="5" align="middle">
     <el-col :span="5">
-      <el-input v-model="formData.name" placeholder="ស្វែងរក" size="large" />
+      <el-input v-model="formData.name" placeholder="ស្វែងរក" size="large" clearable/>
     </el-col>
 
     <el-col :span="3">
