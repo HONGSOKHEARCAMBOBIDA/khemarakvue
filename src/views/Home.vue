@@ -91,7 +91,7 @@
         type="primary"
         size="large"
         style="width:100%"
-        @click="navigateTo('/users')"
+        @click="navigateTo('/7dfb4cf67742cb0660305e56ef816c53fcec892cae7f6ee39b75f34e659d672c')"
       >
         បង្កើតបុគ្គលិកថ្មី
       </el-button>
@@ -378,12 +378,12 @@ function buildParams() {
 
 function getImage(row) {
   const file = row.employeeprofies?.[0]?.profile_image
-  return file ? `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${file}` : "https://via.placeholder.com/40"
+  return file ? `http://localhost:8080/profileimage/${file}` : "https://via.placeholder.com/40"
 }
 
 function getImageQR(row) {
   const file = row.employeeprofies?.[0]?.qr_code_bank_account
-  return file ? `https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${file}` : "https://via.placeholder.com/40"
+  return file ? `http://localhost:8080/qrcodeimage/${file}` : "https://via.placeholder.com/40"
 }
 
 function openDetail(row) {
@@ -466,7 +466,7 @@ watch(() => formData.value.name, () => {
   searchTimer = setTimeout(() => {
     pagination.value.page = 1
     loadEmployees(buildParams())
-  }, 250)
+  },100)
 })
 
 watch(() => formData.value.branch_id, () => {

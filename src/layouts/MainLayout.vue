@@ -5,18 +5,18 @@
         <div class="header-content">
           <div class="logo">សាកលវិទ្យាល័យខេមរៈ ខេត្តបាត់ដំបង</div>
           <div class="nav-buttons desktop-nav">
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បុគ្គលិក</el-button>
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/attendanceview')">វត្តមាន</el-button>
-            <el-button type="primary" plain @click="navigateTo('/leave')">ច្បាប់</el-button>
-            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/loan')">កម្ចី</el-button>
-            <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/payrolllist')">ប្រាក់ខែ</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942')">បុគ្គលិក</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/91e6236168751f05de4ac5f4bbf867fe8d955925d44f356046854829644d0baf')">វត្តមាន</el-button>
+            <el-button type="primary" plain @click="navigateTo('/af193190b8d3cd14103e20e900378a2b76414ff6428065f3f8539b3577b22fdf')">ច្បាប់</el-button>
+            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/472bbf14923e2e7cefd8529825c401e8d1a2937b96dd697a6d1c75c53e6cca3a')">កម្ចី</el-button>
+            <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/bf43e564ebc1b828180e6e4517d872bf71e80b431caeec6b5451e9254a0c6ee9')">ប្រាក់ខែ</el-button>
           </div>
 
           <div class="header-right">
             <div class="user-info">
               <el-dropdown @command="handleCommand">
                <span class="user-dropdown">
-  {{ userlogin }}
+  {{ userlogin.toUpperCase() }}
   <el-icon><arrow-down /></el-icon>
 </span>
                 <template #dropdown>
@@ -37,12 +37,12 @@
 
         <transition name="slide-down">
           <div v-if="menuOpen" class="mobile-nav">
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/users')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/home')">បញ្ជីបុគ្គលិក</el-button>
-            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/attendanceview')">បញ្ជីវត្តមាន</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/7dfb4cf67742cb0660305e56ef816c53fcec892cae7f6ee39b75f34e659d672c')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942')">បញ្ជីបុគ្គលិក</el-button>
+            <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/91e6236168751f05de4ac5f4bbf867fe8d955925d44f356046854829644d0baf')">បញ្ជីវត្តមាន</el-button>
             <el-button type="primary" plain @click="navigateTo('/leave')">ច្បាប់</el-button>
-            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/loan')">កម្ចី</el-button>
-            <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/payrolllist')">ប្រាក់ខែ</el-button>
+            <el-button v-if="hasAdminOrHR" type="warning" plain @click="navigateTo('/472bbf14923e2e7cefd8529825c401e8d1a2937b96dd697a6d1c75c53e6cca3a')">កម្ចី</el-button>
+            <el-button type="primary" v-if="hasAdminOrHR" plain @click="navigateTo('/bf43e564ebc1b828180e6e4517d872bf71e80b431caeec6b5451e9254a0c6ee9')">ប្រាក់ខែ</el-button>
           </div>
         </transition>
       </el-header>
@@ -66,7 +66,6 @@ import { useAuthStore } from '../stores/auth'
 import { ArrowDown, Expand, Close } from '@element-plus/icons-vue'
 import { useAuthStore1 } from '../stores/user'
 import { computed, ref } from 'vue'
-
 const router = useRouter()
 const auth = useAuthStore()
 const authstore = useAuthStore1()
@@ -98,10 +97,11 @@ const handleCommand = (command) => {
 
 <style scoped>
 .el-header {
-  background-color: #fff;
+ background-color: #409eff;
   border-bottom: 1px solid #e4e7ed;
   padding: 0 20px;
   height: auto !important;
+  color: white;
 }
 
 .header-content {
@@ -115,7 +115,7 @@ const handleCommand = (command) => {
 .logo {
   font-size: 16px;
   font-weight: bold;
-  color: #409eff;
+  color: white;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -139,10 +139,12 @@ const handleCommand = (command) => {
 }
 
 .user-info {
+  color: white;
   cursor: pointer;
 }
 
 .user-dropdown {
+  color: white;
   display: flex;
   align-items: center;
   gap: 5px;

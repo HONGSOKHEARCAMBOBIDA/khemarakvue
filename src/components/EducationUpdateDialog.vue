@@ -117,7 +117,7 @@ watch(visible, async (open) => {
   formData.end_date             = edu.end_date             ?? ''
   formData.note                 = edu.note                 ?? ''
   eduImageUrl.value = edu.image
-    ? `https://7ml45f42-8080.asse.devtunnels.ms/educationimage/${edu.image}`
+    ? `http://localhost:8080/educationimage/${edu.image}`
     : ''
 })
 

@@ -68,12 +68,12 @@ function buildParams() {
 
 function getImage(row) {
   const file = row[0]?.profile_image;
-  return file ? `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${file}` : "";
+  return file ? `http://localhost:8080/profileimage/${file}` : "";
 }
 
 function getImageQR(row) {
   const file = row[0]?.qr_code_bank_account;
-  return file ? `https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${file}` : "";
+  return file ? `http://localhost:8080/qrcodeimage/${file}` : "";
 }
 
 function statusTagType(status) {
@@ -392,7 +392,7 @@ watch(() => formData.value.end_date, () => {
           </el-button>
         </el-col>
                 <el-col :xs="24" :sm="12" :md="6" :lg="4">
-          <el-button @click="navigateTo('/payroll')" style="width: 100%">
+          <el-button @click="navigateTo('/60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56')" style="width: 100%">
             បេីកប្រាក់ខែថ្មី
           </el-button>
         </el-col>

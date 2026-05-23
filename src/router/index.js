@@ -32,16 +32,16 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/home'
+        redirect: '/4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942'
       },
       {
-        path: 'home',
+        path: '4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942',
         name: 'Home',
         component: Home,
         meta: { title: 'Home' }
       },
       {
-        path: 'attendanceview',
+        path: '91e6236168751f05de4ac5f4bbf867fe8d955925d44f356046854829644d0baf',
         name: 'attendanceView',
         component: AttendanceView,
         meta: {title: 'AttendanceView',requiresAuth: true}
@@ -53,25 +53,27 @@ const routes = [
         meta: {title: 'Attendance',requiresAuth: true}
       },
       {
-        path: 'leave',
+        path: 'af193190b8d3cd14103e20e900378a2b76414ff6428065f3f8539b3577b22fdf',
         name: 'Leave',
-        component: Leave
-
+        component: Leave,
+        meta: {title: 'Leave',requiresAuth: true}
       },
       {
-        path: 'loan',
+        path: '472bbf14923e2e7cefd8529825c401e8d1a2937b96dd697a6d1c75c53e6cca3a',
         name: 'Loan',
-        component: Loan
+        component: Loan,
+        meta: {title: 'Loan',requiresAuth: true}
       },
       {
-        path: 'payroll',
+        path: '60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56',
         name: 'Payroll',
         component: Payroll
       },
       {
-        path: 'payrolllist',
+        path: 'bf43e564ebc1b828180e6e4517d872bf71e80b431caeec6b5451e9254a0c6ee9',
         name: 'PayrollList',
-        component: PayrollList
+        component: PayrollList,
+        meta: {title: 'Payroll',requiresAuth:true}
       },
       {
         path: 'about',
@@ -86,7 +88,7 @@ const routes = [
         meta: { title: 'Profile' }
       },
       {
-        path: 'users',
+        path: '7dfb4cf67742cb0660305e56ef816c53fcec892cae7f6ee39b75f34e659d672c',
         name: 'Users',
         component: Users,
         meta: { title: 'Users', requiresAuth: true }
@@ -122,7 +124,7 @@ router.beforeEach((to, from) => {
   
   // Update page title
   if (to.meta.title) {
-    document.title = `${to.meta.title} - My App`
+    document.title = `${to.meta.title}`
   }
   
   return true
