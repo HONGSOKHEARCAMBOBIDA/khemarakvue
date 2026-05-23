@@ -79,7 +79,6 @@ import { ElMessage } from 'element-plus'
 import { Upload } from '@element-plus/icons-vue'
 import { updateEducation } from '../services/employee'
 import { fetchEducationLevel } from '../services/educationlevel'
-
 const props = defineProps({
   modelValue: Boolean,
   education: Object   // ← receives the specific edu record directly
@@ -118,7 +117,7 @@ watch(visible, async (open) => {
   formData.end_date             = edu.end_date             ?? ''
   formData.note                 = edu.note                 ?? ''
   eduImageUrl.value = edu.image
-    ? `http://localhost:8080/educationimage/${edu.image}`
+    ? `https://7ml45f42-8080.asse.devtunnels.ms/educationimage/${edu.image}`
     : ''
 })
 

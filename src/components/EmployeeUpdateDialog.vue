@@ -490,12 +490,12 @@ watch(visible, async (open) => {
 
   // ── 5. Set image previews ─────────────────────────────────────────────────
   profileImageUrl.value = profile?.profile_image
-    ? `http://localhost:8080/profileimage/${profile.profile_image}` : ''
+    ? `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${profile.profile_image}` : ''
 
   // API qr path may include "public\qrcodeimage\" prefix — strip it
   const qrRaw = profile?.qr_code_bank_account ?? ''
   const qrFile = qrRaw.includes('\\') ? qrRaw.split('\\').pop() : qrRaw
-  qrImageUrl.value = qrFile ? `http://localhost:8080/qrcodeimage/${qrFile}` : ''
+  qrImageUrl.value = qrFile ? `https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${qrFile}` : ''
 
   // ── 6. Pre-load address cascades ─────────────────────────────────────────
   // province_id_birth comes as string "1" from API → parse to int for el-select matching
