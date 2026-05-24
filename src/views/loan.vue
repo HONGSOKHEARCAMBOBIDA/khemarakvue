@@ -611,15 +611,12 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* ── Base ───────────────────────────────────────────────────────────────────── */
 .loan-page {
-  padding: 14px;
+  padding: 4px;
   min-height: 100vh;
   background: #f4f6fb;
-
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
 .page-header {
   display: flex;
   align-items: center;
@@ -633,31 +630,12 @@ onMounted(() => {
   gap: 14px;
 }
 
-.header-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b5bdb, #4c6ef5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(59, 91, 219, .3);
-}
-
 .page-title {
   font-size: 1.4rem;
   font-weight: 700;
   color: #1a1f36;
   margin: 0;
 }
-
-.page-sub {
-  font-size: .82rem;
-  color: #6b7280;
-  margin: 0;
-}
-
 
 .filter-card {
   background: #fff;
@@ -678,8 +656,6 @@ onMounted(() => {
   width: 180px;
 }
 
-
-/* ── Table Card ──────────────────────────────────────────────────────────────── */
 .table-card {
   background: #fff;
   border-radius: 4px;
@@ -690,7 +666,6 @@ onMounted(() => {
   width: 100%;
 }
 
-/* Table row stripe */
 :deep(.el-table__row:nth-child(even)) {
   background: #f9fafb;
 }
@@ -707,35 +682,10 @@ onMounted(() => {
   vertical-align: middle !important;
 }
 
-/* ── Cell Styles ─────────────────────────────────────────────────────────────── */
-.loan-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .78rem;
-  font-weight: 600;
-  background: #eff2ff;
-  color: #3b5bdb;
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-
 .emp-cell {
   display: flex;
   align-items: center;
   padding-top: 10px;
-}
-
-.emp-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #748ffc, #3b5bdb);
-  color: #fff;
-  font-weight: 700;
-  font-size: .88rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 
 .emp-name {
@@ -748,15 +698,6 @@ onMounted(() => {
 .emp-meta {
   font-size: .74rem;
   color: #9ca3af;
-}
-
-.branch-tag {
-  background: #f0fdf4;
-  color: #15803d;
-  font-size: .78rem;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 6px;
 }
 
 .amount-cell {
@@ -772,21 +713,6 @@ onMounted(() => {
   color: #1a1f36;
 }
 
-.currency {
-  font-size: .73rem;
-  color: #9ca3af;
-  font-weight: 600;
-}
-
-.duration-badge {
-  background: #faf5ff;
-  color: #7c3aed;
-  font-size: .78rem;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-
 .date-range {
   display: flex;
   align-items: center;
@@ -794,60 +720,16 @@ onMounted(() => {
   font-size: .78rem;
 }
 
-.dr-from,
-.dr-to {
+.dr-from {
   color: #4b5563;
 }
 
-.status-pill {
-  font-size: .75rem;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  border: 1px solid transparent;
-  white-space: nowrap;
-}
-
-.approver {
-  font-size: .83rem;
-  color: #374151;
-}
-
-/* ── Action Buttons ──────────────────────────────────────────────────────────── */
 .action-btns {
   display: flex;
   gap: 6px;
   justify-content: center;
 }
 
-.action-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform .12s, box-shadow .12s;
-}
-
-.action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .12);
-}
-
-.action-btn.view {
-  background: #eff2ff;
-  color: #3b5bdb;
-}
-
-.action-btn.expand {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-/* ── Expand Schedule ─────────────────────────────────────────────────────────── */
 .schedule-expand {
   padding: 16px 24px 20px;
   background: #f8fafc;
@@ -866,33 +748,6 @@ onMounted(() => {
   color: #1a1f36;
 }
 
-.schedule-progress-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.progress-label {
-  font-size: .78rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.progress-bar {
-  width: 120px;
-  height: 6px;
-  background: #e5e7eb;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3b5bdb, #748ffc);
-  border-radius: 99px;
-  transition: width .4s;
-}
-
 .inner-table {
   border-radius: 0px;
   overflow: hidden;
@@ -901,13 +756,6 @@ onMounted(() => {
 :deep(.inner-table .el-table__header-wrapper th) {
   background: #f1f5ff !important;
   font-size: .76rem !important;
-}
-
-.schedule-badge {
-  font-size: .72rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 12px;
 }
 
 .date-paid {
@@ -924,40 +772,6 @@ onMounted(() => {
   font-size: .8rem;
 }
 
-.schedule-summary {
-  display: flex;
-  gap: 32px;
-  margin-top: 14px;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #e9ecef;
-}
-
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.summary-label {
-  font-size: .73rem;
-  color: #9ca3af;
-  font-weight: 500;
-}
-
-.summary-value {
-  font-size: .9rem;
-  font-weight: 700;
-  color: #1a1f36;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.summary-value.paid {
-  color: #059669;
-}
-
-/* ── Pagination ──────────────────────────────────────────────────────────────── */
 .pagination-wrap {
   display: flex;
   align-items: center;
@@ -972,11 +786,6 @@ onMounted(() => {
   font-weight: 500;
 }
 
-:deep(.el-pagination.is-background .el-pager li.is-active) {
-  background: #3b5bdb !important;
-}
-
-/* ── Drawer ──────────────────────────────────────────────────────────────────── */
 :deep(.loan-drawer .el-drawer__header) {
   font-weight: 700 !important;
   font-size: 1rem !important;
@@ -987,19 +796,6 @@ onMounted(() => {
 :deep(.loan-drawer .el-drawer__body) {
   padding: 20px 24px;
   overflow-y: auto;
-}
-
-.form-section-title {
-  font-size: .75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: #9ca3af;
-  margin: 20px 0 12px;
-}
-
-.form-section-title:first-child {
-  margin-top: 0;
 }
 
 :deep(.loan-form .el-form-item__label) {
@@ -1057,141 +853,6 @@ onMounted(() => {
   gap: 10px;
 }
 
-.btn-submit {
-  background: linear-gradient(135deg, #3b5bdb, #4c6ef5) !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-}
-
-/* ── View Mode ───────────────────────────────────────────────────────────────── */
-.view-loan {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.view-status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.view-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .85rem;
-  font-weight: 700;
-  background: #eff2ff;
-  color: #3b5bdb;
-  padding: 4px 10px;
-  border-radius: 8px;
-}
-
-.view-amount-hero {
-  background: linear-gradient(135deg, #3b5bdb, #4c6ef5);
-  border-radius: 4px;
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #fff;
-}
-
-.hero-label {
-  font-size: .95rem;
-  opacity: .8;
-  font-weight: 500;
-}
-
-.hero-amount {
-  font-size: 1.8rem;
-  font-weight: 800;
-  font-family: 'Outfit', sans-serif;
-}
-
-.hero-cur {
-  font-size: 1rem;
-  opacity: .7;
-}
-
-.hero-dur {
-  font-size: .88rem;
-  opacity: .75;
-}
-
-.view-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.view-field {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.view-field.full {
-  grid-column: 1 / -1;
-}
-
-.vf-label {
-  font-size: .72rem;
-  color: #dd7825;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-
-.vf-value {
-  font-size: .88rem;
-  color: #1a1f36;
-  font-weight: 500;
-}
-
-.view-section-title {
-  font-size: .85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: #073a91;
-  margin-top: 8px;
-}
-
-.view-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.vp-bar {
-  flex: 1;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.vp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3b5bdb, #748ffc);
-  border-radius: 99px;
-  transition: width .4s;
-}
-
-.vp-label {
-  font-size: .78rem;
-  color: #6b7280;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.view-schedule-table {
-  border-radius: 10px;
-  overflow: hidden;
-}
-
 :deep(.el-table__header-wrapper th) {
   background-color: #409eff !important;
   color: #ffffff !important;
@@ -1201,10 +862,7 @@ onMounted(() => {
   background-color: #2980b9 !important;
   color: #ffffff !important;
 }
-.action-btn.delete {
-  background: #fff1f2;
-  color: #ef4444;
-}
+
 .recieve-card {
   border: 0.5px solid #e5e7eb;
   border-radius: 8px;
@@ -1236,7 +894,7 @@ onMounted(() => {
   color: #1a1f36;
   font-size: .98rem;
 }
-/* ✅ Only applies inside the receive dialog */
+
 :deep(.recieve-dialog .el-table__header-wrapper th) {
   background-color: #2980b9 !important;
   color: #ffffff !important;

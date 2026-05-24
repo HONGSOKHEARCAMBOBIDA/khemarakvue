@@ -15,3 +15,11 @@ export function registerAsFormData(formData) {
 export function getuser(id) {
     return api.get(`/view.user.by.branch/${id}`)
 }
+
+export function getuserbyid(id) {
+    return api.get(`/view.user.by.id/${id}`)
+}
+
+export function updateUser(id, data) {
+  return api.put(`/update.user/${id}`, data)
+}

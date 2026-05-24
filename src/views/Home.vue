@@ -108,6 +108,7 @@
       <template #default="scope">
         <div style="display: flex;">
           <el-button  type="primary" plain :icon="View" @click="openDetail(scope.row)">មេីលលំអិត</el-button>
+         <el-button type="warning" plain @click="openUserForUpdate(scope.row)">កែប្រែ</el-button>
           <!-- <el-button  type="success" plain :icon="Edit">កែប្រែ</el-button>
           <el-button  type="warning" plain :icon="Wallet">កែប្រែប្រាក់ខែ</el-button>
           <el-button  type="success" plain :icon="Wallet">ដំឡេីងប្រាក់ខែ</el-button>
@@ -294,6 +295,48 @@
       @size-change="onSizeChange"
     />
   </div>
+  <el-dialog v-model="userupdatedialog" title="កែប្រែអ្នកប្រើប្រាស់" width="500px" destroy-on-close>
+  <div v-loading="userloading">
+    <el-form v-if="users.length" :model="updateForm" label-width="140px">
+
+      <el-form-item label="សាខា">
+        <el-select v-model="updateForm.branch_id" placeholder="ជ្រើសរើសសាខា" style="width:100%">
+          <el-option v-for="b in branches" :key="b.id" :label="b.name" :value="b.id" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="តួនាទី">
+        <el-select v-model="updateForm.role_id" placeholder="ជ្រើសរើសតួនាទី" style="width:100%">
+          <el-option v-for="r in roles" :key="r.id" :label="r.display_name" :value="r.id" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="គ្រប់គ្រងសាខា">
+        <el-select v-model="updateForm.manage_branch" style="width:100%">
+          <el-option v-for="b in managebranch" :key="b.id" :label="b.name" :value="b.id"/>
+        </el-select>
+      </el-form-item>
+
+      <el-form-item v-if="updateForm.manage_branch === 2" label="សាខាដែលគ្រប់គ្រង">
+        <el-select v-model="updateForm.branch_ids" multiple placeholder="ជ្រើសរើសសាខា" style="width:100%">
+          <el-option v-for="b in branches" :key="b.id" :label="b.name" :value="b.id" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item  label="ផ្នែកដែលគ្រប់គ្រង">
+        <el-select v-model="updateForm.part_ids" multiple placeholder="ជ្រើសរើសផ្នែគ" style="width:100%">
+          <el-option v-for="p in part" :key="p.id" :label="p.display_name" :value="p.id" />
+        </el-select>
+      </el-form-item>
+
+    </el-form>
+  </div>
+
+  <template #footer>
+    <el-button @click="userupdatedialog = false">បោះបង់</el-button>
+    <el-button type="primary" :loading="userloading" @click="submitUpdateUser">រក្សាទុក</el-button>
+  </template>
+</el-dialog>
 </template>
 
 <script setup>
@@ -304,12 +347,16 @@ import { fetchBranch } from "../services/branch"
 import { fetchDepartment } from "../services/department"
 import { fetchPosition } from "../services/position"
 import { fetchOffice } from "../services/office"
+import { fetchRole } from "../services/role"
+import { fetchManageBranch } from "../services/managebranch"
 import {
   Edit, View, Wallet, ArrowUp, Clock, Switch,
   ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download
 } from "@element-plus/icons-vue"
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue"
 import { useRouter } from "vue-router"
+import { getuserbyid,updateUser } from "../services/userservice"
+import { fetchPart } from "../services/part"
 // ── State ──────────────────────────────────────────────────────────────────
 const router = useRouter()
 const loading        = ref(false)
@@ -320,6 +367,59 @@ const branches       = ref([])
 const departments    = ref([])
 const positions      = ref([])
 const offices        = ref([])
+const users = ref([])
+const roles = ref([])
+const managebranch = ref([])
+const selectuserID = ref(null)
+const userupdatedialog = ref(false)
+const userloading = ref(false)
+const part = ref([])
+const updateForm = ref({
+  branch_id:     null,
+  role_id:       null,
+  manage_branch: null,
+  part_ids:      [],
+  branch_ids:    [],
+})
+
+async function openUserForUpdate(row) {
+  selectuserID.value = row.user_id;
+  users.value = [];
+  userupdatedialog.value = true;
+  userloading.value = true;
+  try {
+    const res = await getuserbyid(row.user_id);
+    users.value = res.data.data ?? [];
+    const u = users.value[0];
+    if (u) {
+      updateForm.value = {
+        branch_id:     u.branch_id,
+        role_id:       u.role_id,
+        manage_branch: u.manage_branch,
+        part_ids:      u.user_part?.map(p => p.part_id) ?? [],    
+        branch_ids:    u.user_branch?.map(b => b.branch_ids) ?? [], 
+      }
+    }
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || e?.message || "Failed to load user");
+  } finally {
+    userloading.value = false;
+  }
+}
+async function submitUpdateUser() {
+  userloading.value = true;
+  try {
+    await updateUser(selectuserID.value, updateForm.value);
+    ElMessage.success("កែប្រែដោយជោគជ័យ!");
+    userupdatedialog.value = false;
+    await loadEmployees(buildParams());
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || e?.message || "កែប្រែមិនបានសម្រេច");
+  } finally {
+    userloading.value = false;
+  }
+}
+
 const navigateTo = (path) => {
   router.push(path)
 }
@@ -458,6 +558,9 @@ onMounted(() => {
   loadLookup(fetchBranch,     branches)
   loadLookup(fetchDepartment, departments)
   loadLookup(fetchOffice,     offices)
+  loadLookup(fetchRole,roles)
+  loadLookup(fetchManageBranch,managebranch)
+  loadLookup(fetchPart,part)
 })
 
 // ── Watchers ───────────────────────────────────────────────────────────────
