@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import {
   createLeave,
@@ -13,10 +13,11 @@ import {
 import { fetchBranch } from "../services/branch";
 import { getuser } from "../services/userservice";
 import { fetchOffice } from "../services/office";
-import { Search, Refresh, View ,Check,Edit} from "@element-plus/icons-vue";
+import { Search, Refresh, View ,Check,Edit,Delete} from "@element-plus/icons-vue";
 import logo from "../assets/logo.png";
+import { useAuthStore1 } from '../stores/user';
 const imageUrl = new URL("@public/image.png", import.meta.url).href;
-
+const useauth = useAuthStore1()
 const loading = ref(false);
 const leave = ref([]);
 const leavetype = ref([]);
@@ -41,6 +42,22 @@ const editVisible = ref(false)
 const editLoading = ref(false)
 const editFormRef = ref(null)
 const editRow = ref(null)
+
+const hasPermission = computed(() =>{
+  const permissions = useauth.permissions ?? []
+  const allowed = ['approve.leave']
+  return permissions.some(p => allowed.includes(p.name))
+})
+
+function addDurationRow() {
+  formData.duration_value.push(null)
+  formData.duration_unit_id.push(null)
+}
+
+function removeDurationRow(index) {
+  formData.duration_value.splice(index, 1)
+  formData.duration_unit_id.splice(index, 1)
+}
 
 const editFormData = reactive({
   leave_type_id: null,
@@ -225,15 +242,10 @@ const submitForm = async () => {
       createLoading.value = true
       const fd = buildFormData()
       const res = await createLeave(fd)
-      if(res.status === 200 || res.status === 201){
-        ElMessage.success('បង្កើតអ្នកច្បាប់បានជោគជ័យ!')
-        resetCreateForm()
-        createVisible.value = false
-        loadLeave(buildParams())
-
-      }else{
-        ElMessage.error('មានបញ្ហា៖ ' + (response.data?.message || 'សូមពិនិត្យម្តងទៀត'))
-      }
+      ElMessage.success('បង្កើតអ្នកច្បាប់បានជោគជ័យ!')
+      resetCreateForm()
+      createVisible.value = false
+      loadLeave(buildParams())
 
     } catch (error) {
       ElMessage.error(
@@ -524,6 +536,7 @@ const toKhmerNumber = (num) => {
           placeholder="ស្វែងរក​ឈ្មោះបុគ្គលិក..."
           :prefix-icon="Search"
           clearable
+          size="large"
         />
         <el-date-picker
           v-model="formDataParam.start_date"
@@ -531,6 +544,7 @@ const toKhmerNumber = (num) => {
           placeholder="ថ្ងៃចាប់ផ្ដើម"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          size="large"
         />
         <el-date-picker
           v-model="formDataParam.end_date"
@@ -538,6 +552,7 @@ const toKhmerNumber = (num) => {
           placeholder="ថ្ងៃបញ្ចប់"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          size="large"
         />
         <el-select
           v-model="formDataParam.branch_id"
@@ -545,6 +560,7 @@ const toKhmerNumber = (num) => {
           clearable
           filterable
           style="width: 100%"
+          size="large"
         >
           <el-option
             v-for="b in branch"
@@ -560,6 +576,7 @@ const toKhmerNumber = (num) => {
           filterable
           :disabled="!formDataParam.branch_id"
           style="width: 100%"
+          size="large"
         >
           <el-option
             v-for="u in user"
@@ -574,6 +591,7 @@ const toKhmerNumber = (num) => {
           clearable
           filterable
           style="width: 100%"
+          size="large"
         >
           <el-option
             v-for="o in office"
@@ -587,6 +605,7 @@ const toKhmerNumber = (num) => {
           placeholder="ប្រភេទច្បាប់"
           clearable
           style="width: 100%"
+          size="large"
         >
           <el-option
             v-for="lt in leavetype"
@@ -600,6 +619,7 @@ const toKhmerNumber = (num) => {
           placeholder="ស្ថានភាព"
           clearable
           style="width: 100%"
+          size="large"
         >
           <el-option
             v-for="st in statusleave"
@@ -608,7 +628,7 @@ const toKhmerNumber = (num) => {
             :value="st.id"
           />
         </el-select>
-<el-button type="primary" @click="openCreate">
+<el-button type="primary" @click="openCreate" size="large">
   បង្កើតថ្មី
 </el-button>
       </div>
@@ -804,6 +824,7 @@ const toKhmerNumber = (num) => {
         plain
         style="margin-left:6px"
         @click="openApprove(row)"
+        v-if="hasPermission"
       >
         <el-icon><Check /></el-icon>
       </el-button>
@@ -1095,7 +1116,7 @@ const toKhmerNumber = (num) => {
 <el-dialog
   v-model="createVisible"
   title="បង្កើតច្បាប់ឈប់សម្រាក"
-  width="560px"
+  width="660px"
   destroy-on-close
   @close="resetForm"
 >
@@ -1112,21 +1133,21 @@ const toKhmerNumber = (num) => {
           prop="leave_type_id"
           :rules="[{ required: true, message: 'សូមជ្រើសប្រភេទច្បាប់' }]"
         >
-          <el-select v-model="formData.leave_type_id" placeholder="ជ្រើសប្រភេទ" style="width:100%">
+          <el-select v-model="formData.leave_type_id" placeholder="ជ្រើសប្រភេទ" style="width:100%" size="large">
             <el-option v-for="lt in leavetype" :key="lt.id" :label="lt.name" :value="lt.id" />
           </el-select>
         </el-form-item>
       </el-col>
        <el-col :span="8">
         <el-form-item label="សាខា">
-          <el-select v-model="formDataParam.branch_id" placeholder="ជ្រើសសាខា" clearable style="width:100%">
+          <el-select v-model="formDataParam.branch_id" placeholder="ជ្រើសសាខា" clearable style="width:100%" size="large">
             <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="8">
         <el-form-item label="អនុម័តដោយ" prop="approve_by">
-          <el-select v-model="formData.approve_by" placeholder="ជ្រើសអ្នកអនុម័ត" clearable style="width:100%">
+          <el-select v-model="formData.approve_by" placeholder="ជ្រើសអ្នកអនុម័ត" clearable style="width:100%" size="large">
             <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
           </el-select>
         </el-form-item>
@@ -1146,6 +1167,7 @@ const toKhmerNumber = (num) => {
             placeholder="ថ្ងៃចាប់ផ្ដើម"
             value-format="YYYY-MM-DD"
             style="width:100%"
+            size="large"
           />
         </el-form-item>
       </el-col>
@@ -1161,6 +1183,7 @@ const toKhmerNumber = (num) => {
             placeholder="ថ្ងៃបញ្ចប់"
             value-format="YYYY-MM-DD"
             style="width:100%"
+            size="large"
           />
         </el-form-item>
       </el-col>
@@ -1177,6 +1200,7 @@ const toKhmerNumber = (num) => {
         placeholder="ថ្ងៃត្រឡប់មកវិញ"
         value-format="YYYY-MM-DD"
         style="width:100%"
+        size="large"
       />
     </el-form-item>
 
@@ -1193,6 +1217,7 @@ const toKhmerNumber = (num) => {
         :step="0.5"
         :precision="1"
         style="width:100%"
+        size="large"
       />
     </el-form-item>
   </el-col>
@@ -1202,7 +1227,7 @@ const toKhmerNumber = (num) => {
       :prop="`duration_unit_id.${i}`"
       :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
     >
-      <el-select v-model="formData.duration_unit_id[i]" placeholder="ជ្រើស" style="width:100%">
+      <el-select v-model="formData.duration_unit_id[i]" placeholder="ជ្រើស" style="width:100%" size="large">
         <el-option
           v-for="u in leavedurationunit"
           :key="u.id"
@@ -1217,7 +1242,7 @@ const toKhmerNumber = (num) => {
       type="danger"
       :icon="Delete"
       circle
-      size="small"
+      size="large"
       plain
       :disabled="formData.duration_value.length === 1"
       @click="removeDurationRow(i)"
@@ -1225,15 +1250,14 @@ const toKhmerNumber = (num) => {
   </el-col>
 </el-row>
 
-<!-- Add row button -->
 <el-button
   type="primary"
   plain
-  size="small"
+  size="large"
   style="margin-bottom:12px"
   @click="addDurationRow"
 >
-  + បន្ថែមរយៈពេល
+   បន្ថែមរយៈពេល
 </el-button>
 
     <el-form-item label="មូលហេតុ" prop="description">
@@ -1421,7 +1445,7 @@ const toKhmerNumber = (num) => {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Moul&display=swap");
 .leave-page {
-  padding: 20px;
+  padding: 4px;
   background: #f5f7fa;
   min-height: 100vh;
 }
