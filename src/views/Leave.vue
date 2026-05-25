@@ -189,38 +189,31 @@ const formData = reactive({
   back_date: '',
   description: '',
   approve_by: null,
-  duration_value: null,
-  duration_unit_id: null
+  duration_value: [null],      // start with one row
+  duration_unit_id: [null],    // start with one row
 })
 
-function buildFormData(){
+function buildFormData() {
   const fd = new FormData()
 
-  const scalars = [
-    'start_date','end_date','back_date','description'
-  ]
-
+  const scalars = ['start_date', 'end_date', 'back_date', 'description']
   scalars.forEach(k => {
-    if(formData[k] !== null && formData[k] !== undefined && formData[k] !== ''){
-      fd.append(k,formData[k])
-    }
+    if (formData[k]) fd.append(k, formData[k])
   })
 
-  const numerics = [
-    ['leave_type_id',formData.leave_type_id],
-    ['approve_by',formData.approve_by],
-    ['duration_value',formData.duration_value],
-    ['duration_unit_id',formData.duration_unit_id]
-  ]
+  if (formData.leave_type_id != null) fd.append('leave_type_id', formData.leave_type_id)
+  if (formData.approve_by != null)    fd.append('approve_by', formData.approve_by)
 
-  numerics.forEach(([k,v])=>{
-    if(v !== null && v !== undefined) fd.append(k,v)
+  // ✅ Correctly send parallel arrays
+  formData.duration_value.forEach(v => {
+    if (v != null) fd.append('duration_value', v)
+  })
+  formData.duration_unit_id.forEach(v => {
+    if (v != null) fd.append('duration_unit_id', v)
   })
 
   return fd
-
 }
-
 const submitForm = async () => {
   if(!createFormRef.value) return
   await createFormRef.value.validate(async (valid)=>{
@@ -254,18 +247,17 @@ const submitForm = async () => {
 }
 
 const resetCreateForm = () => {
-  if(createFormRef.value) createFormRef.value.resetFields()
-  Object.assign(formData,{
+  if (createFormRef.value) createFormRef.value.resetFields()
+  Object.assign(formData, {
     leave_type_id: null,
     start_date: '',
     end_date: '',
     back_date: '',
     description: '',
     approve_by: null,
-    duration_value: '',
-    duration_unit_id: null
-})
-
+    duration_value: [null],
+    duration_unit_id: [null],
+  })
 }
 
 const pagination = ref({ page: 1, pageSize: 10, total: 0 });
@@ -710,10 +702,10 @@ const toKhmerNumber = (num) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="សុំច្បាប់" min-width="90" align="center">
+        <el-table-column label="សុំច្បាប់" min-width="110" align="center">
           <template #default="{ row }">
             <el-text
-              >{{ row.duration_value }} {{ row.duration_unit_name_kh }}</el-text
+              >{{row?.leave_durations?.map(d => `${d.duration_value} ${d.duration_unit_name_kh}`).join('')}}</el-text
             >
           </template>
         </el-table-column>
@@ -721,7 +713,9 @@ const toKhmerNumber = (num) => {
         <el-table-column label="រយៈពេល" min-width="170" align="center">
           <template #default="{ row }">
             <div class="two-line center">
-              <span class="line-main">{{ row.duration_display }}</span>
+             <span class="line-main">
+  {{ row?.leave_durations?.map(d => `${d.duration_value} ${d.duration_unit_name_kh}`).join(' ') }}
+</span>
               <el-text type="primary" size="small"
                 >{{ row.start_date }} → {{ row.end_date }}</el-text
               >
@@ -917,7 +911,7 @@ const toKhmerNumber = (num) => {
             >
           </div>
 
-          <div class="pt-3">
+          <div class="text-start pt-3 flex gap-2 flex-nowrap overflow-hidden">
             <el-text
               style="white-space: nowrap; color: black; display: inline-block"
               >ID.......{{
@@ -952,21 +946,20 @@ const toKhmerNumber = (num) => {
               >ការិយាល័យរដ្ឋបាល និងធនធានមនុស្ស</el-text
             >
           </div>
-          <div class="text-start pt-3 flex gap-2">
-            <el-text class="doc-company-kh1"> កម្មវត្ថុ ៖ </el-text>
-            <el-text
-              style="white-space: nowrap; color: black; display: inline-block"
-              >សុំអនុញ្ញាតច្បាប់ឈប់សម្រាកចំនួន......{{
-                toKhmerNumber(previewRow.duration_value)
-              }}
-              {{ previewRow.duration_unit_name_kh }}......គិតចាប់ពីថ្ងៃទី....{{
-                toKhmerNumber(previewRow.start_date.split("-")[2])
-              }}.......ខែ.....{{ toKhmerMonth(previewRow.start_date) }}.......
-              ឆ្នាំ.....{{
-                toKhmerNumber(previewRow.start_date.split("-")[0])
-              }}....</el-text>
-            
-          </div>
+<div class="text-start pt-3 flex gap-2 flex-nowrap ">
+  <el-text class="doc-company-kh1" style="white-space: nowrap;">កម្មវត្ថុ ៖</el-text>
+  <el-text style="white-space: nowrap; color: black; display: inline-block;">
+    សុំអនុញ្ញាតច្បាប់ឈប់សម្រាកចំនួន...{{
+      toKhmerNumber(previewRow.duration_value)
+    }}
+    {{ previewRow?.leave_durations?.map(d => `${d.duration_value} ${d.duration_unit_name_kh}`).join(' ') }}......គិតចាប់ពីថ្ងៃទី....{{
+      toKhmerNumber(previewRow.start_date.split("-")[2])
+    }}....ខែ.....{{ toKhmerMonth(previewRow.start_date) }}.......
+    ឆ្នាំ.....{{
+      toKhmerNumber(previewRow.start_date.split("-")[0])
+    }}
+  </el-text>
+</div>
           <div class="pl-14 pt-3">
             <el-text
               style="white-space: nowrap; color: black; display: inline-block"
@@ -1187,40 +1180,61 @@ const toKhmerNumber = (num) => {
       />
     </el-form-item>
 
-    <el-row :gutter="12">
-      <el-col :span="12">
-        <el-form-item
-          label="រយៈពេល"
-          prop="duration_value"
-          :rules="[{ required: true, message: 'សូមបញ្ចូលរយៈពេល' }]"
-        >
-          <el-input-number
-            v-model="formData.duration_value"
-            :min="0.5"
-            :step="0.5"
-            :precision="1"
-            placeholder="ចំនួន"
-            style="width:100%"
-          />
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item
-          label="ឯកតារយៈពេល"
-          prop="duration_unit_id"
-          :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
-        >
-          <el-select v-model="formData.duration_unit_id" placeholder="ជ្រើស" style="width:100%">
-            <el-option
-              v-for="u in leavedurationunit"
-              :key="u.id"
-              :label="u.name_km"
-              :value="u.id"
-            />
-          </el-select>
-        </el-form-item>
-      </el-col>
-    </el-row>
+<el-row :gutter="12" v-for="(_, i) in formData.duration_value" :key="i" style="margin-bottom:8px">
+  <el-col :span="11">
+    <el-form-item
+      :label="i === 0 ? 'រយៈពេល' : ''"
+      :prop="`duration_value.${i}`"
+      :rules="[{ required: true, message: 'សូមបញ្ចូលរយៈពេល' }]"
+    >
+      <el-input-number
+        v-model="formData.duration_value[i]"
+        :min="0.5"
+        :step="0.5"
+        :precision="1"
+        style="width:100%"
+      />
+    </el-form-item>
+  </el-col>
+  <el-col :span="11">
+    <el-form-item
+      :label="i === 0 ? 'ឯកតារយៈពេល' : ''"
+      :prop="`duration_unit_id.${i}`"
+      :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
+    >
+      <el-select v-model="formData.duration_unit_id[i]" placeholder="ជ្រើស" style="width:100%">
+        <el-option
+          v-for="u in leavedurationunit"
+          :key="u.id"
+          :label="u.name_km"
+          :value="u.id"
+        />
+      </el-select>
+    </el-form-item>
+  </el-col>
+  <el-col :span="2" style="display:flex; align-items:flex-end; padding-bottom:18px">
+    <el-button
+      type="danger"
+      :icon="Delete"
+      circle
+      size="small"
+      plain
+      :disabled="formData.duration_value.length === 1"
+      @click="removeDurationRow(i)"
+    />
+  </el-col>
+</el-row>
+
+<!-- Add row button -->
+<el-button
+  type="primary"
+  plain
+  size="small"
+  style="margin-bottom:12px"
+  @click="addDurationRow"
+>
+  + បន្ថែមរយៈពេល
+</el-button>
 
     <el-form-item label="មូលហេតុ" prop="description">
       <el-input

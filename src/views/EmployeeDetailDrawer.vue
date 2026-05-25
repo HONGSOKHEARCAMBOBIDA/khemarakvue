@@ -307,7 +307,7 @@
 
           <div v-for="sal in employee?.salarys" :key="sal.id " class="p-2">
             <el-descriptions :column="2" border size="large">
-              <el-descriptions-item label="ប្រាក់ខែមូលដ្ឋាន" :span="2" v-if="hasPermission" >
+              <el-descriptions-item label="ប្រាក់ខែមូលដ្ឋាន" :span="2"  >
                 <div style="display: flex; justify-content: space-between">
                   <span
                     style="
@@ -319,13 +319,13 @@
                   >
                     {{ sal.base_salary }} {{ sal.currency_name }}
                   </span>
-                 <el-button type="warning" plain @click="openUpdateSalary(sal)">កែប្រែ</el-button>
+                 <el-button type="warning" plain @click="openUpdateSalary(sal)" v-if="hasPermission">កែប្រែ</el-button>
                 </div>
               </el-descriptions-item>
               <el-descriptions-item label="ចំនួនថ្ងៃធ្វើការ"
                 >{{ sal.work_day }} ថ្ងៃ</el-descriptions-item
               >
-              <el-descriptions-item label="ប្រាក់ជួលក្នុងមួយថ្ងៃ" v-if="hasPermission"
+              <el-descriptions-item label="ប្រាក់ជួលក្នុងមួយថ្ងៃ" 
                 >{{ sal.daily_rate }} {{ sal.currency_name }}
               </el-descriptions-item>
               <el-descriptions-item label="មានប្រសិទ្ធភាព">{{
@@ -365,7 +365,7 @@
     {{ `${session.session_name} : ${session.start_time} - ${session.end_time}` }}
   </el-text>
 
- <el-button type="danger" :loading="loading" @click="SubmitUpdate">
+ <el-button type="danger" :loading="loading" @click="SubmitUpdate" v-if="hasPermission">
   ប្ដូរវ៉េនធ្វេីការ
 </el-button>
 </div>
@@ -404,6 +404,7 @@
         style="margin-top: 6px;"
         :loading="changingShiftId === day.id"
         @click="handleChangeShift(day.id)"
+        v-if="hasPermission"
       >
         ផ្លាស់ប្ដូរ
       </el-button>
@@ -599,7 +600,7 @@ const formData = reactive({
 
 const hasPermission = computed(() => {
   const permissions = authstore.permissions ?? []
-  const allowed = ['view.salary', 'edit.salary', 'add.salary']
+  const allowed = [ 'edit.salary', 'add.salary','change.shift.pattern','change.day.off']
   return permissions.some(p => allowed.includes(p.name))
 })
 async function handleChangeShift(id) {
