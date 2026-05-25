@@ -17,6 +17,7 @@
         roleId: (state) => state.auth?.role_id,
         parts: (state) => state.auth?.parts,
         name: (state) => state.auth?.name,
+        permissions: (state) => state.auth?.permissions,
     },  
 
     actions: {
@@ -33,6 +34,7 @@
                 name: response.name,
                 contact: response.contact,
                 parts: response.parts,
+                permissions: response.permissions,
             }
 
             this.auth = authData

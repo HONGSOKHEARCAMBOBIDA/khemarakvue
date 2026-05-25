@@ -16,7 +16,6 @@ const currency = ref([]);
 const bonustype = ref([]);
 const tableRef = ref(null)
 const selectedRows = ref([])
-
 function handleSelectionChange(rows){
   selectedRows.value = rows;
 }

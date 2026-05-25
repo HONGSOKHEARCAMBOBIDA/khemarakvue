@@ -23,3 +23,7 @@ export function getuserbyid(id) {
 export function updateUser(id, data) {
   return api.put(`/update.user/${id}`, data)
 }
+
+export function changepassword(id,data){
+    return api.put(`/change.password/${id}`,data)
+}

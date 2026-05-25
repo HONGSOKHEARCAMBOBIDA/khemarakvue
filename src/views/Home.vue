@@ -88,6 +88,7 @@
 
     <el-col :span="3">
       <el-button
+        v-if="hasPermission"
         type="primary"
         size="large"
         style="width:100%"
@@ -108,7 +109,8 @@
       <template #default="scope">
         <div style="display: flex;">
           <el-button  type="primary" plain :icon="View" @click="openDetail(scope.row)">មេីលលំអិត</el-button>
-         <el-button type="warning" plain @click="openUserForUpdate(scope.row)">កែប្រែ</el-button>
+         <el-button v-if="hasPermission" type="warning" plain @click="openUserForUpdate(scope.row)">កែប្រែ</el-button>
+        <el-button  type="warning" plain @click="openUserPassword(scope.row)">ដូរពាក្យសម្ងាត់</el-button>
           <!-- <el-button  type="success" plain :icon="Edit">កែប្រែ</el-button>
           <el-button  type="warning" plain :icon="Wallet">កែប្រែប្រាក់ខែ</el-button>
           <el-button  type="success" plain :icon="Wallet">ដំឡេីងប្រាក់ខែ</el-button>
@@ -295,21 +297,27 @@
       @size-change="onSizeChange"
     />
   </div>
-  <el-dialog v-model="userupdatedialog" title="កែប្រែអ្នកប្រើប្រាស់" width="500px" destroy-on-close>
+<el-dialog v-model="userupdatedialog" title="កែប្រែអ្នកប្រើប្រាស់" width="800px" destroy-on-close>
   <div v-loading="userloading">
     <el-form v-if="users.length" :model="updateForm" label-width="140px">
 
-      <el-form-item label="សាខា">
-        <el-select v-model="updateForm.branch_id" placeholder="ជ្រើសរើសសាខា" style="width:100%">
-          <el-option v-for="b in branches" :key="b.id" :label="b.name" :value="b.id" />
-        </el-select>
-      </el-form-item>
+      <el-row :gutter="2">
+        <el-col :span="12">
+          <el-form-item label="សាខា">
+            <el-select v-model="updateForm.branch_id" placeholder="ជ្រើសរើសសាខា" style="width:100%">
+              <el-option v-for="b in branches" :key="b.id" :label="b.name" :value="b.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
 
-      <el-form-item label="តួនាទី">
-        <el-select v-model="updateForm.role_id" placeholder="ជ្រើសរើសតួនាទី" style="width:100%">
-          <el-option v-for="r in roles" :key="r.id" :label="r.display_name" :value="r.id" />
-        </el-select>
-      </el-form-item>
+        <el-col :span="12">
+          <el-form-item label="តួនាទី">
+            <el-select v-model="updateForm.role_id" placeholder="ជ្រើសរើសតួនាទី" style="width:100%">
+              <el-option v-for="r in roles" :key="r.id" :label="r.display_name" :value="r.id" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
       <el-form-item label="គ្រប់គ្រងសាខា">
         <el-select v-model="updateForm.manage_branch" style="width:100%">
@@ -323,7 +331,7 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item  label="ផ្នែកដែលគ្រប់គ្រង">
+      <el-form-item label="ផ្នែកដែលគ្រប់គ្រង">
         <el-select v-model="updateForm.part_ids" multiple placeholder="ជ្រើសរើសផ្នែគ" style="width:100%">
           <el-option v-for="p in part" :key="p.id" :label="p.display_name" :value="p.id" />
         </el-select>
@@ -337,10 +345,21 @@
     <el-button type="primary" :loading="userloading" @click="submitUpdateUser">រក្សាទុក</el-button>
   </template>
 </el-dialog>
+
+<el-dialog v-model="userpassworddialog" title="កែប្រែពាក្យសម្ងាត់" width="400px" destroy-on-close>
+  <div>
+    <el-input v-model="changepasswordForm.newpassword" type="password"></el-input>
+  </div>
+
+  <template #footer>
+    <el-button @click="userpassworddialog = false">បោះបង់</el-button>
+    <el-button type="primary" :loading="userloading" @click="changeuserpassword">រក្សាទុក</el-button>
+  </template>
+</el-dialog>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue"
+import { onMounted, ref, watch,computed } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus"
 import { fetchEmployee } from "../services/employee"
 import { fetchBranch } from "../services/branch"
@@ -355,9 +374,12 @@ import {
 } from "@element-plus/icons-vue"
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue"
 import { useRouter } from "vue-router"
-import { getuserbyid,updateUser } from "../services/userservice"
+import { getuserbyid,updateUser,changepassword } from "../services/userservice"
 import { fetchPart } from "../services/part"
-// ── State ──────────────────────────────────────────────────────────────────
+import { useAuthStore1 } from '../stores/user'
+
+// ── State
+
 const router = useRouter()
 const loading        = ref(false)
 const employees      = ref([])
@@ -372,14 +394,25 @@ const roles = ref([])
 const managebranch = ref([])
 const selectuserID = ref(null)
 const userupdatedialog = ref(false)
+const userpassworddialog = ref(false)
 const userloading = ref(false)
 const part = ref([])
+const authstore = useAuthStore1()
 const updateForm = ref({
   branch_id:     null,
   role_id:       null,
   manage_branch: null,
   part_ids:      [],
   branch_ids:    [],
+})
+
+const changepasswordForm = ref({
+  newpassword: null,
+})
+
+const hasPermission = computed(() => {
+  const permission = authstore.permissions ?? []
+  return permission.some(p => p.name === 'update.user' || p.name === 'add.user')
 })
 
 async function openUserForUpdate(row) {
@@ -406,6 +439,13 @@ async function openUserForUpdate(row) {
     userloading.value = false;
   }
 }
+
+async function openUserPassword(row) {
+  selectuserID.value = row.user_id;
+  userpassworddialog.value = true;
+}
+
+
 async function submitUpdateUser() {
   userloading.value = true;
   try {
@@ -417,6 +457,17 @@ async function submitUpdateUser() {
     ElMessage.error(e?.response?.data?.message || e?.message || "កែប្រែមិនបានសម្រេច");
   } finally {
     userloading.value = false;
+  }
+}
+
+async function changeuserpassword(){
+  try {
+    await changepassword(selectuserID.value,changepasswordForm.value);
+    ElMessage.success("កែប្រែពាក្យសម្ងាត់ដោយជោគជ័យ!");
+    userpassworddialog.value = false;
+    await loadEmployees(buildParams())
+  }catch(e){
+ ElMessage.error(e?.response?.data?.message || e?.message || "កែប្រែមិនបានសម្រេច");
   }
 }
 

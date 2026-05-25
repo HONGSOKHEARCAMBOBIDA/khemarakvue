@@ -1,4 +1,5 @@
 <script setup>
+'use strict'
 import { useRouter } from "vue-router";
 import { onMounted, ref, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -8,6 +9,7 @@ import { fetchDepartment } from "../services/department";
 import { fetchPosition } from "../services/position";
 import { fetchOffice } from "../services/office";
 import { markRaw } from 'vue'
+import { useAuthStore1 } from '../stores/user';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
 const loading = ref(false);
 const payroll  = ref([]);
@@ -17,7 +19,12 @@ const positions     = ref([]);
 const offices       = ref([]);
 const payrollstatus = ref([]);
 const router = useRouter()
-
+const authstore = useAuthStore1()
+const hasPermission = computed(() => {
+  const permissions = authstore.permissions ?? []
+  const allowed = ['add.payroll']
+  return permissions.some(p => allowed.includes(p.name))
+})
 const navigateTo = (path) => {
   router.push(path)
 }
@@ -392,7 +399,7 @@ watch(() => formData.value.end_date, () => {
           </el-button>
         </el-col>
                 <el-col :xs="24" :sm="12" :md="6" :lg="4">
-          <el-button @click="navigateTo('/60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56')" style="width: 100%">
+          <el-button v-if="hasPermission" @click="navigateTo('/60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56')" style="width: 100%">
             បេីកប្រាក់ខែថ្មី
           </el-button>
         </el-col>
@@ -409,7 +416,8 @@ watch(() => formData.value.end_date, () => {
         style="width: 100%"
         empty-text="No payroll records found"
       >
-                 <el-table-column label="QR" width="70" align="center" fixed>
+      <el-table-column type="selection" width="55" align="center"/>
+                 <el-table-column label="QR" width="70" align="center" >
           <template #default="{ row }">
             <el-image
               v-if="row.qr_code_bank_account"
@@ -422,7 +430,7 @@ watch(() => formData.value.end_date, () => {
             <span v-else class="amount amount--muted">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="បុគ្គលិក" min-width="130" fixed>
+        <el-table-column label="បុគ្គលិក" min-width="130" >
           <template #default="{ row }">
             <div class="emp-cell">
               <div class="emp-info">

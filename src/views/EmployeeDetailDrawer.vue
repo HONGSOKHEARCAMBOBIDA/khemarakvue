@@ -299,7 +299,7 @@
           <div class="pb-4" style="display: flex">
             <el-tag type="primary" size="large">ព័ត៌មានប្រាក់ខែ</el-tag>
             <div class="pl-4">
-              <el-button type="success" @click="showCreateSalary = true"
+              <el-button type="success" @click="showCreateSalary = true" v-if="hasPermission"
                 >តម្លេីងប្រាក់ខែ</el-button
               >
             </div>
@@ -307,14 +307,15 @@
 
           <div v-for="sal in employee?.salarys" :key="sal.id " class="p-2">
             <el-descriptions :column="2" border size="large">
-              <el-descriptions-item label="ប្រាក់ខែមូលដ្ឋាន" :span="2">
+              <el-descriptions-item label="ប្រាក់ខែមូលដ្ឋាន" :span="2" v-if="hasPermission" >
                 <div style="display: flex; justify-content: space-between">
                   <span
                     style="
-                      font-size: 22px;
+                      font-size: 14px;
                       font-weight: 800;
                       color: var(--el-color-primary);
                     "
+                  
                   >
                     {{ sal.base_salary }} {{ sal.currency_name }}
                   </span>
@@ -324,7 +325,7 @@
               <el-descriptions-item label="ចំនួនថ្ងៃធ្វើការ"
                 >{{ sal.work_day }} ថ្ងៃ</el-descriptions-item
               >
-              <el-descriptions-item label="ប្រាក់ជួលក្នុងមួយថ្ងៃ"
+              <el-descriptions-item label="ប្រាក់ជួលក្នុងមួយថ្ងៃ" v-if="hasPermission"
                 >{{ sal.daily_rate }} {{ sal.currency_name }}
               </el-descriptions-item>
               <el-descriptions-item label="មានប្រសិទ្ធភាព">{{
@@ -569,6 +570,7 @@ import { changeshift, changeshiftpattern } from "../services/employee";
 import { fetchBranch } from "../services/branch";
 import { fetchShift } from '../services/shift'
 import { fetchShiftSession } from '../services/shiftsession'
+import { useAuthStore1 } from "../stores/user";
 import {
   Edit,
   View,
@@ -583,6 +585,7 @@ import {
   Download,
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
+const authstore = useAuthStore1()
 const changingShiftId = ref(null);
 const branches = ref([])
 const shifts = ref([])
@@ -592,6 +595,12 @@ const formData = reactive({
   employee_id: null,
   branch_id:                null,
   shift_id:                 null,
+})
+
+const hasPermission = computed(() => {
+  const permissions = authstore.permissions ?? []
+  const allowed = ['view.salary', 'edit.salary', 'add.salary']
+  return permissions.some(p => allowed.includes(p.name))
 })
 async function handleChangeShift(id) {
   try {

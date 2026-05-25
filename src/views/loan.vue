@@ -8,7 +8,7 @@ import { getuser } from '../services/userservice';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
 import { markRaw } from 'vue'
 import { fetchRecieve } from '../services/recieve';
-
+import { useAuthStore1 } from '../stores/user';
 const recieveDialogVisible = ref(false);
 const recieveLoading = ref(false);
 const recieveData = ref([]);
@@ -29,7 +29,7 @@ async function openRecieve(row) {
   }
 }
 
-
+const usestore = useAuthStore1()
 const loading = ref(false);
 const submitting = ref(false);
 const loans = ref([]);
@@ -47,6 +47,11 @@ const formDataParam = ref({
   status: null
 });
 
+const hasPermission = computed(() => {
+  const permissions = usestore.permissions ?? []
+  const allowed = ['add.loan']
+  return permissions.some(p => allowed.includes(p.name))
+})
 const pagination = ref({ page: 1, pageSize: 10, total: 0 });
 let searchTimer = null;
 
@@ -261,7 +266,7 @@ onMounted(() => {
           <h1 class="page-title">គ្រប់គ្រងកម្ចី</h1>
         </div>
       </div>
-      <el-button type="primary" @click="openCreate">
+      <el-button type="primary" @click="openCreate" v-if="hasPermission">
         <el-icon>
           <Plus />
         </el-icon>
