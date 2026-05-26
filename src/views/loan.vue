@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, watch, computed } from 'vue';
+import { onMounted, reactive, ref, watch, computed,onUnmounted } from 'vue';
 import { ElMessage,ElMessageBox  } from 'element-plus';
 import { fetchloan, createloan,deleteloan } from '../services/loan';
 import { fetchBranch } from '../services/branch';
@@ -40,6 +40,7 @@ const drawerVisible = ref(false);
 const drawerMode = ref('create'); // 'create' | 'view'
 const selectedLoan = ref(null);
 const currency = ref([]);
+const searchInputRef = ref(null)
 const formDataParam = ref({
   search: "",
   employee_id: null,
@@ -82,7 +83,7 @@ const statusMap = {
 };
 
 
-const durationOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const durationOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function buildParams() {
@@ -255,51 +256,71 @@ onMounted(() => {
   loadLookup(fetchBranch, branch);
   loadLoan(buildParams());
   loadLookup(fetchCurrency, currency)
+  window.addEventListener('keydown', handleGlobalKeydown)
 });
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+function handleGlobalKeydown(e) {
+  if (e.ctrlKey && e.key === 'f') {
+    e.preventDefault() 
+    searchInputRef.value?.focus()
+  }
+  if (e.key === 'Escape') {
+    resetFilters()
+  }
+
+  if (e.ctrlKey && e.key === '+') {
+    e.preventDefault()
+    openCreate()
+  }
+}
 </script>
 
 <template>
   <div class="loan-page">
     <div class="page-header">
-      <div class="header-left">
-        <div>
-          <h1 class="page-title">គ្រប់គ្រងកម្ចី</h1>
-        </div>
-      </div>
-      <el-button type="primary" @click="openCreate" v-if="hasPermission" size="large">
+    </div>
+    <div class="filter-card">
+      <el-input v-model="formDataParam.search" placeholder="ស្វែងរកដោយឈ្មោះ" class="filter-search" clearable size="large" ref="searchInputRef">
+        <template #prefix><el-icon>
+            <Search />
+          </el-icon></template>
+      </el-input>
+
+      <el-select v-model="formDataParam.branch_id" placeholder="ជ្រេីសរេីសសាខា" clearable class="filter-select" size="large"
+      style="width: 200px;"
+      >
+        <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
+      </el-select>
+
+      <el-select v-model="formDataParam.employee_id" placeholder="ជ្រេីសរេីសបុគ្គលិក" clearable class="filter-select"
+        :disabled="!formDataParam.branch_id" size="large" style="width: 200px;">
+        <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
+      </el-select>
+
+      <el-select v-model="formDataParam.status" placeholder="ជ្រេីសរេីសស្ថានភាពកម្ចី" clearable class="filter-select"
+        style="width:200px" size="large">
+        <el-option label="បង់ផ្ដាច់" :value="0" />
+        <el-option label="កំពុងខ្ចី" :value="1" />
+      </el-select>
+
+      <el-button type="warning" plain :icon="Refresh" @click="resetFilters" size="large">លុបការស្វែងរក</el-button>
+            <el-button type="primary" @click="openCreate" v-if="hasPermission" size="large">
         <el-icon>
           <Plus />
         </el-icon>
         បង្កេីតថ្មី
       </el-button>
     </div>
-    <div class="filter-card">
-      <el-input v-model="formDataParam.search" placeholder="ស្វែងរកដោយឈ្មោះ" class="filter-search" clearable size="large">
-        <template #prefix><el-icon>
-            <Search />
-          </el-icon></template>
-      </el-input>
-
-      <el-select v-model="formDataParam.branch_id" placeholder="Branch" clearable class="filter-select" size="large">
-        <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
-      </el-select>
-
-      <el-select v-model="formDataParam.employee_id" placeholder="Employee" clearable class="filter-select"
-        :disabled="!formDataParam.branch_id" size="large">
-        <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
-      </el-select>
-
-      <el-select v-model="formDataParam.status" placeholder="Status" clearable class="filter-select"
-        style="width:130px" size="large">
-        <el-option label="បង់ផ្ដាច់" :value="0" />
-        <el-option label="កំពុងខ្ចី" :value="1" />
-      </el-select>
-
-      <el-button type="warning" plain :icon="Refresh" @click="resetFilters" size="large">លុបការស្វែងរក</el-button>
-    </div>
     <div class="table-card">
       <el-table :data="loans" v-loading="loading" row-key="id" :expand-row-keys="expandedRows.map(String)"
         class="loan-table">
+        <template #empty>
+          <el-empty description="គ្មានទិន្ន័យ"></el-empty>
+        </template>
         <!-- Expand -->
         <el-table-column type="expand" width="40">
           <template #default="{ row }">
@@ -475,7 +496,7 @@ onMounted(() => {
 
     <!-- ── Create Drawer ──────────────────────────────────────────────── -->
     <el-drawer v-model="drawerVisible" :title="drawerMode === 'create' ? 'បង្កេីតកម្ចីថ្មី' : 'កម្ចីលំអិត'"
-      direction="rtl" size="520px" class="loan-drawer" :before-close="closeDrawer">
+      direction="rtl" size="820px" class="loan-drawer" :before-close="closeDrawer">
       <!-- Create Form -->
       <template v-if="drawerMode === 'create'">
         <el-form ref="formRef" :model="formData" :rules="formRules" label-position="top" class="loan-form">

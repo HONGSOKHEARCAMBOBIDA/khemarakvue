@@ -1,7 +1,7 @@
 <script setup>
 'use strict'
 import { useRouter } from "vue-router";
-import { onMounted, ref, watch, computed } from "vue";
+import { onMounted, ref, watch, computed,onUnmounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { fetchpayroll, fetchpayrollstatus,approvepayroll,deletepayroll } from "../services/payroll";
 import { fetchBranch } from "../services/branch";
@@ -11,6 +11,7 @@ import { fetchOffice } from "../services/office";
 import { markRaw } from 'vue'
 import { useAuthStore1 } from '../stores/user';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete } from "@element-plus/icons-vue";
+
 const loading = ref(false);
 const payroll  = ref([]);
 const branches      = ref([]);
@@ -20,6 +21,7 @@ const offices       = ref([]);
 const payrollstatus = ref([]);
 const router = useRouter()
 const authstore = useAuthStore1()
+const searchInputRef = ref(null)
 const hasPermission = computed(() => {
   const permissions = authstore.permissions ?? []
   const allowed = ['add.payroll']
@@ -183,8 +185,27 @@ onMounted(() => {
   loadLookup(fetchDepartment,     departments);
   loadLookup(fetchOffice,         offices);
   loadLookup(fetchpayrollstatus,  payrollstatus);
+  window.addEventListener('keydown', handleGlobalKeydown)
 });
 
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+function handleGlobalKeydown(e) {
+  if (e.ctrlKey && e.key === 'f') {
+    e.preventDefault() 
+    searchInputRef.value?.focus()
+  }
+  if (e.key === 'Escape') {
+   formData.value.name = ""
+  }
+
+  if (e.ctrlKey && e.key === '+') {
+    e.preventDefault()
+    navigateTo('/60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56')  // ✅ closed
+  }
+}
 
 watch(() => formData.value.name, () => {
   clearTimeout(searchTimer);
@@ -282,6 +303,7 @@ watch(() => formData.value.end_date, () => {
             clearable
             prefix-icon="Search"
             size="large"
+            ref="searchInputRef"
           />
         </el-col>
 
@@ -424,6 +446,11 @@ watch(() => formData.value.end_date, () => {
         style="width: 100%"
         empty-text="No payroll records found"
       >
+              <template #empty>
+          <el-empty description="គ្មានទិន្ន័យ">
+
+          </el-empty>
+        </template>
       <el-table-column type="selection" width="55" align="center"/>
                  <el-table-column label="QR" width="70" align="center" >
           <template #default="{ row }">

@@ -40,7 +40,7 @@
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/7dfb4cf67742cb0660305e56ef816c53fcec892cae7f6ee39b75f34e659d672c')">បង្កេីតអ្នកប្រេីប្រាស់ថ្មី</el-button>
             <el-button v-if="hasAdminOrHR" type="primary" plain @click="navigateTo('/4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942')">បញ្ជីបុគ្គលិក</el-button>
             <el-button  type="primary" plain @click="navigateTo('/91e6236168751f05de4ac5f4bbf867fe8d955925d44f356046854829644d0baf')">បញ្ជីវត្តមាន</el-button>
-            <el-button type="primary" plain @click="navigateTo('/leave')">ច្បាប់</el-button>
+            <el-button type="primary" plain @click="navigateTo('/af193190b8d3cd14103e20e900378a2b76414ff6428065f3f8539b3577b22fdf ')">ច្បាប់</el-button>
             <el-button  type="warning" plain @click="navigateTo('/472bbf14923e2e7cefd8529825c401e8d1a2937b96dd697a6d1c75c53e6cca3a')">កម្ចី</el-button>
             <el-button type="primary"  plain @click="navigateTo('/bf43e564ebc1b828180e6e4517d872bf71e80b431caeec6b5451e9254a0c6ee9')">ប្រាក់ខែ</el-button>
           </div>

@@ -132,21 +132,20 @@
       </template>
     </el-table-column>
 
-<el-table-column label="រូបភាព" width="100" fixed>
+<el-table-column label="រូបភាព" width="100" fixed align="center">
   <template #default="{ row }">
     <el-image
       :src="getImage(row)"
       :preview-src-list="[getImage(row)]"
       preview-teleported
-      style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer"
+      style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 2px solid #409eff;"
       fit="cover"
     >
       <template #toolbar="{ actions }">
         <el-icon @click="actions('zoomOut')"><ZoomOut /></el-icon>
         <el-icon @click="actions('zoomIn')"><ZoomIn /></el-icon>
         <el-icon @click="actions('clockwise')"><RefreshRight /></el-icon>
-        <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>
-        <!-- ✅ Add this -->
+        <el-icon @click="actions('anticlockwise')"><RefreshLeft /></el-icon>>
         <el-icon @click="downloadImage(getImage(row), row.employees?.[0]?.name_en + '_profile.jpg')">
           <Download />
         </el-icon>
@@ -161,7 +160,7 @@
       :src="getImageQR(row)"
       :preview-src-list="[getImageQR(row)]"
       preview-teleported
-      style="width: 60px; height: 60px; border-radius: 10%; cursor: pointer"
+      style="width: 60px; height: 60px; border-radius: 10%; cursor: pointer;border: 1px solid #409eff;"
       fit="cover"
     >
       <!-- ✅ Add toolbar -->

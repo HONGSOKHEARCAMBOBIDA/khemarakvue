@@ -1,6 +1,6 @@
 <script setup>
 'use strict'
-import { onMounted, ref } from 'vue';
+import { onMounted, ref,onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { fetchdrafpayroll, fetchpayrolltype ,createpayroll} from '../services/payroll';
 import { fetchBranch } from '../services/branch';
@@ -8,6 +8,9 @@ import { fetchCurrency } from '../services/currency';
 import { Search, Refresh,  View as IconView, Check, Edit, Plus, Close, Calendar, Money, User, Delete,ChatDotRound ,Back } from "@element-plus/icons-vue";
 import { computed } from 'vue';
 import { fetechbonustype } from '../services/bonus';
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 const loading = ref(false);
 const payrolldraft = ref([]);
 const payrolltype = ref([]);
@@ -112,9 +115,18 @@ onMounted(() => {
   loadLookup(fetchBranch,      branch);
   loadLookup(fetchCurrency,    currency);
   loadLookup(fetechbonustype,bonustype);
+  window.addEventListener('keydown', handleGlabalKeydown)
 });
 
+onUnmounted(() => {
+  window.removeEventListener('keydown',handleGlabalKeydown)
+})
 
+function handleGlabalKeydown(e){
+  if(e.key === 'Escape') {
+    router.back()
+  }
+}
 const formatMoney = (value) => {
   return (Math.round(value * 100) / 100).toFixed(2);
 };
@@ -269,6 +281,11 @@ const totals = computed(() => {
           show-summary
           :summary-method="() => []"
         >
+        <template #empty>
+          <el-empty description="គ្មានទិន្ន័យ">
+
+          </el-empty>
+        </template>
         <el-table-column type="selection" width="55" align="center"/>
           <el-table-column label="ឈ្មោះបុគ្គលិក" width="150" fixed="left">
             <template #default="{ row }">

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch,onUnmounted } from "vue";
 import { ElMessage } from "element-plus";
 import {
   createLeave,
@@ -42,7 +42,7 @@ const editVisible = ref(false)
 const editLoading = ref(false)
 const editFormRef = ref(null)
 const editRow = ref(null)
-
+const searchInputRef = ref(null)
 const hasPermission = computed(() =>{
   const permissions = useauth.permissions ?? []
   const allowed = ['approve.leave']
@@ -352,6 +352,7 @@ function resetFilters() {
   loadLeave(buildParams());
 }
 
+
 function statusType(id) {
   const map = { 1: "warning", 2: "success", 3: "danger", 4: "info" };
   return map[id] ?? "info";
@@ -364,7 +365,27 @@ onMounted(() => {
   loadLookup(fetchStatusLeave, statusleave);
   loadLookup(fetchOffice, office);
   loadLookup(fetchLeaveDurationUnit,leavedurationunit)
+  window.addEventListener('keydown', handleGlobalKeydown)
 });
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+function handleGlobalKeydown(e) {
+  if (e.ctrlKey && e.key === 'f') {
+    e.preventDefault() 
+    searchInputRef.value?.focus()
+  }
+  if (e.key === 'Escape') {
+    formDataParam.value.search = ""
+  }
+
+  if (e.ctrlKey && e.key === '+') {
+    e.preventDefault()
+    createVisible.value = true;
+  }
+}
 
 watch(
   () => formDataParam.value.search,
@@ -545,10 +566,11 @@ const toKhmerNumber = (num) => {
       <div class="filter-grid">
         <el-input
           v-model="formDataParam.search"
-          placeholder="ស្វែងរក​ឈ្មោះបុគ្គលិក..."
+          placeholder="ស្វែងរក​ឈ្មោះបុគ្គលិក"
           :prefix-icon="Search"
           clearable
           size="large"
+          ref="searchInputRef"
         />
         <el-date-picker
           v-model="formDataParam.start_date"
@@ -656,8 +678,11 @@ const toKhmerNumber = (num) => {
         border
         row-key="id"
         style="width: 100%"
-        empty-text="គ្មានទិន្នន័យ"
+       
       >
+      <template #empty>
+        <el-empty description="គ្មានទិន្ន័យ" />
+      </template>
         <el-table-column
           type="index"
           label="ល.រ"
@@ -726,7 +751,7 @@ const toKhmerNumber = (num) => {
           </template>
         </el-table-column>
 
-        <el-table-column label="ប្រភេទច្បាប់" min-width="100" align="center">
+        <el-table-column label="ប្រភេទច្បាប់" min-width="110" align="center">
           <template #default="{ row }">
             <el-tag type="primary" effect="light" size="large">{{
               row.leave_type_name

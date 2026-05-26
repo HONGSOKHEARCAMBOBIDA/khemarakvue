@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { fetchAttendance } from '../services/attendance'
 import { fetchDepartment } from '../services/department'
@@ -13,6 +13,7 @@ const offices = ref([])
 const expandedRows = ref([])
 const branch = ref([])
 const user = ref([])
+const searchInputRef = ref(null)
 function getToday() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -132,7 +133,22 @@ onMounted(() => {
   loadMeta(fetchDepartment, departments)
   loadMeta(fetchOffice, offices)
   loadMeta(fetchBranch,branch)
+  window.addEventListener('keydown', handleGlobalKeydown)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+function handleGlobalKeydown(e){
+  if(e.ctrlKey && e.key === 'f'){
+    e.preventDefault() 
+    searchInputRef.value?.focus()
+  }
+  if (e.key === 'Escape') {
+    resetFilters()
+  }
+}
 
 watch(() => formData.value.name, () => {
   clearTimeout(searchTimer)
@@ -207,7 +223,7 @@ function formatDiff(scheduledTime, checkTime) {
 
     <el-col :xs="24" :sm="12" :md="3">
       <el-input v-model="formData.name" placeholder="ស្វែងរកឈ្មោះ"
-        clearable size="large" :prefix-icon="Search" />
+        clearable size="large" :prefix-icon="Search" ref="searchInputRef"/>
     </el-col>
 
     <el-col :xs="12" :sm="6" :md="3">
@@ -322,7 +338,7 @@ function formatDiff(scheduledTime, checkTime) {
       <!-- Avatar -->
       <el-table-column label="រូបភាព" width="80">
         <template #default="{ row }">
-          <el-avatar :size="55" :src="getImage(row)">
+          <el-avatar :size="55" :src="getImage(row)" style="border: 2px solid #409eff;">
           </el-avatar>
         </template>
       </el-table-column>
