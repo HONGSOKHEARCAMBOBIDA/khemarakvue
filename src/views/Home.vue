@@ -2,7 +2,11 @@
 <div class="pb-4">
   <el-row :gutter="5" align="middle">
     <el-col :span="5">
-      <el-input v-model="formData.name" placeholder="ស្វែងរក" size="large" clearable/>
+      <el-input v-model="formData.name" placeholder="ស្វែងរក (Ctrl+F)" size="large" clearable ref="searchInputRef" >
+        <template #prefix>
+          <el-icon><Search /></el-icon>
+        </template>
+      </el-input>
     </el-col>
 
     <el-col :span="3">
@@ -12,6 +16,7 @@
         style="width:100%"
         size="large"
         clearable
+        filterable
       >
         <el-option
           v-for="branch in branches"
@@ -29,6 +34,7 @@
         style="width:100%"
         size="large"
         clearable
+        filterable
       >
         <el-option
           v-for="department in departments"
@@ -46,6 +52,7 @@
         style="width:100%"
         size="large"
         clearable
+        filterable
       >
         <el-option
           v-for="position in positions"
@@ -63,6 +70,7 @@
         style="width:100%"
         size="large"
         clearable
+        filterable
       >
         <el-option
           v-for="office in offices"
@@ -80,6 +88,7 @@
         style="width:100%"
         size="large"
         clearable
+        filterable
       >
         <el-option label="បានវាយតម្លៃ" :value="1" />
         <el-option label="មិនទាន់វាយតម្លៃ" :value="0" />
@@ -103,7 +112,9 @@
   <EmployeeDetailDrawer v-model="drawerVisible" :employee="selectedEmployee" @refresh="onEmployeeUpdated"/>
 
   <el-table :data="employees" height="750" style="width: 100%" v-loading="loading" >
-    <!-- default-expand-all -->
+    <template #empty>
+      <el-empty description="គ្មានទិន្ន័យ" />
+    </template>
 
     <el-table-column type="expand" fixed>
       <template #default="scope">
@@ -359,7 +370,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch,computed } from "vue"
+import { onMounted, ref, watch,computed,onUnmounted } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus"
 import { fetchEmployee } from "../services/employee"
 import { fetchBranch } from "../services/branch"
@@ -370,7 +381,7 @@ import { fetchRole } from "../services/role"
 import { fetchManageBranch } from "../services/managebranch"
 import {
   Edit, View, Wallet, ArrowUp, Clock, Switch,
-  ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download
+  ZoomIn, ZoomOut, RefreshLeft, RefreshRight,Download,Search
 } from "@element-plus/icons-vue"
 import EmployeeDetailDrawer from "./EmployeeDetailDrawer.vue"
 import { useRouter } from "vue-router"
@@ -398,6 +409,7 @@ const userpassworddialog = ref(false)
 const userloading = ref(false)
 const part = ref([])
 const authstore = useAuthStore1()
+const searchInputRef = ref(null)
 const updateForm = ref({
   branch_id:     null,
   role_id:       null,
@@ -603,6 +615,20 @@ function handleDelete(row) {
   })
 }
 
+function clearAllFilters() {
+  formData.value = {
+    name:          "",
+    branch_id:     null,
+    department_id: null,
+    position_id:   null,
+    office_id:     null,
+    is_promote:    null,
+  }
+  positions.value = []
+  pagination.value.page = 1
+  loadEmployees(buildParams())
+}
+
 // ── Mounted ────────────────────────────────────────────────────────────────
 onMounted(() => {
   loadEmployees(buildParams())
@@ -612,8 +638,27 @@ onMounted(() => {
   loadLookup(fetchRole,roles)
   loadLookup(fetchManageBranch,managebranch)
   loadLookup(fetchPart,part)
+  window.addEventListener('keydown', handleGlobalKeydown)
 })
 
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+function handleGlobalKeydown(e) {
+  if (e.ctrlKey && e.key === 'f') {
+    e.preventDefault() 
+    searchInputRef.value?.focus()
+  }
+  if (e.key === 'Escape') {
+    clearAllFilters()
+  }
+
+  if (e.ctrlKey && e.key === '+') {
+    e.preventDefault()
+    navigateTo('/7dfb4cf67742cb0660305e56ef816c53fcec892cae7f6ee39b75f34e659d672c')  // ✅ closed
+  }
+}
 // ── Watchers ───────────────────────────────────────────────────────────────
 watch(() => formData.value.name, () => {
   clearTimeout(searchTimer)

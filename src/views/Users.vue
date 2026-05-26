@@ -555,7 +555,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { registerAsFormData, getuser } from '../services/userservice'
 import { fetchDepartment } from '../services/department'
@@ -577,6 +577,8 @@ import { fetchCommunce } from '../services/communce'
 import { fetchVillage } from '../services/village'
 import { fetchDayofweek } from '../services/dayofweek'
 import { Delete, Edit, Search, Share, Upload,Back } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const parentBorder = ref(true)
 const formRef       = ref(null)
@@ -1004,7 +1006,18 @@ onMounted(async() => {
   } finally {
     loading.value = false;
   }
+  window.addEventListener('keydown', handleGlabalKeydown)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('keydown',handleGlabalKeydown)
+})
+
+function handleGlabalKeydown(e){
+  if(e.key === 'Escape') {
+    router.back()
+  }
+}
 
 // ─── Watchers ────────────────────────────────────────────────────────────────
 watch(() => formData.department_id, async (v) => {

@@ -59,6 +59,16 @@ function removeDurationRow(index) {
   formData.duration_unit_id.splice(index, 1)
 }
 
+function addEditDurationRow() {
+  editFormData.duration_value.push(null)
+  editFormData.duration_unit_id.push(null)
+}
+
+function removeEditDurationRow(index) {
+  editFormData.duration_value.splice(index, 1)
+  editFormData.duration_unit_id.splice(index, 1)
+}
+
 const editFormData = reactive({
   leave_type_id: null,
   start_date: '',
@@ -66,8 +76,8 @@ const editFormData = reactive({
   back_date: '',
   description: '',
   approve_by: null,
-  duration_value: null,
-  duration_unit_id: null,
+  duration_value: [null],
+  duration_unit_id: [null],
   branch_id: null
 })
 
@@ -80,8 +90,8 @@ function openEdit(row) {
     back_date: row.back_date,
     description: row.description,
     approve_by: row.approve_by_id,
-    duration_value: row.duration_value,
-    duration_unit_id: row.duration_unit_id,
+    duration_value: row.leave_durations?.map(d => d.duration_value) ?? [null],
+    duration_unit_id: row.leave_durations?.map(d => d.duration_unit_id) ?? [null],
     branch_id: row.branch_id
   })
   editVisible.value = true
@@ -93,15 +103,18 @@ function buildEditFormData() {
   scalars.forEach(k => {
     if (editFormData[k]) fd.append(k, editFormData[k])
   })
-  const numerics = [
-    ['leave_type_id', editFormData.leave_type_id],
-    ['approve_by', editFormData.approve_by],
-    ['duration_value', editFormData.duration_value],
-    ['duration_unit_id', editFormData.duration_unit_id]
-  ]
-  numerics.forEach(([k, v]) => {
-    if (v !== null && v !== undefined) fd.append(k, v)
+
+  if(editFormData.leave_type_id != null) fd.append('leave_type_id',editFormData.leave_type_id)
+  if(editFormData.approve_by != null) fd.append('approve_by',editFormData.approve_by)
+
+  editFormData.duration_value.forEach(v => {
+    if(v != null) fd.append('duration_value',v)
   })
+
+  editFormData.duration_unit_id.forEach(v => {
+    if(v != null) fd.append('duration_unit_id',v)
+  })
+
   return fd
 }
 
@@ -206,8 +219,8 @@ const formData = reactive({
   back_date: '',
   description: '',
   approve_by: null,
-  duration_value: [null],      // start with one row
-  duration_unit_id: [null],    // start with one row
+  duration_value: [null],     
+  duration_unit_id: [null],   
 })
 
 function buildFormData() {
@@ -221,7 +234,6 @@ function buildFormData() {
   if (formData.leave_type_id != null) fd.append('leave_type_id', formData.leave_type_id)
   if (formData.approve_by != null)    fd.append('approve_by', formData.approve_by)
 
-  // ✅ Correctly send parallel arrays
   formData.duration_value.forEach(v => {
     if (v != null) fd.append('duration_value', v)
   })
@@ -1271,8 +1283,8 @@ const toKhmerNumber = (num) => {
   </el-form>
 
   <template #footer>
-    <el-button @click="createVisible = false">បោះបង់</el-button>
-    <el-button type="success" :loading="createLoading" @click="submitForm">
+    <el-button @click="createVisible = false" size="large">បោះបង់</el-button>
+    <el-button type="success" :loading="createLoading" @click="submitForm" size="large">
       រក្សាទុក
     </el-button>
   </template>
@@ -1349,21 +1361,21 @@ const toKhmerNumber = (num) => {
           prop="leave_type_id"
           :rules="[{ required: true, message: 'សូមជ្រើសប្រភេទច្បាប់' }]"
         >
-          <el-select v-model="editFormData.leave_type_id" style="width:100%">
+          <el-select v-model="editFormData.leave_type_id" style="width:100%" size="large">
             <el-option v-for="lt in leavetype" :key="lt.id" :label="lt.name" :value="lt.id" />
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="8">
         <el-form-item label="សាខា">
-          <el-select v-model="editFormData.branch_id" placeholder="ជ្រើសសាខា" clearable style="width:100%">
+          <el-select v-model="editFormData.branch_id" placeholder="ជ្រើសសាខា" clearable style="width:100%" size="large">
             <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="8">
         <el-form-item label="អនុម័តដោយ" prop="approve_by">
-          <el-select v-model="editFormData.approve_by" clearable style="width:100%">
+          <el-select v-model="editFormData.approve_by" clearable style="width:100%" size="large">
             <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
           </el-select>
         </el-form-item>
@@ -1378,7 +1390,7 @@ const toKhmerNumber = (num) => {
           :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃចាប់ផ្ដើម' }]"
         >
           <el-date-picker v-model="editFormData.start_date" type="date"
-            value-format="YYYY-MM-DD" style="width:100%" />
+            value-format="YYYY-MM-DD" style="width:100%" size="large"/>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -1388,7 +1400,7 @@ const toKhmerNumber = (num) => {
           :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃបញ្ចប់' }]"
         >
           <el-date-picker v-model="editFormData.end_date" type="date"
-            value-format="YYYY-MM-DD" style="width:100%" />
+            value-format="YYYY-MM-DD" style="width:100%" size="large"/>
         </el-form-item>
       </el-col>
     </el-row>
@@ -1399,42 +1411,71 @@ const toKhmerNumber = (num) => {
       :rules="[{ required: true, message: 'សូមបញ្ចូលថ្ងៃត្រឡប់' }]"
     >
       <el-date-picker v-model="editFormData.back_date" type="date"
-        value-format="YYYY-MM-DD" style="width:100%" />
+        value-format="YYYY-MM-DD" style="width:100%" size="large"/>
     </el-form-item>
 
-    <el-row :gutter="12">
-      <el-col :span="12">
-        <el-form-item
-          label="រយៈពេល"
-          prop="duration_value"
-          :rules="[{ required: true, message: 'សូមបញ្ចូលរយៈពេល' }]"
-        >
-          <el-input-number v-model="editFormData.duration_value"
-            :min="0.5" :step="0.5" :precision="1" style="width:100%" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item
-          label="ឯកតារយៈពេល"
-          prop="duration_unit_id"
-          :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
-        >
-          <el-select v-model="editFormData.duration_unit_id" style="width:100%">
-            <el-option v-for="u in leavedurationunit" :key="u.id"
-              :label="u.name_km" :value="u.id" />
-          </el-select>
-        </el-form-item>
-      </el-col>
-    </el-row>
-
+<el-row :gutter="12" v-for="(_, i) in editFormData.duration_value" :key="i" style="margin-bottom:8px">
+  <el-col :span="11">
+    <el-form-item
+      :label="i === 0 ? 'រយៈពេល' : ''"
+      :prop="`duration_value.${i}`"
+      :rules="[{ required: true, message: 'សូមបញ្ចូលរយៈពេល' }]"
+    >
+      <el-input-number
+        v-model="editFormData.duration_value[i]"
+        :min="0.5"
+        :step="0.5"
+        :precision="1"
+        style="width:100%"
+        size="large"
+      />
+    </el-form-item>
+  </el-col>
+  <el-col :span="11">
+    <el-form-item
+      :label="i === 0 ? 'ឯកតារយៈពេល' : ''"
+      :prop="`duration_unit_id.${i}`"
+      :rules="[{ required: true, message: 'សូមជ្រើសឯកតា' }]"
+    >
+      <el-select v-model="editFormData.duration_unit_id[i]" placeholder="ជ្រើស" style="width:100%" size="large">
+        <el-option
+          v-for="u in leavedurationunit"
+          :key="u.id"
+          :label="u.name_km"
+          :value="u.id"
+        />
+      </el-select>
+    </el-form-item>
+  </el-col>
+  <el-col :span="2" style="display:flex; align-items:flex-end; padding-bottom:18px">
+<el-button
+  type="danger"
+  :icon="Delete"
+  circle
+  size="large"
+  plain
+  :disabled="editFormData.duration_value.length === 1"
+  @click="removeEditDurationRow(i)"  
+/>
+  </el-col>
+</el-row>
+<el-button
+  type="primary"
+  plain
+  size="large"
+  style="margin-bottom:12px"
+  @click="addEditDurationRow"   
+>
+  បន្ថែមរយៈពេល
+</el-button>
     <el-form-item label="មូលហេតុ">
       <el-input v-model="editFormData.description" type="textarea" :rows="3" />
     </el-form-item>
   </el-form>
 
   <template #footer>
-    <el-button @click="editVisible = false">បោះបង់</el-button>
-    <el-button type="warning" :loading="editLoading" @click="submitEdit">
+    <el-button @click="editVisible = false" size="large">បោះបង់</el-button>
+    <el-button type="warning" :loading="editLoading" @click="submitEdit" size="large">
       រក្សាទុក
     </el-button>
   </template>

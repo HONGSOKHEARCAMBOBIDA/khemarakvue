@@ -4,18 +4,21 @@ import { ElMessage } from 'element-plus'
 import { fetchAttendance } from '../services/attendance'
 import { fetchDepartment } from '../services/department'
 import { fetchOffice } from '../services/office'
-
+import { fetchBranch } from '../services/branch'
+import { getuser } from '../services/userservice'
 const loading = ref(false)
 const attendance = ref([])
 const departments = ref([])
 const offices = ref([])
 const expandedRows = ref([])
-
+const branch = ref([])
+const user = ref([])
 function getToday() {
   return new Date().toISOString().slice(0, 10)
 }
 const formData = ref({
   name: '',
+  branch_id: null,
   department_id: null,
   office_id: null,
   check_date_from: getToday(),
@@ -45,6 +48,8 @@ function buildParams() {
   const p = { page: pagination.value.page, pageSize: pagination.value.pageSize }
   const f = formData.value
   if (f.name.trim()) p.name = f.name.trim()
+  if(f.branch_id) p.branch_id = f.branch_id
+  if(f.employee_id) p.employee_id = f.employee_id
   if (f.department_id) p.department_id = f.department_id
   if (f.office_id) p.office_id = f.office_id
   if (f.check_date_from) p.check_date_from = f.check_date_from
@@ -126,6 +131,7 @@ onMounted(() => {
   loadAttendance(buildParams())
   loadMeta(fetchDepartment, departments)
   loadMeta(fetchOffice, offices)
+  loadMeta(fetchBranch,branch)
 })
 
 watch(() => formData.value.name, () => {
@@ -136,10 +142,20 @@ watch(() => formData.value.name, () => {
   }, 300)
 })
 
+watch(() => formData.value.branch_id,async (v) => {
+  user.value = [];
+  if(!v) return
+  try{
+    user.value = (await getuser(v)).data.data
+  }catch(e){
+ElMessage.error(e?.message || 'Load branch data failed')
+  }
+})
+
 const watchFields = [
   'department_id', 'office_id', 'check_date_from', 'check_date_to',
   'is_late', 'is_left_early', 'check_in_early', 'check_in_on_time',
-  'check_out_on_time', 'check_out_overtime'
+  'check_out_on_time', 'check_out_overtime','branch_id','employee_id'
 ]
 watchFields.forEach(field => {
   watch(() => formData.value[field], () => {
@@ -186,39 +202,69 @@ function formatDiff(scheduledTime, checkTime) {
 <template>
   <div>
     <!-- Filters -->
-    <el-card class="mb-4" shadow="never">
-      <el-row :gutter="10" align="middle">
-        <el-col :xs="24" :sm="12" :md="5">
-          <el-input v-model="formData.name" placeholder="ស្វែងរកឈ្មោះ" clearable size="default" :prefix-icon="Search" />
-        </el-col>
-        <el-col :xs="12" :sm="8" :md="4">
-          <el-select v-model="formData.department_id" placeholder="នាយកដ្ឋាន" clearable style="width:100%">
-            <el-option v-for="d in departments" :key="d.id" :label="d.display_name" :value="d.id" />
-          </el-select>
-        </el-col>
-        <el-col :xs="12" :sm="8" :md="4">
-          <el-select v-model="formData.office_id" placeholder="ការិយាល័យ" clearable style="width:100%">
-            <el-option v-for="o in offices" :key="o.id" :label="o.name" :value="o.id" />
-          </el-select>
-        </el-col>
-        <el-col :xs="12" :sm="8" :md="4">
-          <el-date-picker v-model="formData.check_date_from" type="date" placeholder="ចាប់ពីថ្ងៃ"
-            value-format="YYYY-MM-DD" style="width:100%" />
-        </el-col>
-        <el-col :xs="12" :sm="8" :md="4">
-          <el-date-picker v-model="formData.check_date_to" type="date" placeholder="រហូតថ្ងៃ" value-format="YYYY-MM-DD"
-            style="width:100%" />
-        </el-col>
-        <el-col :xs="24" :sm="12" :md="3">
-          <el-select v-model="selectedStatus" placeholder="ស្ថានភាព" clearable style="width:100%"
-            @change="onStatusChange" @clear="onStatusClear">
-            <el-option v-for="s in statusOptions" :key="s.field" :label="s.label" :value="s.field" />
-          </el-select>
-        </el-col>
-      </el-row>
-    </el-card>
+<el-card class="mb-4" shadow="never">
+  <el-row :gutter="8" align="middle">
+
+    <el-col :xs="24" :sm="12" :md="3">
+      <el-input v-model="formData.name" placeholder="ស្វែងរកឈ្មោះ"
+        clearable size="large" :prefix-icon="Search" />
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-select v-model="formData.branch_id" placeholder="សាខា"
+        clearable filterable style="width:100%" size="large">
+        <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
+      </el-select>
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-select v-model="formData.employee_id" placeholder="បុគ្គលិក"
+        clearable filterable style="width:100%" size="large">
+        <el-option v-for="e in user" :key="e.id" :label="e.name" :value="e.id" />
+      </el-select>
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-select v-model="formData.department_id" placeholder="នាយកដ្ឋាន"
+        clearable filterable style="width:100%" size="large">
+        <el-option v-for="d in departments" :key="d.id" :label="d.display_name" :value="d.id" />
+      </el-select>
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-select v-model="formData.office_id" placeholder="ការិយាល័យ"
+        clearable filterable style="width:100%" size="large">
+        <el-option v-for="o in offices" :key="o.id" :label="o.name" :value="o.id" />
+      </el-select>
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-date-picker v-model="formData.check_date_from" type="date"
+        placeholder="ចាប់ពីថ្ងៃ" value-format="YYYY-MM-DD"
+        style="width:100%" size="large" />
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-date-picker v-model="formData.check_date_to" type="date"
+        placeholder="រហូតថ្ងៃ" value-format="YYYY-MM-DD"
+        style="width:100%" size="large" />
+    </el-col>
+
+    <el-col :xs="12" :sm="6" :md="3">
+      <el-select v-model="selectedStatus" placeholder="ស្ថានភាព"
+        clearable filterable style="width:100%" size="large"
+        @change="onStatusChange" @clear="onStatusClear">
+        <el-option v-for="s in statusOptions" :key="s.field" :label="s.label" :value="s.field" />
+      </el-select>
+    </el-col>
+
+  </el-row>
+</el-card>
 
     <el-table v-loading="loading" :data="attendance" row-key="employee_id" border stripe style="width:100%" height="700" default-expand-all>
+      <template #empty>
+        <el-empty description="គ្មានទិន្ន័យ" />
+      </template>
       <el-table-column type="expand" class="p-4">
         <template #default="{ row }">
           <div v-for="log in row.attendancelogresponse" :key="log.id" class="mb-4">
@@ -287,6 +333,7 @@ function formatDiff(scheduledTime, checkTime) {
           <div class="text-xs text-gray-400">{{ row.employee_name_en }}</div>
         </template>
       </el-table-column>
+      <el-table-column label="សាខា" prop="branch_name"></el-table-column>
             <el-table-column label="ភេទ" width="130" >
               <template #default="{ row }">
         <el-tag type="primary" size="large">

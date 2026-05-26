@@ -46,7 +46,7 @@ async function handleLogin() {
 
 <template>
   <div class="flex justify-center items-center h-screen px-4">
-    <el-card class="w-full max-w-md p-6 border border-gray-300" shadow="never">
+    <el-card class="w-full max-w-md p-2 border border-gray-300" shadow="never">
       <div class="flex flex-col gap-4 items-center">
          <el-image
           :src="logo"
@@ -78,6 +78,7 @@ async function handleLogin() {
           class="w-full"
           :loading="loading"
           @click="handleLogin"
+          size="large"
         >
           Login
         </el-button>

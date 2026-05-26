@@ -278,9 +278,10 @@ watch(() => formData.value.end_date, () => {
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-input
             v-model="formData.name"
-            placeholder="ស្វែងរក...."
+            placeholder="ស្វែងរក"
             clearable
             prefix-icon="Search"
+            size="large"
           />
         </el-col>
 
@@ -291,6 +292,7 @@ watch(() => formData.value.end_date, () => {
             placeholder="សាខា"
             clearable
             style="width: 100%"
+            size="large"
           >
             <el-option
               v-for="b in branches"
@@ -308,6 +310,7 @@ watch(() => formData.value.end_date, () => {
             placeholder="នាយកដ្ឋាន"
             clearable
             style="width: 100%"
+            size="large"
           >
             <el-option
               v-for="d in departments"
@@ -326,6 +329,7 @@ watch(() => formData.value.end_date, () => {
             clearable
             :disabled="!formData.department_id"
             style="width: 100%"
+            size="large"
           >
             <el-option
               v-for="p in positions"
@@ -343,6 +347,7 @@ watch(() => formData.value.end_date, () => {
             placeholder="ការិយាល័យ"
             clearable
             style="width: 100%"
+            size="large"
           >
             <el-option
               v-for="o in offices"
@@ -360,6 +365,7 @@ watch(() => formData.value.end_date, () => {
             placeholder="ស្ថានភាព"
             clearable
             style="width: 100%"
+            size="large"
           >
             <el-option
               v-for="s in payrollstatus"
@@ -378,6 +384,7 @@ watch(() => formData.value.end_date, () => {
             placeholder="ចាប់ពី"
             value-format="YYYY-MM-DD"
             style="width: 100%"
+            size="large"
           />
         </el-col>
 
@@ -389,17 +396,18 @@ watch(() => formData.value.end_date, () => {
             placeholder="រហូតដល់"
             value-format="YYYY-MM-DD"
             style="width: 100%"
+            size="large"
           />
         </el-col>
 
         <!-- Reset button -->
         <el-col :xs="24" :sm="12" :md="6" :lg="4">
-          <el-button @click="resetFilters" style="width: 100%">
+          <el-button @click="resetFilters" style="width: 100%" size="large">
             លុបការស្វែងរក
           </el-button>
         </el-col>
                 <el-col :xs="24" :sm="12" :md="6" :lg="4">
-          <el-button v-if="hasPermission" @click="navigateTo('/60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56')" style="width: 100%">
+          <el-button v-if="hasPermission" @click="navigateTo('/60f91a742458ae606572f40dd7df0a128e554acb023f6989fe5148872648fc56')" style="width: 100%" size="large">
             បេីកប្រាក់ខែថ្មី
           </el-button>
         </el-col>

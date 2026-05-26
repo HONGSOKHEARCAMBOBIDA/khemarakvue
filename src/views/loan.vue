@@ -266,7 +266,7 @@ onMounted(() => {
           <h1 class="page-title">គ្រប់គ្រងកម្ចី</h1>
         </div>
       </div>
-      <el-button type="primary" @click="openCreate" v-if="hasPermission">
+      <el-button type="primary" @click="openCreate" v-if="hasPermission" size="large">
         <el-icon>
           <Plus />
         </el-icon>
@@ -274,28 +274,28 @@ onMounted(() => {
       </el-button>
     </div>
     <div class="filter-card">
-      <el-input v-model="formDataParam.search" placeholder="ស្វែងរកដោយឈ្មោះ......" class="filter-search" clearable>
+      <el-input v-model="formDataParam.search" placeholder="ស្វែងរកដោយឈ្មោះ" class="filter-search" clearable size="large">
         <template #prefix><el-icon>
             <Search />
           </el-icon></template>
       </el-input>
 
-      <el-select v-model="formDataParam.branch_id" placeholder="Branch" clearable class="filter-select">
+      <el-select v-model="formDataParam.branch_id" placeholder="Branch" clearable class="filter-select" size="large">
         <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
       </el-select>
 
       <el-select v-model="formDataParam.employee_id" placeholder="Employee" clearable class="filter-select"
-        :disabled="!formDataParam.branch_id">
+        :disabled="!formDataParam.branch_id" size="large">
         <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
       </el-select>
 
       <el-select v-model="formDataParam.status" placeholder="Status" clearable class="filter-select"
-        style="width:130px">
+        style="width:130px" size="large">
         <el-option label="បង់ផ្ដាច់" :value="0" />
         <el-option label="កំពុងខ្ចី" :value="1" />
       </el-select>
 
-      <el-button type="warning" plain :icon="Refresh" @click="resetFilters">លុបការស្វែងរក</el-button>
+      <el-button type="warning" plain :icon="Refresh" @click="resetFilters" size="large">លុបការស្វែងរក</el-button>
     </div>
     <div class="table-card">
       <el-table :data="loans" v-loading="loading" row-key="id" :expand-row-keys="expandedRows.map(String)"
@@ -483,7 +483,7 @@ onMounted(() => {
           <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="ជ្រេីសរេីសសាខា" prop="branch_id">
-                <el-select v-model="formData.branch_id" placeholder="Select branch" filterable style="width:100%">
+                <el-select v-model="formData.branch_id" placeholder="Select branch" filterable style="width:100%" size="large">
                   <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
                 </el-select>
               </el-form-item>
@@ -491,7 +491,7 @@ onMounted(() => {
             <el-col :span="12">
               <el-form-item label="ជ្រេីសរេីសបុគ្គលិក" prop="employee_id">
                 <el-select v-model="formData.employee_id" placeholder="Select employee" filterable style="width:100%"
-                  :disabled="!formData.branch_id">
+                  :disabled="!formData.branch_id" size="large">
                   <el-option v-for="u in user" :key="u.id" :label="u.name" :value="u.id" />
                 </el-select>
               </el-form-item>
@@ -501,14 +501,14 @@ onMounted(() => {
           <el-row :gutter="16">
             <el-col :span="14">
               <el-form-item label="ទំហំកម្ចី" prop="loan_amount">
-                <el-input v-model="formData.loan_amount" placeholder="0.00" type="number" min="0">
+                <el-input v-model="formData.loan_amount" placeholder="0.00" type="number" min="0" size="large">
                   <template #suffix><span class="input-suffix"></span></template>
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="10">
               <el-form-item label="រូបិយប័ណ្ណ" prop="currency_id">
-                <el-select v-model="formData.currency_id" placeholder="Currency" style="width:100%">
+                <el-select v-model="formData.currency_id" placeholder="Currency" style="width:100%" size="large">
                   <el-option v-for="c in currency" :key="c.id" :label="c.name" :value="c.id" />
                 </el-select>
               </el-form-item>
@@ -535,7 +535,7 @@ onMounted(() => {
 
           <el-form-item label="ថ្ងៃចាប់ផ្ដេីមកម្ចី" prop="loan_start_date">
             <el-date-picker v-model="formData.loan_start_date" type="date" placeholder="Pick start date"
-              style="width:100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+              style="width:100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" size="large"/>
           </el-form-item>
 
 
@@ -545,8 +545,8 @@ onMounted(() => {
         </el-form>
 
         <div class="drawer-footer">
-          <el-button @click="closeDrawer">ចាកចេញ</el-button>
-          <el-button type="primary" :loading="submitting" @click="submitCreate">
+          <el-button @click="closeDrawer" size="large">ចាកចេញ</el-button>
+          <el-button type="primary" :loading="submitting" @click="submitCreate" size="large">
             បញ្ចូនទិន្ន័យ
           </el-button>
         </div>
