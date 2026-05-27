@@ -406,7 +406,17 @@
         @click="handleChangeShift(day.id)"
         v-if="hasPermission"
       >
-        ផ្លាស់ប្ដូរ
+        សម្រាក
+      </el-button>
+        <el-button
+        type="warning"
+        size="small"
+        style="margin-top: 6px;"
+        :loading="changingShiftId === day.id"
+        @click="handleChangeSingleShift(day.id)"
+        v-if="hasPermission"
+      >
+        ប្ដូរវ៉េន
       </el-button>
             </div>
           </div>
@@ -555,6 +565,28 @@ v-model="showCreateSalary"
 :employee="employee"
 @created="emit('refresh')"
 />
+<el-dialog v-model="showChangeSingleShift" title="ផ្លាស់ប្ដូរវេនការងារតែមួយថ្ងៃ" width="600px">
+  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <el-select v-model="formData.branch_id" placeholder="ជ្រើសរើសសាខា" style="width: 270px" size="large">
+      <el-option v-for="branch in branches" :key="branch.id" :label="branch.name" :value="branch.id" />
+    </el-select>
+
+    <el-select v-model="singleShiftId" placeholder="ជ្រើសរើសវេនថ្មី" style="width: 280px" size="large">
+      <el-option v-for="shift in shifts" :key="shift.id" :label="shift.name" :value="shift.id" />
+    </el-select>
+
+    <el-text v-for="session in shiftsession" :key="session.id" type="danger" size="large">
+      {{ `${session.session_name} : ${session.start_time} - ${session.end_time}` }}
+    </el-text>
+  </div>
+
+  <template #footer>
+    <el-button @click="showChangeSingleShift = false">បោះបង់</el-button>
+    <el-button type="primary" :loading="changingShiftId === selectedShiftPatternId" @click="confirmChangeSingleShift">
+      យល់ព្រម
+    </el-button>
+  </template>
+</el-dialog>
 </template>
 
 <script setup>
@@ -567,7 +599,7 @@ import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue
 import WorkExperienceCreateDialog from "../components/WorkExperienceCreateDialog.vue";
 import SalaryUpdateDialog from "../components/SalaryUpdateDialog.vue";
 import SalaryCreateDialog from "../components/SalaryCreateDialog.vue";
-import { changeshift, changeshiftpattern } from "../services/employee";
+import { changeshift, changeshiftpattern ,changesingleshift} from "../services/employee";
 import { fetchBranch } from "../services/branch";
 import { fetchShift } from '../services/shift'
 import { fetchShiftSession } from '../services/shiftsession'
@@ -597,6 +629,9 @@ const formData = reactive({
   branch_id:                null,
   shift_id:                 null,
 })
+const showChangeSingleShift = ref(false)
+const selectedShiftPatternId = ref(null)
+const singleShiftId = ref(null)
 
 const hasPermission = computed(() => {
   const permissions = authstore.permissions ?? []
@@ -613,6 +648,29 @@ async function handleChangeShift(id) {
     ElMessage.error("ផ្លាស់ប្ដូរវេនការងារមិនបានសម្រេច");
   } finally {
     changingShiftId.value = null;
+  }
+}
+function handleChangeSingleShift(id) {
+  selectedShiftPatternId.value = id
+  singleShiftId.value = null
+  showChangeSingleShift.value = true
+}
+async function confirmChangeSingleShift() {
+  if (!singleShiftId.value) {
+    ElMessage.warning("សូមជ្រើសរើសវេនការងារជាមុន")
+    return
+  }
+  try {
+    changingShiftId.value = selectedShiftPatternId.value
+  await changesingleshift(selectedShiftPatternId.value, singleShiftId.value)
+    ElMessage.success("ផ្លាស់ប្ដូរវេនការងារបានសម្រេច")
+    showChangeSingleShift.value = false
+    shiftsession.value = []
+    emit("refresh")
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || "ផ្លាស់ប្ដូរវេនការងារមិនបានសម្រេច")
+  } finally {
+    changingShiftId.value = null
   }
 }
 const showCreateSalary = ref(false);
@@ -709,6 +767,16 @@ watch(() => formData.branch_id, async (v)=>{
 })
 
 watch(() => formData.shift_id, async (v)=>{
+  shiftsession.value = []
+  if(!v) return
+  try{
+shiftsession.value = (await fetchShiftSession(v)).data.data
+  }catch(e){
+ElMessage.error(e?.message)
+  }
+})
+
+watch(() => singleShiftId.value,async (v)=>{
   shiftsession.value = []
   if(!v) return
   try{

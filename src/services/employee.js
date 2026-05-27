@@ -16,3 +16,4 @@ export const updatesalary = (id,formData) => api.put(`edit.salary/${id}`,formDat
 export const createsalary = (formData) => api.post(`add.salary`,formData)
 export const changeshiftpattern = (id) => api.put(`edit.shift.pattern/${id}`)
 export const changeshift = (formData) => api.put(`edit.shift`,formData)
+export const changesingleshift = (id, shift_id) => api.put(`edit.single.shift`, null, { params: { id, shift_id } })
