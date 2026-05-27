@@ -540,12 +540,12 @@ function buildParams() {
 
 function getImage(row) {
   const file = row.employeeprofies?.[0]?.profile_image
-  return file ? `http://localhost:8080/profileimage/${file}` : "https://via.placeholder.com/40"
+  return file ? `https://tp4jp1v0-8080.asse.devtunnels.ms/profileimage/${file}` : "https://via.placeholder.com/40"
 }
 
 function getImageQR(row) {
   const file = row.employeeprofies?.[0]?.qr_code_bank_account
-  return file ? `http://localhost:8080/qrcodeimage/${file}` : "https://via.placeholder.com/40"
+  return file ? `https://tp4jp1v0-8080.asse.devtunnels.ms/qrcodeimage/${file}` : "https://via.placeholder.com/40"
 }
 
 function openDetail(row) {

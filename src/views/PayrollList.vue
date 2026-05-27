@@ -77,12 +77,12 @@ function buildParams() {
 
 function getImage(row) {
   const file = row[0]?.profile_image;
-  return file ? `http://localhost:8080/profileimage/${file}` : "";
+  return file ? `https://tp4jp1v0-8080.asse.devtunnels.ms/profileimage/${file}` : "";
 }
 
 function getImageQR(row) {
   const file = row[0]?.qr_code_bank_account;
-  return file ? `http://localhost:8080/qrcodeimage/${file}` : "";
+  return file ? `https://tp4jp1v0-8080.asse.devtunnels.ms/qrcodeimage/${file}` : "";
 }
 
 function statusTagType(status) {
