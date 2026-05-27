@@ -1034,7 +1034,7 @@ const toKhmerNumber = (num) => {
               style="white-space: nowrap; color: black; display: inline-block"
               >................................................................{{
                 previewRow.description
-              }}....................................................................</el-text
+              }}........................................................</el-text
             >
           </div>
           <div class="pl-10 pt-3">
@@ -1083,7 +1083,7 @@ const toKhmerNumber = (num) => {
             <el-text class="doc-company-kh1"> ហត្ថលេខា និងឈ្មោះ </el-text>
           </div>
 
-          <div v-if="previewRow.office_id == 2" class="pl-40 pt-6 pb-4">
+          <div v-if="previewRow.office_id == 2  || previewRow.office_id == 3" class="pl-40 pt-6 pb-20">
   <el-text style="white-space: nowrap; color: black; display: inline-block">
     បានឃើញ និងបញ្ជាក់ថា...........................................
   </el-text>
@@ -1097,7 +1097,7 @@ const toKhmerNumber = (num) => {
   </div>
 </div>
 
-<div v-else-if="previewRow.office_id == 1 || previewRow.office_id == 3" >
+<div v-else-if="previewRow.office_id == 1 && previewRow.role_level < 4" >
   <div class="pl-1 pt-5">
   <el-text style="white-space: nowrap; color: black; display: inline-block">
     បានឃើញ និងបញ្ជាក់ថា...........................................
@@ -1128,6 +1128,21 @@ const toKhmerNumber = (num) => {
 </div>
 </div>
 </div>
+
+         <div v-else-if="previewRow.office_id == 1  || previewRow.role_level >= 4" class="pl-40 pt-6 pb-20">
+  <el-text style="white-space: nowrap; color: black; display: inline-block">
+    បានឃើញ និងបញ្ជាក់ថា...........................................
+  </el-text>
+  <div class="pt-3">
+    <el-text style="white-space: nowrap; color: black">
+      បាត់ដំបង ថ្ងៃទី.........ខែ..........ឆ្នាំ...........
+    </el-text>
+    <div class="pt-3">
+      <el-text class="doc-company-kh1">ប្រធានការិយាល័យរដ្ឋបាលនិងធនធានមនុស្ស</el-text>
+    </div>
+  </div>
+</div>
+
 
 
 

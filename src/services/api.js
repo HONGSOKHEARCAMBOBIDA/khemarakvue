@@ -2,7 +2,7 @@ import axios from 'axios'
 import { getToken } from '../utils/token'
 
 const api = axios.create({
-  baseURL: 'https://tp4jp1v0-8080.asse.devtunnels.ms'
+  baseURL: 'http://localhost:8080'
 })
 //​ បង្កើត Axios Instance
 
