@@ -133,8 +133,8 @@ const formatMoney = (value) => {
 
 const gethalfSalary = (row) => {
   const workday = Number(row.total_work_day) || 0;
-  const dailyrate = Number(row.daily_rate) || 0;
-  return workday * dailyrate;
+  const base_salary = Number(row.base_salary) || 0;
+  return base_salary * (workday / 26);
 }
 
 const getDeduction = (row) => {
