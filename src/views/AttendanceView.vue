@@ -63,7 +63,7 @@ function buildParams() {
 
 function getImage(row) {
   return row.profile
-    ? `http://localhost:8080/profileimage/${row.profile}`
+    ? `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${row.profile}`
     : 'https://via.placeholder.com/40'
 }
 
