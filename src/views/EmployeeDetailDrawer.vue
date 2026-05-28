@@ -366,7 +366,7 @@
   </el-text>
 
  <el-button type="danger" :loading="loading" @click="SubmitUpdate" v-if="hasPermission">
-  ប្ដូរវ៉េនធ្វេីការ
+  ប្ដូរវ៉េនធ្វេីការទាំងអស់
 </el-button>
 </div>
 
@@ -409,7 +409,7 @@
         សម្រាក
       </el-button>
         <el-button
-        type="warning"
+        type="danger"
         size="small"
         style="margin-top: 6px;"
         :loading="changingShiftId === day.id"

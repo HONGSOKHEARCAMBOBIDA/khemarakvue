@@ -667,9 +667,7 @@ const toKhmerNumber = (num) => {
 </el-button>
       </div>
     </el-card>
-
-    <!-- ── table ── -->
-    <el-card class="table-card" shadow="never">
+    <el-card shadow="never">
     <div style="overflow-x: auto;">
         <el-table
         :data="leave"
@@ -678,7 +676,7 @@ const toKhmerNumber = (num) => {
         border
         row-key="id"
         style="width: 100%"
-       
+        height="700"
       >
       <template #empty>
         <el-empty description="គ្មានទិន្ន័យ" />
@@ -1554,9 +1552,7 @@ const toKhmerNumber = (num) => {
 }
 
 
-.table-card {
-  border-radius: 3px;
-}
+
 
 .emp-name-kh {
   font-size: 13px;
@@ -1699,9 +1695,7 @@ const toKhmerNumber = (num) => {
     grid-template-columns: 1fr 1fr;
     gap: 6px;
   }
-  .table-card {
-    overflow-x: auto;
-  }
+ 
 
   :deep(.el-table) {
     min-width: 900px;

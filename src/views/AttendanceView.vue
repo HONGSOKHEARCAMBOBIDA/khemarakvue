@@ -150,6 +150,11 @@ function handleGlobalKeydown(e){
   }
 }
 
+function cellStyle({ column }) {
+    return { backgroundColor: '#fef9c3', color: '#000' }
+  
+}
+
 watch(() => formData.value.name, () => {
   clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
@@ -277,7 +282,7 @@ function formatDiff(scheduledTime, checkTime) {
   </el-row>
 </el-card>
 
-    <el-table v-loading="loading" :data="attendance" row-key="employee_id" border stripe style="width:100%" height="700" default-expand-all>
+    <el-table v-loading="loading" :data="attendance" row-key="employee_id" border stripe style="width:100%" height="700" default-expand-all :cell-style="cellStyle">
       <template #empty>
         <el-empty description="គ្មានទិន្ន័យ" />
       </template>
@@ -394,4 +399,5 @@ function formatDiff(scheduledTime, checkTime) {
   background-color: #2980b9 !important;
   color: #ffffff !important;
 }
+
 </style>

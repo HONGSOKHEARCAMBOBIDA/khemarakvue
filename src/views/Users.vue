@@ -1,7 +1,7 @@
 
 <template>
   <div class="user-register-container">
-    <el-card class="register-card">
+    <el-card class="register-card" shadow="never"> 
 <template #header>
   <div class="flex justify-between items-center">
     
@@ -693,15 +693,7 @@ const formData = reactive({
   village_id_current_address: null,
 })
 
-// const dailyRate = computed({
-//   get() {
-//     if (!formData.work_day || formData.work_day === 0) return 0
-//     return parseFloat((formData.base_salary / formData.work_day).toFixed(2))
-//   },
-//   set(val) {
-//     formData.daily_rate = val
-//   }
-// })
+
 watch(
   () => [formData.base_salary, formData.work_day],
   ([salary, days]) => {

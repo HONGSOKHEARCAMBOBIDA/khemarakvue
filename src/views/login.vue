@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref,onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useAuthStore1 } from '../stores/user'
@@ -14,7 +14,14 @@ const form = ref({
   username: '',
   password: ''
 })
-
+const usernameRef = ref(null)
+const passwordRef = ref(null)
+function focusPassword() {   
+  passwordRef.value?.focus()
+}
+onMounted(()=>{
+  usernameRef.value.focus()
+})
 const loading = ref(false)
 async function handleLogin() {
   loading.value = true
@@ -56,14 +63,16 @@ async function handleLogin() {
 
          <el-text class="mx-1" size="large">សាកលវិទ្យាល័យខេមរៈ</el-text>
         <el-input
+          ref="usernameRef"
           v-model="form.username"
           placeholder="Username"
            :disabled="loading"
            size="large"
-           @keyup.enter="handleLogin"
+           @keyup.enter="focusPassword"
         />
 
         <el-input
+          ref="passwordRef"
           v-model="form.password"
           type="password"
           placeholder="Please input password"
