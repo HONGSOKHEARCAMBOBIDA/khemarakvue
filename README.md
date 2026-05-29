@@ -10,4 +10,5 @@ F3 go to Leave Page
 F4 go to Loan Page
 F12 go to Payroll
 Ctrl + `+` for Add
-https://7ml45f42-8080.asse.devtunnels.ms
+http://localhost:8080
+http://localhost:8080

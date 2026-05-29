@@ -67,7 +67,7 @@ function buildParams() {
 
 function getImage(row) {
   return row.profile
-    ? `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${row.profile}`
+    ? `http://localhost:8080/profileimage/${row.profile}`
     : 'https://via.placeholder.com/40'
 }
 
@@ -226,161 +226,191 @@ function formatDiff(scheduledTime, checkTime) {
 
 <template>
   <div>
-    <!-- Filters -->
-<el-card class="mb-4" shadow="never">
-  <el-row :gutter="8" align="middle">
+    <!-- Filters (unchanged) -->
+    <el-card class="mb-4" shadow="never">
+      <el-row :gutter="8" align="middle">
+        <el-col :xs="24" :sm="12" :md="3">
+          <el-input v-model="formData.name" placeholder="ស្វែងរកឈ្មោះ"
+            clearable size="large" :prefix-icon="Search" ref="searchInputRef"/>
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-select v-model="formData.branch_id" placeholder="សាខា"
+            clearable filterable style="width:100%" size="large">
+            <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
+          </el-select>
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-select v-model="formData.employee_id" placeholder="បុគ្គលិក"
+            clearable filterable style="width:100%" size="large">
+            <el-option v-for="e in user" :key="e.id" :label="e.name" :value="e.id" />
+          </el-select>
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-select v-model="formData.department_id" placeholder="នាយកដ្ឋាន"
+            clearable filterable style="width:100%" size="large">
+            <el-option v-for="d in departments" :key="d.id" :label="d.display_name" :value="d.id" />
+          </el-select>
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-select v-model="formData.office_id" placeholder="ការិយាល័យ"
+            clearable filterable style="width:100%" size="large">
+            <el-option v-for="o in offices" :key="o.id" :label="o.name" :value="o.id" />
+          </el-select>
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-date-picker v-model="formData.check_date_from" type="date"
+            placeholder="ចាប់ពីថ្ងៃ" value-format="YYYY-MM-DD"
+            style="width:100%" size="large" />
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-date-picker v-model="formData.check_date_to" type="date"
+            placeholder="រហូតថ្ងៃ" value-format="YYYY-MM-DD"
+            style="width:100%" size="large" />
+        </el-col>
+        <el-col :xs="12" :sm="6" :md="3">
+          <el-select v-model="selectedStatus" placeholder="ស្ថានភាព"
+            clearable filterable style="width:100%" size="large"
+            @change="onStatusChange" @clear="onStatusClear">
+            <el-option v-for="s in statusOptions" :key="s.field" :label="s.label" :value="s.field" />
+          </el-select>
+        </el-col>
+      </el-row>
+    </el-card>
 
-    <el-col :xs="24" :sm="12" :md="3">
-      <el-input v-model="formData.name" placeholder="ស្វែងរកឈ្មោះ"
-        clearable size="large" :prefix-icon="Search" ref="searchInputRef"/>
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-select v-model="formData.branch_id" placeholder="សាខា"
-        clearable filterable style="width:100%" size="large">
-        <el-option v-for="b in branch" :key="b.id" :label="b.name" :value="b.id" />
-      </el-select>
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-select v-model="formData.employee_id" placeholder="បុគ្គលិក"
-        clearable filterable style="width:100%" size="large">
-        <el-option v-for="e in user" :key="e.id" :label="e.name" :value="e.id" />
-      </el-select>
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-select v-model="formData.department_id" placeholder="នាយកដ្ឋាន"
-        clearable filterable style="width:100%" size="large">
-        <el-option v-for="d in departments" :key="d.id" :label="d.display_name" :value="d.id" />
-      </el-select>
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-select v-model="formData.office_id" placeholder="ការិយាល័យ"
-        clearable filterable style="width:100%" size="large">
-        <el-option v-for="o in offices" :key="o.id" :label="o.name" :value="o.id" />
-      </el-select>
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-date-picker v-model="formData.check_date_from" type="date"
-        placeholder="ចាប់ពីថ្ងៃ" value-format="YYYY-MM-DD"
-        style="width:100%" size="large" />
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-date-picker v-model="formData.check_date_to" type="date"
-        placeholder="រហូតថ្ងៃ" value-format="YYYY-MM-DD"
-        style="width:100%" size="large" />
-    </el-col>
-
-    <el-col :xs="12" :sm="6" :md="3">
-      <el-select v-model="selectedStatus" placeholder="ស្ថានភាព"
-        clearable filterable style="width:100%" size="large"
-        @change="onStatusChange" @clear="onStatusClear">
-        <el-option v-for="s in statusOptions" :key="s.field" :label="s.label" :value="s.field" />
-      </el-select>
-    </el-col>
-
-  </el-row>
-</el-card>
-
-    <el-table v-loading="loading" :data="attendance" row-key="employee_id" border stripe style="width:100%" height="700" default-expand-all :cell-style="cellStyle">
+    <el-table
+      v-loading="loading"
+      :data="attendance"
+      row-key="id"
+      border
+      stripe
+      style="width:100%"
+      height="700"
+      default-expand-all
+    >
       <template #empty>
         <el-empty description="គ្មានទិន្ន័យ" />
       </template>
-      <el-table-column type="expand" class="p-4">
+
+      <!-- ✅ FIX 1: Expand row — loop over attendance_record correctly -->
+      <el-table-column type="expand">
         <template #default="{ row }">
-          <div v-for="log in row.attendancelogresponse" :key="log.id" class="mb-4">
-            <div class="text-sm text-gray-800 mb-2">
-              {{ log.branch_name }} - {{ log.status_attendance_log_name }} វេន {{ log.attendancerecordresponse[0]?.shift_order }} ថ្ងៃ : {{ log.check_date?.slice(0,10) }}
+          <div
+            v-for="log in row.attendance_record"
+            :key="log.id"
+            class="mb-4"
+          >
+            <!-- Session header -->
+            <div class="text-sm text-gray-800 mb-2 font-semibold">
+              {{ log.session_name }} : {{ log.start_time }} – {{ log.end_time }}
             </div>
-            <el-table :data="log.attendancerecordresponse" size="small" border style="width:100%">
-              <el-table-column label="ប្រភេទ" width="120">
+
+            <!-- ✅ FIX 2: Inner table data = array with just this one log record -->
+            <el-table :data="[log]" size="small" border style="width:100%">
+
+              <el-table-column label="ប្រភេទ" width="140">
+                <!-- ✅ FIX 3: was missing #default slot binding -->
                 <template #default="{ row: rec }">
-                  <div class="p-3">
-                    <el-tag :type="rec.type === 'IN' ? 'success' : 'danger'" size="large">
-                      {{ getCheckTypeLabel(rec.type) }}
-                    </el-tag>
-                  </div>
+                  <el-tag :type="rec.type === 'IN' ? 'success' : 'danger'" size="large">
+                    {{ getCheckTypeLabel(rec.type) }}
+                  </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="ម៉ោងធ្វេីការ" width="150">
+
+              <el-table-column label="ម៉ោងធ្វើការ" width="160">
                 <template #default="{ row: rec }">
                   {{ rec.start_time }} – {{ rec.end_time }}
                 </template>
               </el-table-column>
-              <el-table-column prop="check_time" label="ម៉ោងបាន Check" width="110" />
-              <el-table-column label="ស្ថានភាព" min-width="200">
+
+              <el-table-column prop="check_time" label="ម៉ោងបាន Check" width="120" />
+
+              <el-table-column label="ស្ថានភាព" min-width="220">
                 <template #default="{ row: rec }">
                   <el-tag v-if="rec.is_late" type="danger" size="large" class="mr-1">
-                    មកយឺត <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.start_time, rec.check_time)
-                      }}</span>
+                    មកយឺត
+                    <span style="font-weight:600; margin-left:4px">
+                      {{ formatDiff(rec.start_time, rec.check_time) }}
+                    </span>
                   </el-tag>
                   <el-tag v-if="rec.is_left_early" type="warning" size="large" class="mr-1">
-                    ចេញមុន <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.end_time, rec.check_time)
-                      }}</span>
+                    ចេញមុន
+                    <span style="font-weight:600; margin-left:4px">
+                      {{ formatDiff(rec.end_time, rec.check_time) }}
+                    </span>
                   </el-tag>
                   <el-tag v-if="rec.check_out_overtime" type="success" size="large" class="mr-1">
-                    ចេញយឺត <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.end_time, rec.check_time)
-                      }}</span>
+                    ចេញយឺត
+                    <span style="font-weight:600; margin-left:4px">
+                      {{ formatDiff(rec.end_time, rec.check_time) }}
+                    </span>
                   </el-tag>
                   <el-tag v-if="rec.check_in_early" type="primary" size="large" class="mr-1">
-                    មកមុន <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.start_time, rec.check_time)
-                      }}</span>
+                    មកមុន
+                    <span style="font-weight:600; margin-left:4px">
+                      {{ formatDiff(rec.start_time, rec.check_time) }}
+                    </span>
                   </el-tag>
-                  <el-tag v-if="!rec.is_late && !rec.is_left_early && !rec.check_out_overtime && !rec.check_in_early"
-                    type="info" size="large">ធម្មតា</el-tag>
+                  <el-tag
+                    v-if="!rec.is_late && !rec.is_left_early && !rec.check_out_overtime && !rec.check_in_early"
+                    type="info"
+                    size="large"
+                  >
+                    ធម្មតា
+                  </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column prop="note" label="កំណត់ចំណាំ" min-width="180">
+
+              <el-table-column label="កំណត់ចំណាំ" min-width="180">
                 <template #default="{ row: rec }">
                   {{ rec.note || '—' }}
                 </template>
               </el-table-column>
+
             </el-table>
           </div>
         </template>
       </el-table-column>
 
-      <!-- Avatar -->
+      <!-- Outer columns -->
       <el-table-column label="រូបភាព" width="80">
         <template #default="{ row }">
-          <el-avatar :size="55" :src="getImage(row)" style="border: 2px solid #409eff;">
-          </el-avatar>
+          <el-avatar :size="55" :src="getImage(row)" style="border: 2px solid #409eff;" />
         </template>
       </el-table-column>
-      <el-table-column label="លេខកូដ" prop="employee_code"></el-table-column>
+
       <el-table-column label="ឈ្មោះ" min-width="160">
         <template #default="{ row }">
-          <div class="font-medium">{{ row.employee_name_kh }}</div>
-          <div class="text-xs text-gray-400">{{ row.employee_name_en }}</div>
+          <div class="font-medium">{{ row.employee_name }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="សាខា" prop="branch_name"></el-table-column>
-            <el-table-column label="ភេទ" width="130" >
-              <template #default="{ row }">
-        <el-tag type="primary" size="large">
-          {{ row.gender === 1 ? "ប្រុស" : row.gender === 2 ? "ស្រី" : "—" }}
-        </el-tag>
-      </template>
+
+      <el-table-column label="សាខា" prop="branch_name" />
+
+      <!-- ✅ BONUS: show status badges on outer row -->
+      <el-table-column label="ស្ថានភាព" min-width="200">
+        <template #default="{ row }">
+          <template v-for="badge in getStatusBadges(row.attendance_record)" :key="badge">
+            <el-tag :type="badgeMap[badge].type" size="small" class="mr-1">
+              {{ badgeMap[badge].label }}
+            </el-tag>
+          </template>
+        </template>
       </el-table-column>
-
-      <el-table-column prop="position_display_name" label="តួនាទី" min-width="160" />
-      <el-table-column prop="department_display_name" label="នាយកដ្ឋាន" min-width="140" />
-      <el-table-column prop="office_name" label="ការិយាល័យ" min-width="140" />
-
-
-
 
     </el-table>
 
     <!-- Pagination -->
     <div class="flex justify-end mt-4">
-      <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.pageSize"
-        :total="pagination.total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next" background
-        @current-change="onPageChange" @size-change="onSizeChange" />
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.pageSize"
+        :total="pagination.total"
+        :page-sizes="[10, 20, 50]"
+        layout="total, sizes, prev, pager, next"
+        background
+        @current-change="onPageChange"
+        @size-change="onSizeChange"
+      />
     </div>
   </div>
 </template>

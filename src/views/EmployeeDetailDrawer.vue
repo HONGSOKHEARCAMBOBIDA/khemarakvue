@@ -169,9 +169,9 @@
           </el-descriptions>
           <el-image
             v-if="profile.qr_code_bank_account"
-            :src="`https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${profile.qr_code_bank_account}`"
+            :src="`http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`"
             :preview-src-list="[
-              `https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${profile.qr_code_bank_account}`,
+              `http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`,
             ]"
             preview-teleported
             alt="qr image"
@@ -227,9 +227,9 @@
                 </div>
                 <el-image
                   v-if="edu.image"
-                  :src="`https://7ml45f42-8080.asse.devtunnels.ms/educationimage/${edu.image}`"
+                  :src="`http://localhost:8080/educationimage/${edu.image}`"
                   :preview-src-list="[
-                    `https://7ml45f42-8080.asse.devtunnels.ms/educationimage/${edu.image}`,
+                    `http://localhost:8080/educationimage/${edu.image}`,
                   ]"
                   preview-teleported
                   alt="edu image"
@@ -723,7 +723,7 @@ const profile = computed(() => props.employee?.employeeprofies?.[0]);
 const profileImage = computed(() => {
   const imageFile = profile.value?.profile_image;
   if (!imageFile) return null;
-  return `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${imageFile}`;
+  return `http://localhost:8080/profileimage/${imageFile}`;
 });
 
 async function downloadImage(url, filename) {
