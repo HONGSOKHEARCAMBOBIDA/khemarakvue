@@ -15,7 +15,11 @@ const branch = ref([])
 const user = ref([])
 const searchInputRef = ref(null)
 function getToday() {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 const formData = ref({
   name: '',
@@ -23,7 +27,7 @@ const formData = ref({
   department_id: null,
   office_id: null,
   check_date_from: getToday(),
-  check_date_to: getToday(),
+  check_date_to:getToday() ,
   is_late: null,
   is_left_early: null,
   check_in_early: null,
@@ -311,19 +315,19 @@ function formatDiff(scheduledTime, checkTime) {
               <el-table-column label="ស្ថានភាព" min-width="200">
                 <template #default="{ row: rec }">
                   <el-tag v-if="rec.is_late" type="danger" size="large" class="mr-1">
-                    មកយឺត <span style="font-weight:600;margin-left:4px">+{{ formatDiff(rec.start_time, rec.check_time)
+                    មកយឺត <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.start_time, rec.check_time)
                       }}</span>
                   </el-tag>
                   <el-tag v-if="rec.is_left_early" type="warning" size="large" class="mr-1">
-                    ចេញមុន <span style="font-weight:600;margin-left:4px">-{{ formatDiff(rec.end_time, rec.check_time)
+                    ចេញមុន <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.end_time, rec.check_time)
                       }}</span>
                   </el-tag>
                   <el-tag v-if="rec.check_out_overtime" type="success" size="large" class="mr-1">
-                    ចេញយឺត <span style="font-weight:600;margin-left:4px">+{{ formatDiff(rec.end_time, rec.check_time)
+                    ចេញយឺត <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.end_time, rec.check_time)
                       }}</span>
                   </el-tag>
                   <el-tag v-if="rec.check_in_early" type="primary" size="large" class="mr-1">
-                    មកមុន <span style="font-weight:600;margin-left:4px">-{{ formatDiff(rec.start_time, rec.check_time)
+                    មកមុន <span style="font-weight:600;margin-left:4px">{{ formatDiff(rec.start_time, rec.check_time)
                       }}</span>
                   </el-tag>
                   <el-tag v-if="!rec.is_late && !rec.is_left_early && !rec.check_out_overtime && !rec.check_in_early"

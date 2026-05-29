@@ -37,7 +37,7 @@ async function handleLogin() {
     position: 'top-left',
     type: 'success',
   })
-    await router.replace('/attendance')
+    await router.replace('/5a3bcbcef5b4e4d069cf81db423a5de624c6d0bc32c227cd32d4bc9ee9145ec1')
   } catch (error) {
      ElNotification({
     title: 'បរាជ័យ',

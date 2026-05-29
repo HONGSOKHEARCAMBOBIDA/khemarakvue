@@ -32,7 +32,7 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942'
+        redirect: '/5a3bcbcef5b4e4d069cf81db423a5de624c6d0bc32c227cd32d4bc9ee9145ec1'
       },
       {
         path: '4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942',
@@ -47,7 +47,7 @@ const routes = [
         meta: {title: 'AttendanceView',requiresAuth: true}
       },
       {
-        path: 'attendance',
+        path: '5a3bcbcef5b4e4d069cf81db423a5de624c6d0bc32c227cd32d4bc9ee9145ec1',
         name: 'Attendance',
         component: AttendanceCreate,
         meta: {title: 'Attendance',requiresAuth: true}
@@ -119,7 +119,7 @@ router.beforeEach((to, from) => {
   
   // Check if route is for guests only (like login page)
   if (to.meta.guestOnly && auth.isAuthenticated) {
-    return '/attendance'
+    return '/5a3bcbcef5b4e4d069cf81db423a5de624c6d0bc32c227cd32d4bc9ee9145ec1'
   }
   
   // Update page title
