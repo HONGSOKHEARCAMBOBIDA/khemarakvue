@@ -211,7 +211,8 @@ const suggestionleftearly = [
   </script>
 
   <template>
-    <el-container
+   <div>
+     <el-container
       style="min-height: 40vh; background: var(--el-fill-color-black)"
     >
       <el-main
@@ -223,30 +224,30 @@ const suggestionleftearly = [
         "
       >
         <el-card
-          style="width: 100%; max-width: 480px"
+          style="width: 100%; max-width: 480px; background: #17212b;"
           :body-style="{ padding: '28px 24px' }"
           shadow="never"
         >
           <!-- ── Header ── -->
           <el-row align="middle" :gutter="12" style="margin-bottom: 14px">
           
-              <el-text tag="p" size="large" style="font-weight: 700; margin: 0">
+              <el-text tag="p" size="large" style="font-weight: 700; margin: 0;color: white;">
                 ម៉ោងធ្វេីការ :
               </el-text>
-              <el-text class="pl-4" type="primary" size="large" style="font-weight: 500;">
+              <el-text class="pl-4" type="primary" size="large" style="font-weight: 500;color: white;">
                 {{ session.start_time }} - {{ session.end_time }}
               </el-text>
             
           </el-row>
 
-          <el-divider style="margin: 0 0 20px" />
+          <el-divider style="margin: 0 0 20px;color: #2b5278;" />
 
           <!-- ── Clock ── -->
           <el-card
             shadow="never"
-            :body-style="{ padding: '20px', textAlign: 'center' }"
+            :body-style="{ padding: '20px', textAlign: 'center', }"
             style="
-              background: var(--el-color-primary-light-9);
+              background: #2b5278;
               margin-bottom: 20px;
               border: none;
             "
@@ -263,7 +264,7 @@ const suggestionleftearly = [
               {{ clock }}
             </el-text>
             <div>
-              <el-text type="info" size="small">{{ dateStr }}</el-text>
+              <el-text type="info" size="small" style="color: white;">{{ dateStr }}</el-text>
             </div>
           </el-card>
 
@@ -276,6 +277,7 @@ const suggestionleftearly = [
               margin-bottom: 8px;
               text-transform: uppercase;
               letter-spacing: 1px;
+              color: white;
             "
           >
             ទីតាំងបុគ្គលិក
@@ -353,11 +355,11 @@ const suggestionleftearly = [
               <el-text
                 type="info"
                 size="small"
-                style="text-transform: uppercase; letter-spacing: 1px"
+                style="text-transform: uppercase; letter-spacing: 1px;color: white;"
               >
                 មូលហេតុ
               </el-text>
-              <el-text type="warning" size="small" style="margin-left: 6px">
+              <el-text type="warning" size="small" style="margin-left: 6px;color: #448692;">
                 (បំពេញបើ យឺត ឬ ចេញមុន)
               </el-text>
             </div>
@@ -366,9 +368,11 @@ const suggestionleftearly = [
               v-model="noteInput"
               :fetch-suggestions="querySearch"
               placeholder="បញ្ចូលមូលហេតុ..."
-              style="width: 100%; height: 60px"
+              style="width: 100%; height: 60px;    --el-input-bg-color: #2b5278;
+    --el-input-text-color: white;"
               :trigger-on-focus="true"
               clearable
+
             />
           </div>
 
@@ -406,9 +410,16 @@ const suggestionleftearly = [
         </el-card>
       </el-main>
     </el-container>
+   </div>
   </template>
 
   <style scoped>
+  .telegram-bg {
+  background: #17212B;
+}
+.telegram-bg-second {
+  background: #0E1621;
+}
   .spinning {
     animation: spin 1s linear infinite;
   }

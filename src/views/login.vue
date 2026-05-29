@@ -50,25 +50,38 @@ async function handleLogin() {
   }
 }
 </script>
-
+<style scoped>
+.telegram-bg {
+  background: #17212B;
+}
+.telegram-bg-second {
+  background: #0E1621;
+}
+</style>
 <template>
-  <div class="flex justify-center items-center h-screen px-4">
-    <el-card class="w-full max-w-md p-2 border border-gray-300" shadow="never">
+  <div class="telegram-bg">
+      <div class="flex justify-center items-center h-screen px-4 ">
+    <el-card class="w-full max-w-md p-2 border border-gray-300 telegram-bg-second" shadow="never" >
       <div class="flex flex-col gap-4 items-center">
          <el-image
           :src="logo"
-          style="width: 100px; height: 100px"
+          style="width: 130px; height: 130px"
           fit="cover"
         />
 
-         <el-text class="mx-1" size="large">សាកលវិទ្យាល័យខេមរៈ</el-text>
+         <el-text class="mx-1" size="large" style="color: whitesmoke;">សាកលវិទ្យាល័យខេមរៈ</el-text>
         <el-input
+          
           ref="usernameRef"
           v-model="form.username"
           placeholder="Username"
            :disabled="loading"
            size="large"
            @keyup.enter="focusPassword"
+             style="
+    --el-input-bg-color: #2b5278;
+    --el-input-text-color: white;
+  "
         />
 
         <el-input
@@ -80,6 +93,10 @@ async function handleLogin() {
            :disabled="loading"
            size="large"
            @keyup.enter="handleLogin"
+            style="
+    --el-input-bg-color: #2b5278;
+    --el-input-text-color: white;
+  "
         />
 
         <el-button
@@ -95,4 +112,6 @@ async function handleLogin() {
       </div>
     </el-card>
   </div>
+  </div>
+
 </template>

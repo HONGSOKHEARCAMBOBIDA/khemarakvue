@@ -704,6 +704,12 @@ watch(() => formData.value.is_promote, () => {
 </script>
 
 <style scoped>
+.telegram-bg {
+  background: #17212B;
+}
+.telegram-bg-second {
+  background: #0E1621;
+}
 :deep(.el-table__expand-icon) {
   font-size: 16px;
 }
