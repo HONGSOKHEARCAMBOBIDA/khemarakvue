@@ -71,18 +71,7 @@ function getImage(row) {
     : 'https://via.placeholder.com/40'
 }
 
-function getStatusBadges(logs) {
-  const badges = new Set()
-  logs.forEach(log => {
-    log.attendancerecordresponse.forEach(rec => {
-      if (rec.is_late) badges.add('is_late')
-      if (rec.is_left_early) badges.add('is_left_early')
-      if (rec.check_out_overtime) badges.add('check_out_overtime')
-      if (rec.check_in_early) badges.add('check_in_early')
-    })
-  })
-  return [...badges]
-}
+
 
 const badgeMap = {
   is_late: { label: 'មកយឺត', type: 'danger' },
@@ -291,110 +280,115 @@ function formatDiff(scheduledTime, checkTime) {
         <el-empty description="គ្មានទិន្ន័យ" />
       </template>
 
-      <!-- ✅ FIX 1: Expand row — loop over attendance_record correctly -->
-      <el-table-column type="expand">
-        <template #default="{ row }">
-          <div
-            v-for="log in row.attendance_record"
-            :key="log.id"
-            class="mb-4"
+<el-table-column type="expand">
+  <template #default="{ row }">
+    <el-table
+      :data="row.attendance_record"
+      size="small"
+      border
+      style="width: 100%"
+    >
+      <el-table-column label="វេនការងារ">
+       <template #default="{row}">
+        {{ row.type === 'IN' ? 'ចូលធ្វើការ' : 'ចេញពីធ្វើការ' }}
+        {{ row.session_name }}
+       </template>
+      </el-table-column>
+
+      <el-table-column label="ម៉ោងធ្វើការ" width="180">
+        <template #default="{ row: rec }">
+          {{ rec.start_time }} - {{ rec.end_time }}
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        prop="check_time"
+        label="ម៉ោង Check"
+        width="120"
+      />
+
+      <el-table-column label="ស្ថានភាព" min-width="250">
+        <template #default="{ row: rec }">
+
+          <el-tag
+            v-if="rec.is_late"
+            type="danger"
+            class="mr-1"
           >
-            <!-- Session header -->
-            <div class="text-sm text-gray-800 mb-2 font-semibold">
-              {{ log.session_name }} : {{ log.start_time }} – {{ log.end_time }}
-            </div>
+            មកយឺត
+            {{ formatDiff(rec.start_time, rec.check_time) }}
+          </el-tag>
 
-            <!-- ✅ FIX 2: Inner table data = array with just this one log record -->
-            <el-table :data="[log]" size="small" border style="width:100%">
+          <el-tag
+            v-if="rec.check_in_early"
+            type="primary"
+            class="mr-1"
+          >
+            មកមុន
+            {{ formatDiff(rec.start_time, rec.check_time) }}
+          </el-tag>
 
-              <el-table-column label="ប្រភេទ" width="140">
-                <!-- ✅ FIX 3: was missing #default slot binding -->
-                <template #default="{ row: rec }">
-                  <el-tag :type="rec.type === 'IN' ? 'success' : 'danger'" size="large">
-                    {{ getCheckTypeLabel(rec.type) }}
-                  </el-tag>
-                </template>
-              </el-table-column>
+          <el-tag
+            v-if="rec.is_left_early"
+            type="warning"
+            class="mr-1"
+          >
+            ចេញមុន
+            {{ formatDiff(rec.end_time, rec.check_time) }}
+          </el-tag>
 
-              <el-table-column label="ម៉ោងធ្វើការ" width="160">
-                <template #default="{ row: rec }">
-                  {{ rec.start_time }} – {{ rec.end_time }}
-                </template>
-              </el-table-column>
+          <el-tag
+            v-if="rec.check_out_overtime"
+            type="success"
+            class="mr-1"
+          >
+            ចេញយឺត
+            {{ formatDiff(rec.end_time, rec.check_time) }}
+          </el-tag>
 
-              <el-table-column prop="check_time" label="ម៉ោងបាន Check" width="120" />
+          <el-tag
+            v-if="
+              !rec.is_late &&
+              !rec.check_in_early &&
+              !rec.is_left_early &&
+              !rec.check_out_overtime
+            "
+            type="info"
+          >
+            ធម្មតា
+          </el-tag>
 
-              <el-table-column label="ស្ថានភាព" min-width="220">
-                <template #default="{ row: rec }">
-                  <el-tag v-if="rec.is_late" type="danger" size="large" class="mr-1">
-                    មកយឺត
-                    <span style="font-weight:600; margin-left:4px">
-                      {{ formatDiff(rec.start_time, rec.check_time) }}
-                    </span>
-                  </el-tag>
-                  <el-tag v-if="rec.is_left_early" type="warning" size="large" class="mr-1">
-                    ចេញមុន
-                    <span style="font-weight:600; margin-left:4px">
-                      {{ formatDiff(rec.end_time, rec.check_time) }}
-                    </span>
-                  </el-tag>
-                  <el-tag v-if="rec.check_out_overtime" type="success" size="large" class="mr-1">
-                    ចេញយឺត
-                    <span style="font-weight:600; margin-left:4px">
-                      {{ formatDiff(rec.end_time, rec.check_time) }}
-                    </span>
-                  </el-tag>
-                  <el-tag v-if="rec.check_in_early" type="primary" size="large" class="mr-1">
-                    មកមុន
-                    <span style="font-weight:600; margin-left:4px">
-                      {{ formatDiff(rec.start_time, rec.check_time) }}
-                    </span>
-                  </el-tag>
-                  <el-tag
-                    v-if="!rec.is_late && !rec.is_left_early && !rec.check_out_overtime && !rec.check_in_early"
-                    type="info"
-                    size="large"
-                  >
-                    ធម្មតា
-                  </el-tag>
-                </template>
-              </el-table-column>
-
-              <el-table-column label="កំណត់ចំណាំ" min-width="180">
-                <template #default="{ row: rec }">
-                  {{ rec.note || '—' }}
-                </template>
-              </el-table-column>
-
-            </el-table>
-          </div>
         </template>
       </el-table-column>
 
-      <!-- Outer columns -->
-      <el-table-column label="រូបភាព" width="80">
-        <template #default="{ row }">
-          <el-avatar :size="55" :src="getImage(row)" style="border: 2px solid #409eff;" />
+      <el-table-column
+        prop="note"
+        label="កំណត់ចំណាំ"
+        min-width="250"
+      >
+        <template #default="{ row: rec }">
+          {{ rec.note || '—' }}
         </template>
       </el-table-column>
 
+    </el-table>
+  </template>
+</el-table-column>
+      <el-table-column label="លេខកូដ" prop="employee_code"></el-table-column>
       <el-table-column label="ឈ្មោះ" min-width="160">
         <template #default="{ row }">
           <div class="font-medium">{{ row.employee_name }}</div>
+          <el-text>{{ row.employee_name_en }}</el-text>
         </template>
       </el-table-column>
+      <el-table-column label="នាយកដ្ឋាន" prop="department_name"></el-table-column>
+      <el-table-column label="តួនាទី" prop="position_name"></el-table-column>
+      <el-table-column label="ថ្ងៃធ្វេីការ" prop="check_date"></el-table-column>
 
       <el-table-column label="សាខា" prop="branch_name" />
 
       <!-- ✅ BONUS: show status badges on outer row -->
-      <el-table-column label="ស្ថានភាព" min-width="200">
-        <template #default="{ row }">
-          <template v-for="badge in getStatusBadges(row.attendance_record)" :key="badge">
-            <el-tag :type="badgeMap[badge].type" size="small" class="mr-1">
-              {{ badgeMap[badge].label }}
-            </el-tag>
-          </template>
-        </template>
+      <el-table-column label="ស្ថានភាព" min-width="200" prop="status_name">
       </el-table-column>
 
     </el-table>
