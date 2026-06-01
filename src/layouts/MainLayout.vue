@@ -11,9 +11,13 @@
             <el-button  type="primary" plain @click="navigateTo('/af193190b8d3cd14103e20e900378a2b76414ff6428065f3f8539b3577b22fdf')" :class="{'is-active-nav': isActive('/af193190b8d3cd14103e20e900378a2b76414ff6428065f3f8539b3577b22fdf')}">ច្បាប់</el-button>
             <el-button  type="primary" plain @click="navigateTo('/472bbf14923e2e7cefd8529825c401e8d1a2937b96dd697a6d1c75c53e6cca3a')" :class="{'is-active-nav': isActive('/472bbf14923e2e7cefd8529825c401e8d1a2937b96dd697a6d1c75c53e6cca3a')}">កម្ចី</el-button>
             <el-button  type="primary"  plain @click="navigateTo('/bf43e564ebc1b828180e6e4517d872bf71e80b431caeec6b5451e9254a0c6ee9')" :class="{'is-active-nav': isActive('/bf43e564ebc1b828180e6e4517d872bf71e80b431caeec6b5451e9254a0c6ee9')}">ប្រាក់ខែ</el-button>
+             
           </div>
 
           <div class="header-right">
+             <el-button type="success" plain @click="calcVisible = true">
+    <el-icon><Cpu /></el-icon>
+  </el-button>
             <div class="user-info">
               <el-dropdown @command="handleCommand">
                <span class="user-dropdown">
@@ -27,6 +31,7 @@
                 </template>
               </el-dropdown>
             </div>
+            
             <el-button
               class="hamburger-btn"
               :icon="menuOpen ? Close : Expand"
@@ -59,6 +64,9 @@
       </el-footer>
     </el-container>
   </div>
+    <el-dialog v-model="calcVisible" title="គណនា" width="350px" :show-close="true">
+    <Calculator />
+  </el-dialog>
 </template>
 
 <script setup>
@@ -68,6 +76,9 @@ import { ArrowDown, Expand, Close } from '@element-plus/icons-vue'
 import { useAuthStore1 } from '../stores/user'
 import { computed, ref , onUnmounted, onMounted} from 'vue'
 import { useRoute } from 'vue-router'
+import { Cpu } from '@element-plus/icons-vue'
+import Calculator from '../components/Calculator.vue'
+const calcVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
