@@ -51,6 +51,7 @@
           <el-menu-item index="salary">ប្រាក់ខែ</el-menu-item>
           <el-menu-item index="shift">វេនការងារ</el-menu-item>
           <el-menu-item index="system">ព័ត៌មានប្រេីប្រាស់ប្រព័ន្ធ</el-menu-item>
+          <el-menu-item index="device">Device</el-menu-item>          
         </el-menu>
       </div>
 
@@ -527,6 +528,112 @@
             </el-descriptions>
           </div>
         </template>
+<template v-else-if="activeTab === 'device'">
+  <el-space
+    direction="vertical"
+    fill
+    size="large"
+    style="width: 100%"
+  >
+    <div
+      style="display:flex;justify-content:space-between;align-items:center;"
+    >
+      <div>
+        <h2 style="margin:0">Active Sessions</h2>
+        <el-text type="info">
+          Devices currently signed in to this account
+        </el-text>
+      </div>
+
+      <el-tag type="success" size="large">
+        {{ employee?.sessions?.length || 0 }} Devices
+      </el-tag>
+    </div>
+
+    <el-empty
+      v-if="!employee?.sessions?.length"
+      description="No active sessions"
+    />
+
+    <el-row
+      v-else
+      :gutter="20"
+    >
+      <el-col
+        v-for="session in employee.sessions"
+        :key="session.id"
+        :xs="24"
+        :sm="24"
+        :md="12"
+        :lg="8"
+      >
+        <el-card shadow="hover">
+          <template #header>
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;"
+            >
+              <el-space>
+                <el-avatar :size="40">
+                  💻
+                </el-avatar>
+
+                <div>
+                  <div>
+                    <strong>
+                      {{ session.device_name || 'Unknown Device' }}
+                    </strong>
+                  </div>
+
+                  <el-text size="small" type="info">
+                    Session #{{ session.id }}
+                  </el-text>
+                </div>
+              </el-space>
+
+              <el-tag type="success">
+                Active
+              </el-tag>
+            </div>
+          </template>
+
+          <el-descriptions
+            :column="1"
+            border
+            size="small"
+          >
+            <el-descriptions-item label="IP Address">
+              {{ session.ip_address }}
+            </el-descriptions-item>
+
+            <el-descriptions-item label="Last Active">
+              {{ formatDate(session.last_active) }}
+            </el-descriptions-item>
+
+            <el-descriptions-item label="Expires">
+              {{ formatDate(session.expires_at) }}
+            </el-descriptions-item>
+
+            <el-descriptions-item label="Created">
+              {{ formatDate(session.created_at) }}
+            </el-descriptions-item>
+          </el-descriptions>
+
+          <el-divider />
+
+          <div style="text-align:right">
+            <el-button
+              type="danger"
+              plain
+              size="small"
+            >
+              Logout Device
+            </el-button>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+  </el-space>
+</template>
       </div>
     </div>
   </el-drawer>
@@ -632,7 +739,10 @@ const formData = reactive({
 const showChangeSingleShift = ref(false)
 const selectedShiftPatternId = ref(null)
 const singleShiftId = ref(null)
-
+const formatDate = (date) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleString()
+}
 const hasPermission = computed(() => {
   const permissions = authstore.permissions ?? []
   const allowed = [ 'edit.salary', 'add.salary','change.shift.pattern','change.day.off']

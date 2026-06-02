@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { pinia } from '../main'
-
+import { useAuthStore1 } from '../stores/user.js'
 // Import layouts
 import MainLayout from '../layouts/MainLayout.vue'
 
@@ -110,7 +110,7 @@ const router = createRouter({
 
 // Navigation guard
 router.beforeEach((to, from) => {
-  const auth = useAuthStore(pinia)
+  const auth = useAuthStore1(pinia)
   
   // Check if route requires authentication
   if (to.meta.requiresAuth && !auth.isAuthenticated) {

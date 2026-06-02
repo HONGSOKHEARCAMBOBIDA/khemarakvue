@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getToken, setToken, removeToken } from '../utils/token'
+import { getToken, setToken, removeToken, removeAllTokens } from '../utils/token'
 import { removeAuth,getAuth } from '../utils/userdata'
 // បង្កេីត store
 export const useAuthStore = defineStore('auth',{
@@ -26,20 +26,16 @@ export const useAuthStore = defineStore('auth',{
     },
 
     actions: {
-        login(token,user){
-            this.token = token
-            // this.user = user
+        login(token){
+            this.otken = token
             setToken(token)
-             
-            // save token to state
-
         },
         logout(){
             this.token = null
             this.user = null
             removeToken()
-            // remove token from state
             removeAuth()
+            removeAllTokens()
         }
     }
 })

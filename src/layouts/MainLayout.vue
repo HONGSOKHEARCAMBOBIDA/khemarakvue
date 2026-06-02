@@ -103,7 +103,7 @@ const userlogin = computed(() => authstore.name)
 
 const handleCommand = (command) => {
   if (command === 'logout') {
-    auth.logout()
+    authstore.logout()
     router.push('/login')
   } 
 }

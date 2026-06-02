@@ -24,30 +24,35 @@ onMounted(()=>{
 })
 const loading = ref(false)
 async function handleLogin() {
-  loading.value = true
-  try {
-    const response = await loginApi(form.value)
-    const token = response.data.data.Token 
-    const user = response.data.data 
-    auth.login(token)
-    userdata.login(user)
-    ElNotification({
-    title: 'ជោគជ័យ',
-    message: 'ចូលប្រព័ន្ធបានជោគជ័យ',
-    position: 'top-left',
-    type: 'success',
-  })
-    await router.replace('/5a3bcbcef5b4e4d069cf81db423a5de624c6d0bc32c227cd32d4bc9ee9145ec1')
-  } catch (error) {
-     ElNotification({
-    title: 'បរាជ័យ',
-    message: 'ព្យាយាមម្ដងទៀត',
-    position: 'top-left',
-    type: 'error',
-  })
-  } finally {
-    loading.value = false
-  }
+    loading.value = true
+    try {
+        const response = await loginApi({ 
+            username: form.value.username, 
+            password: form.value.password 
+        })
+
+        const data = response.data.data    
+
+      //  auth.login(data.access_token)       
+        userdata.login(data)              
+
+        ElNotification({
+            title: 'ជោគជ័យ',
+            message: 'ចូលប្រព័ន្ធបានជោគជ័យ',
+            position: 'top-left',
+            type: 'success',
+        })
+        await router.replace('/5a3bcbcef5b4e4d069cf81db423a5de624c6d0bc32c227cd32d4bc9ee9145ec1')
+    } catch (error) {
+        ElNotification({
+            title: 'បរាជ័យ',
+            message: error.response?.data?.message || 'ព្យាយាមម្ដងទៀត',
+            position: 'top-left',
+            type: 'error',
+        })
+    } finally {
+        loading.value = false
+    }
 }
 </script>
 <style scoped>

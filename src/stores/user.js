@@ -1,49 +1,38 @@
-    import { defineStore } from 'pinia'
-    // import { getAuth, setAuth, removeAuth } from '../utils/token'
-    import { getAuth,setAuth,removeAuth } from '../utils/userdata'
-    export const useAuthStore1 = defineStore('authuser', {
-        state: () => ({
-            auth: getAuth() || null
-        }),
+import { defineStore } from 'pinia'
+import { getAuth, setAuth, removeAuth } from '../utils/userdata'
+import { setToken, setRefreshToken, removeAllTokens } from '../utils/token'
+
+export const useAuthStore1 = defineStore('authuser', {
+    state: () => ({
+        auth: getAuth() || null
+    }),
 
     getters: {
-        isAuthenticated: (state) => !!state.auth?.token,
-        token: (state) => state.auth?.token,
-        branchID: (state) => state.auth?.branch_id,
-        employeeID: (state) => state.auth?.employee_id,
-        branchLatitude: (state) => state.auth?.branch_latitude,
-        branchLongitude: (state) => state.auth?.branch_longitude,
-        branchRadius: (state) => state.auth?.branch_radius,
-        roleId: (state) => state.auth?.role_id,
+        isAuthenticated: (state) => !!state.auth?.access_token,
         parts: (state) => state.auth?.parts,
         name: (state) => state.auth?.name,
         permissions: (state) => state.auth?.permissions,
-    },  
+    },
 
     actions: {
         login(response) {
             const authData = {
-                token: response.Token,                      // ✅ ADD THIS BACK
-                user_id: response.id,
-                branch_id: response.branch_id,
-                employee_id: response.employee_id,
-                branch_latitude: response.branch_latitude,
-                branch_longitude: response.branch_longitude,
-                branch_radius: response.branch_radius,
-                role_id: response.role_id,
+                access_token: response.access_token, 
                 name: response.name,
-                contact: response.contact,
                 parts: response.parts,
                 permissions: response.permissions,
             }
 
             this.auth = authData
             setAuth(authData)
+            setToken(response.access_token)
+            setRefreshToken(response.refresh_token)     // ← new
         },
 
         logout() {
             this.auth = null
             removeAuth()
+            removeAllTokens()   // ← removes both tokens
         }
     }
-    })
+})
