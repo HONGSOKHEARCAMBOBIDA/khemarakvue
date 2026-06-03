@@ -4,7 +4,7 @@ import router from '../router'
 import { removeAuth } from '../utils/userdata'
 
 const api = axios.create({
-    baseURL: 'https://7ml45f42-8080.asse.devtunnels.ms'
+    baseURL: 'http://localhost:8080'
 })
 
 // ── Request interceptor: attach access token ──────────────────────────────
@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
 // track whether refresh token request is already running
 let isRefreshing = false
 
-// Stores requests waiting for a new token.
+// រក្សាទុក Request ដែលកំពុងរង់ចាំ Token ថ្មី
 let failedQueue = []
 
 function processQueue(error, token = null) {
@@ -48,7 +48,7 @@ api.interceptors.response.use(
         const refreshToken = getRefreshToken()
         if (!refreshToken) {
             removeAllTokens()
-          await router.push('/login')
+          window.location.replace('/login')
             return Promise.reject(error)
         }
 
@@ -70,7 +70,7 @@ api.interceptors.response.use(
 
         try {
             const response = await axios.post(
-                'https://7ml45f42-8080.asse.devtunnels.ms/refresh',
+                'http://localhost:8080/refresh',
                 { refresh_token: refreshToken }
             )
 

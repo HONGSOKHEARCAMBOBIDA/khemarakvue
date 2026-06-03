@@ -170,9 +170,9 @@
           </el-descriptions>
           <el-image
             v-if="profile.qr_code_bank_account"
-            :src="`https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${profile.qr_code_bank_account}`"
+            :src="`http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`"
             :preview-src-list="[
-              `https://7ml45f42-8080.asse.devtunnels.ms/qrcodeimage/${profile.qr_code_bank_account}`,
+              `http://localhost:8080/qrcodeimage/${profile.qr_code_bank_account}`,
             ]"
             preview-teleported
             alt="qr image"
@@ -228,9 +228,9 @@
                 </div>
                 <el-image
                   v-if="edu.image"
-                  :src="`https://7ml45f42-8080.asse.devtunnels.ms/educationimage/${edu.image}`"
+                  :src="`http://localhost:8080/educationimage/${edu.image}`"
                   :preview-src-list="[
-                    `https://7ml45f42-8080.asse.devtunnels.ms/educationimage/${edu.image}`,
+                    `http://localhost:8080/educationimage/${edu.image}`,
                   ]"
                   preview-teleported
                   alt="edu image"
@@ -545,7 +545,7 @@
         </el-text>
       </div>
 
-      <el-tag type="success" size="large">
+      <el-tag type="warning" size="large">
         {{ employee?.sessions?.length || 0 }} Devices
       </el-tag>
     </div>
@@ -567,13 +567,13 @@
         :md="12"
         :lg="8"
       >
-        <el-card shadow="hover">
+        <el-card shadow="never">
           <template #header>
             <div
               style="display:flex;justify-content:space-between;align-items:center;"
             >
               <el-space>
-                <el-avatar :size="40">
+                <el-avatar :size="50">
                   💻
                 </el-avatar>
 
@@ -583,16 +583,8 @@
                       {{ session.device_name || 'Unknown Device' }}
                     </strong>
                   </div>
-
-                  <el-text size="small" type="info">
-                    Session #{{ session.id }}
-                  </el-text>
                 </div>
               </el-space>
-
-              <el-tag type="success">
-                Active
-              </el-tag>
             </div>
           </template>
 
@@ -612,22 +604,21 @@
             <el-descriptions-item label="Expires">
               {{ formatDate(session.expires_at) }}
             </el-descriptions-item>
-
-            <el-descriptions-item label="Created">
-              {{ formatDate(session.created_at) }}
-            </el-descriptions-item>
           </el-descriptions>
 
           <el-divider />
 
           <div style="text-align:right">
-            <el-button
-              type="danger"
-              plain
-              size="small"
-            >
-              Logout Device
-            </el-button>
+<el-button
+  type="danger"
+  plain
+  size="large"
+  :icon="RemoveFilled"
+  :loading="revokingSessionId === session.id"
+  @click="handleRevokeSession(session.id)"
+>
+  Logout Device
+</el-button>
           </div>
         </el-card>
       </el-col>
@@ -706,7 +697,7 @@ import WorkExperienUpdateDialog from "../components/WorkExperienUpdateDialog.vue
 import WorkExperienceCreateDialog from "../components/WorkExperienceCreateDialog.vue";
 import SalaryUpdateDialog from "../components/SalaryUpdateDialog.vue";
 import SalaryCreateDialog from "../components/SalaryCreateDialog.vue";
-import { changeshift, changeshiftpattern ,changesingleshift} from "../services/employee";
+import { changeshift, changeshiftpattern ,changesingleshift, revokesession} from "../services/employee";
 import { fetchBranch } from "../services/branch";
 import { fetchShift } from '../services/shift'
 import { fetchShiftSession } from '../services/shiftsession'
@@ -723,6 +714,7 @@ import {
   RefreshLeft,
   RefreshRight,
   Download,
+  RemoveFilled
 } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 const authstore = useAuthStore1()
@@ -731,6 +723,7 @@ const branches = ref([])
 const shifts = ref([])
 const shiftsession = ref([])
 const loading = ref(false)
+const revokingSessionId = ref(null)
 const formData = reactive({
   employee_id: null,
   branch_id:                null,
@@ -748,6 +741,20 @@ const hasPermission = computed(() => {
   const allowed = [ 'edit.salary', 'add.salary','change.shift.pattern','change.day.off']
   return permissions.some(p => allowed.includes(p.name))
 })
+
+async function handleRevokeSession(sessionId) {
+  try {
+    revokingSessionId.value = sessionId
+    await revokesession(sessionId)
+    ElMessage.success("Logout Device Success")
+    emit("refresh")
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || "Logout Device Error")
+  } finally {
+    revokingSessionId.value = null
+  }
+}
+
 async function handleChangeShift(id) {
   try {
     changingShiftId.value = id;
@@ -833,7 +840,7 @@ const profile = computed(() => props.employee?.employeeprofies?.[0]);
 const profileImage = computed(() => {
   const imageFile = profile.value?.profile_image;
   if (!imageFile) return null;
-  return `https://7ml45f42-8080.asse.devtunnels.ms/profileimage/${imageFile}`;
+  return `http://localhost:8080/profileimage/${imageFile}`;
 });
 
 async function downloadImage(url, filename) {
