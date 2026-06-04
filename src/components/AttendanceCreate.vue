@@ -224,11 +224,10 @@ const suggestionleftearly = [
         "
       >
         <el-card
-          style="width: 100%; max-width: 480px; background: #17212b;"
+          style="width: 100%; max-width: 480px;"
           :body-style="{ padding: '28px 24px' }"
           shadow="never"
         >
-          <!-- ── Header ── -->
           <el-row align="middle" :gutter="12" style="margin-bottom: 14px">
           
               <el-text tag="p" size="large" style="font-weight: 700; margin: 0;color: white;">
@@ -415,10 +414,10 @@ const suggestionleftearly = [
 
   <style scoped>
   .telegram-bg {
-  background: #17212B;
+  background: #59a5f1;
 }
 .telegram-bg-second {
-  background: #0E1621;
+  background: #5d9aee;
 }
   .spinning {
     animation: spin 1s linear infinite;

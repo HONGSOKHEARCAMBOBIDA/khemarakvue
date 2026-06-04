@@ -15,9 +15,9 @@
           </div>
 
           <div class="header-right">
-             <el-button type="success" plain @click="calcVisible = true">
+             <!-- <el-button type="success" plain @click="calcVisible = true">
     <el-icon><Cpu /></el-icon>
-  </el-button>
+  </el-button> -->
             <div class="user-info">
               <el-dropdown @command="handleCommand">
                <span class="user-dropdown">
@@ -78,6 +78,7 @@ import { computed, ref , onUnmounted, onMounted} from 'vue'
 import { useRoute } from 'vue-router'
 import { Cpu } from '@element-plus/icons-vue'
 import Calculator from '../components/Calculator.vue'
+import { logoutsession } from '../services/auth.js'
 const calcVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
@@ -101,11 +102,17 @@ const hasAdminOrHR = computed(() => {
 
 const userlogin = computed(() => authstore.name)
 
-const handleCommand = (command) => {
+const handleCommand = async (command) => {
   if (command === 'logout') {
-    authstore.logout()
-    router.push('/login')
-  } 
+    try {
+      await logoutsession()
+    } catch (e) {
+      ElMessage.error(e?.response?.data?.message || "Logout Error")
+    } finally {
+      authstore.logout()
+      router.push('/login')
+    }
+  }
 }
 
 onMounted(()=>{
